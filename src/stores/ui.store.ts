@@ -9,13 +9,16 @@ interface UiState {
   closeLogin: () => void;
 }
 
+let toastTimer: ReturnType<typeof setTimeout> | null = null;
+
 export const useUiStore = create<UiState>((set) => ({
   toastMessage: '',
   toastVisible: false,
   isLoginOpen: false,
   showToast: (message) => {
+    if (toastTimer) clearTimeout(toastTimer);
     set({ toastMessage: message, toastVisible: true });
-    setTimeout(() => set({ toastVisible: false }), 1800);
+    toastTimer = setTimeout(() => set({ toastVisible: false }), 1800);
   },
   openLogin: () => set({ isLoginOpen: true }),
   closeLogin: () => set({ isLoginOpen: false }),

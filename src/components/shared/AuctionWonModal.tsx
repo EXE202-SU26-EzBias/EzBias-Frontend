@@ -4,9 +4,10 @@ import { formatCurrency } from '../../utils/formatters';
 interface AuctionWonModalProps {
   auction: AuctionDetail;
   onClose: () => void;
+  onProceedToPayment: (auctionId: string) => void;
 }
 
-const AuctionWonModal = ({ auction, onClose }: AuctionWonModalProps) => (
+const AuctionWonModal = ({ auction, onClose, onProceedToPayment }: AuctionWonModalProps) => (
   <div
     className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm"
     role="dialog"
@@ -29,6 +30,7 @@ const AuctionWonModal = ({ auction, onClose }: AuctionWonModalProps) => (
       <div className="flex flex-col gap-3">
         <button
           type="button"
+          onClick={() => onProceedToPayment(auction.id)}
           className="flex h-11 w-full items-center justify-center rounded-full bg-[#ad93e6] text-sm font-semibold text-white transition-colors hover:bg-[#9d7ed9]"
         >
           Proceed to Payment

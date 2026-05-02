@@ -1,9 +1,11 @@
+import { useNavigate } from 'react-router-dom';
 import AuctionCard from '../../components/card/AuctionCard';
 import PageLayout from '../../components/layout/PageLayout';
-import type { Auction } from '../../types/landing';
+import { useAuctions } from '../../services/auction.service';
 
 const AuctionPage = () => {
-  const auctions: Auction[] = [];
+  const navigate = useNavigate();
+  const { data: auctions = [], isLoading } = useAuctions();
 
   return (
     <PageLayout>
@@ -13,10 +15,18 @@ const AuctionPage = () => {
           <p className="text-sm text-[#737373]">Bid on rare &amp; limited K-pop collectibles</p>
         </div>
 
-        {auctions.length > 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <span className="h-8 w-8 animate-spin rounded-full border-2 border-[#e6e6e6] border-t-[#ad93e6]" />
+          </div>
+        ) : auctions.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3" role="list">
             {auctions.map((auction) => (
-              <AuctionCard key={auction.id} {...auction} />
+              <AuctionCard
+                key={auction.id}
+                {...auction}
+                onBid={() => navigate(`/auction/${auction.id}`)}
+              />
             ))}
           </div>
         ) : (

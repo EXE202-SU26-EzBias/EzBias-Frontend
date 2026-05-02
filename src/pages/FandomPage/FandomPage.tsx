@@ -1,35 +1,10 @@
 import { useState } from 'react';
 import ProductCard from '../../components/card/ProductCard';
 import PageLayout from '../../components/layout/PageLayout';
+import Tabs from '../../components/ui/Tabs';
 import type { Product } from '../../types/landing';
 
 const ALL_TAB = 'All';
-
-interface FandomTabsProps {
-  tabs: string[];
-  active: string;
-  onSelect: (tab: string) => void;
-}
-
-const FandomTabs = ({ tabs, active, onSelect }: FandomTabsProps) => (
-  <div className="mb-8 flex flex-wrap gap-2" role="tablist" aria-label="Fandom filter">
-    {tabs.map((tab) => (
-      <button
-        key={tab}
-        role="tab"
-        aria-selected={active === tab}
-        onClick={() => onSelect(tab)}
-        className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
-          active === tab
-            ? 'bg-[#ad93e6] text-white'
-            : 'bg-[rgba(173,147,230,0.12)] text-[#ad93e6] hover:bg-[rgba(173,147,230,0.25)]'
-        }`}
-      >
-        {tab}
-      </button>
-    ))}
-  </div>
-);
 
 const FandomPage = () => {
   const tabs: string[] = [];
@@ -52,6 +27,7 @@ const FandomPage = () => {
 
         {tabs.length > 0 && (
           <div className="mb-6">
+            <label htmlFor="fandom-product-search" className="sr-only">Search products</label>
             <input
               id="fandom-product-search"
               type="text"
@@ -64,9 +40,9 @@ const FandomPage = () => {
         )}
 
         {tabs.length > 0 && (
-          <FandomTabs
+          <Tabs
             tabs={tabs}
-            active={activeTab}
+            activeTab={activeTab}
             onSelect={(tab) => {
               setSearchTerm('');
               setActiveTab(tab);
@@ -77,7 +53,7 @@ const FandomPage = () => {
         {filtered.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4" role="list">
             {filtered.map((product) => (
-              <ProductCard key={product.name} {...product} />
+              <ProductCard key={product.id} {...product} />
             ))}
           </div>
         ) : (

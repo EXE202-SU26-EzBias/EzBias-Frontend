@@ -1,4 +1,5 @@
 export interface Product {
+  id: string;
   artist: string;
   name: string;
   price: number;

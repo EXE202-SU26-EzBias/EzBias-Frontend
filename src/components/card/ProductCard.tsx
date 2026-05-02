@@ -1,23 +1,10 @@
-import { useState } from 'react';
 import type { Product } from '../../types/landing';
-import { useCartStore } from '../../stores/cart.store';
-import { useUiStore } from '../../stores/ui.store';
+import { useAddToCart } from '../../features/cart/useAddToCart';
+import { formatCurrency } from '../../utils/formatters';
 
-const fmt = (v: number) => v.toLocaleString('vi-VN') + ' VNĐ';
-
-const ProductCard = ({ artist, name, price, image, isBoosted, stock }: Product) => {
-  const [added, setAdded] = useState(false);
-  const addItem = useCartStore((s) => s.addItem);
-  const showToast = useUiStore((s) => s.showToast);
+const ProductCard = ({ id, artist, name, price, image, isBoosted, stock }: Product) => {
+  const { added, handleAdd } = useAddToCart();
   const isOutOfStock = stock != null && stock === 0;
-
-  const handleAdd = () => {
-    if (isOutOfStock) return;
-    addItem({ artist, name, price, image, isBoosted, stock });
-    showToast(`Added "${name}" to cart`);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
-  };
 
   return (
     <article className="overflow-hidden rounded-xl border border-[rgba(230,230,230,0.5)] bg-white shadow-[0_1px_2px_2px_rgba(0,0,0,0.09)]">
@@ -34,12 +21,11 @@ const ProductCard = ({ artist, name, price, image, isBoosted, stock }: Product) 
           </span>
         )}
         <div
-          className="absolute inset-0 grid place-items-center text-xl font-bold tracking-wide text-[#ad93e6]"
-          style={
-            image
-              ? { background: `center/cover url(${image})` }
-              : { background: 'linear-gradient(135deg, #f0edf7 0%, #fcf6e8 100%)' }
-          }
+          className={[
+            'absolute inset-0 grid place-items-center text-xl font-bold tracking-wide text-[#ad93e6]',
+            image ? 'bg-center bg-cover' : 'bg-gradient-to-br from-[#f0edf7] to-[#fcf6e8]',
+          ].join(' ')}
+          style={image ? { backgroundImage: `url(${image})` } : undefined}
         >
           {!image && <span>{artist}</span>}
         </div>
@@ -60,10 +46,10 @@ const ProductCard = ({ artist, name, price, image, isBoosted, stock }: Product) 
           </p>
         )}
         <div className="flex items-center justify-between gap-2 pt-1">
-          <span className="text-sm font-bold text-[#121212]">{fmt(price)}</span>
+          <span className="text-sm font-bold text-[#121212]">{formatCurrency(price)}</span>
           <button
             disabled={isOutOfStock}
-            onClick={handleAdd}
+            onClick={() => handleAdd({ id, artist, name, price, image, isBoosted, stock })}
             className={[
               'inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-medium transition-colors',
               isOutOfStock

@@ -1,58 +1,35 @@
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import BidHistory from '../../components/auction/BidHistory';
 import CountdownTimer from '../../components/auction/CountdownTimer';
 import PageLayout from '../../components/layout/PageLayout';
 import AuctionWonModal from '../../components/shared/AuctionWonModal';
 import BackLink from '../../components/ui/BackLink';
 import Badge from '../../components/ui/Badge';
+import { TrendIcon, RocketIcon } from '../../components/ui/Icon';
+import { useAuctionDetail, usePlaceBid } from '../../services/auction.service';
+import { useCountdown } from '../../features/auction/useCountdown';
 import type { AuctionDetail } from '../../types/auction';
 import { formatCurrency } from '../../utils/formatters';
 
-const TrendIcon = () => (
-  <svg
-    className="h-4 w-4 text-[#ad93e6]"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.519l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"
-    />
-  </svg>
-);
-
-const RocketIcon = () => (
-  <svg
-    className="h-4 w-4"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"
-    />
-  </svg>
-);
-
 const AuctionDetailPage = () => {
-  const [auction] = useState<AuctionDetail | null>(null);
-  const [loading] = useState(false);
+  const { id = '' } = useParams<{ id: string }>();
+  const { data: auction, isLoading } = useAuctionDetail(id);
+  const { mutate: placeBid, isPending: placing } = usePlaceBid(id);
+  const { hours, minutes, secs } = useCountdown(auction?.endsAt);
   const [bidInput, setBidInput] = useState('');
-  const [placing] = useState(false);
   const [paying, setPaying] = useState<AuctionDetail | null>(null);
 
   const formattedBidInput = bidInput ? Number(bidInput).toLocaleString('vi-VN') : '';
 
   const handleBidInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBidInput(e.target.value.replace(/\D/g, ''));
+  };
+
+  const handlePlaceBid = () => {
+    const amount = Number(bidInput);
+    if (!amount) return;
+    placeBid(amount, { onSuccess: () => setBidInput('') });
   };
 
   const bids = (auction?.bids ?? []).map((b) => ({
@@ -70,7 +47,7 @@ const AuctionDetailPage = () => {
       <div className="mx-auto w-full max-w-[1000px] px-4 py-10 md:py-14">
         <BackLink to="/auction" label="Back to Auctions" />
 
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center py-20">
             <span className="h-8 w-8 animate-spin rounded-full border-2 border-[#e6e6e6] border-t-[#ad93e6]" />
           </div>
@@ -102,7 +79,7 @@ const AuctionDetailPage = () => {
 
                 <p className="text-sm leading-6 text-[#737373]">{auction.description}</p>
 
-                <CountdownTimer hours={0} minutes={0} secs={0} />
+                <CountdownTimer hours={hours} minutes={minutes} secs={secs} />
 
                 <div className="flex items-end gap-10">
                   <div>
@@ -118,7 +95,7 @@ const AuctionDetailPage = () => {
                       Current Highest Bid
                     </p>
                     <div className="flex items-center gap-1.5">
-                      <TrendIcon />
+                      <TrendIcon className="h-4 w-4 text-[#ad93e6]" />
                       <p className="text-2xl font-bold text-[#ad93e6]">
                         {formatCurrency(auction.currentBid)}
                       </p>
@@ -140,10 +117,11 @@ const AuctionDetailPage = () => {
                   />
                   <button
                     type="button"
+                    onClick={handlePlaceBid}
                     disabled={placing || !auction.isLive}
                     className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#ad93e6] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#9d7ed9] disabled:opacity-60"
                   >
-                    <RocketIcon />
+                    <RocketIcon className="h-4 w-4" />
                     {placing ? 'Placing…' : 'Place Bid'}
                   </button>
                 </div>
@@ -153,7 +131,14 @@ const AuctionDetailPage = () => {
             <BidHistory bids={bids} />
 
             {paying && (
-              <AuctionWonModal auction={paying} onClose={() => setPaying(null)} />
+              <AuctionWonModal
+                auction={paying}
+                onClose={() => setPaying(null)}
+                onProceedToPayment={(auctionId) => {
+                  setPaying(null);
+                  window.location.href = `/payment/${auctionId}`;
+                }}
+              />
             )}
           </>
         ) : (

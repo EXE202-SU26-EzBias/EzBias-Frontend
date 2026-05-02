@@ -26,8 +26,8 @@ const BidHistory = ({ bids }: BidHistoryProps) => (
           >
             <div className="flex items-center gap-3">
               <div
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold text-white"
-                style={{ backgroundColor: bid.avatarBg ?? '#ad93e6' }}
+                className="bid-avatar grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold text-white"
+                style={{ '--avatar-bg': bid.avatarBg ?? '#ad93e6' } as React.CSSProperties}
                 aria-hidden="true"
               >
                 {bid.avatar ?? bid.user.slice(0, 2).toUpperCase()}

@@ -1,3 +1,13 @@
+export interface Auction {
+  id: string;
+  artist: string;
+  name: string;
+  currentBid: number;
+  timer: string;
+  isUrgent: boolean;
+  image?: string;
+}
+
 export interface BidEntry {
   id: string;
   username: string;

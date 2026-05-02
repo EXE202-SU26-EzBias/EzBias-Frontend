@@ -1,26 +1,11 @@
-import { useState, type FormEvent } from 'react';
-import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
+import { useLoginForm } from '../../features/auth/useLoginForm';
 
 const LoginModal = () => {
-  const { isLoginOpen, closeLogin, showToast } = useUiStore();
-  const setAuth = useAuthStore((s) => s.setAuth);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { isLoginOpen, closeLogin } = useUiStore();
+  const { register, onSubmit, errors, isPending } = useLoginForm();
 
   if (!isLoginOpen) return null;
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setAuth({
-      user: { id: '1', email, name: email.split('@')[0] },
-      accessToken: 'demo-token',
-    });
-    closeLogin();
-    showToast("Welcome back! You're now logged in.");
-    setEmail('');
-    setPassword('');
-  };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) closeLogin();
@@ -30,11 +15,11 @@ const LoginModal = () => {
     <div
       className="fixed inset-0 z-[200] grid place-items-center bg-black/45 p-4"
       onClick={handleBackdropClick}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Login"
     >
-      <div
-        className="flex w-full max-w-[720px] overflow-hidden rounded-xl bg-[#fcfeff] shadow-[0_4px_28.6px_-4px_rgba(0,0,0,0.16)]"
-        style={{ height: 512 }}
-      >
+      <div className="flex h-[512px] w-full max-w-[720px] overflow-hidden rounded-xl bg-[#fcfeff] shadow-[0_4px_28.6px_-4px_rgba(0,0,0,0.16)]">
         {/* Image panel */}
         <div className="hidden w-[297px] shrink-0 sm:block">
           <img
@@ -46,9 +31,8 @@ const LoginModal = () => {
 
         {/* Form */}
         <form
-          onSubmit={handleSubmit}
-          className="relative flex flex-1 flex-col items-center px-10 py-12"
-          style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }}
+          onSubmit={onSubmit}
+          className="relative flex flex-1 flex-col items-center px-10 py-12 font-sans"
         >
           <button
             type="button"
@@ -64,28 +48,31 @@ const LoginModal = () => {
           <label className="mb-1.5 w-[300px] text-[10px] font-medium text-[#7c838a]">Email</label>
           <input
             type="email"
-            required
             placeholder="Enter your Email here"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mb-4 h-[32.5px] w-[300px] rounded-[10px] bg-[rgba(176,186,195,0.4)] px-5 text-[10px] text-black/80 outline-none focus:shadow-[0_0_0_2px_rgba(155,132,236,0.4)]"
+            {...register('email')}
+            className="mb-1 h-[32.5px] w-[300px] rounded-[10px] bg-[rgba(176,186,195,0.4)] px-5 text-[10px] text-black/80 outline-none focus:shadow-[0_0_0_2px_rgba(155,132,236,0.4)]"
           />
+          {errors.email && (
+            <p className="mb-2 w-[300px] text-[9px] text-red-500">{errors.email.message}</p>
+          )}
 
           <label className="mb-1.5 w-[300px] text-[10px] font-medium text-[#7c838a]">Password</label>
           <input
             type="password"
-            required
             placeholder="Enter your Password here"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mb-4 h-[32.5px] w-[300px] rounded-[10px] bg-[rgba(176,186,195,0.4)] px-5 text-[10px] text-black/80 outline-none focus:shadow-[0_0_0_2px_rgba(155,132,236,0.4)]"
+            {...register('password')}
+            className="mb-1 h-[32.5px] w-[300px] rounded-[10px] bg-[rgba(176,186,195,0.4)] px-5 text-[10px] text-black/80 outline-none focus:shadow-[0_0_0_2px_rgba(155,132,236,0.4)]"
           />
+          {errors.password && (
+            <p className="mb-2 w-[300px] text-[9px] text-red-500">{errors.password.message}</p>
+          )}
 
           <button
             type="submit"
-            className="mb-5 mt-2 h-[30px] w-[170px] rounded bg-[#9b84ec] text-[13px] font-medium text-black transition-colors hover:bg-[#8a72db]"
+            disabled={isPending}
+            className="mb-5 mt-2 h-[30px] w-[170px] rounded bg-[#9b84ec] text-[13px] font-medium text-black transition-colors hover:bg-[#8a72db] disabled:opacity-60"
           >
-            Login Account
+            {isPending ? 'Logging in…' : 'Login Account'}
           </button>
 
           <p className="mb-4 text-[9px] text-[#7c838a]">

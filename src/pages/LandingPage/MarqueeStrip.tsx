@@ -1,6 +1,9 @@
 import { MARQUEE_ITEMS } from '../../constants/landing';
 
-const doubled = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+const doubled = [
+  ...MARQUEE_ITEMS.map((item, i) => ({ item, key: `a-${i}` })),
+  ...MARQUEE_ITEMS.map((item, i) => ({ item, key: `b-${i}` })),
+];
 
 const MarqueeStrip = () => (
   <div
@@ -8,9 +11,9 @@ const MarqueeStrip = () => (
     aria-hidden="true"
   >
     <div className="flex w-max gap-12 animate-marquee">
-      {doubled.map((item, i) => (
+      {doubled.map(({ item, key }) => (
         <span
-          key={i}
+          key={key}
           className="whitespace-nowrap text-[13px] font-medium tracking-[0.2px] text-[#737373]"
         >
           {item}

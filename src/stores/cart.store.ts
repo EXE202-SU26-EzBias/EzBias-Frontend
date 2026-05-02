@@ -10,7 +10,7 @@ interface CartState {
   items: CartItem[];
   count: number;
   addItem: (product: Product) => void;
-  removeItem: (name: string) => void;
+  removeItem: (id: string) => void;
   clearCart: () => void;
 }
 
@@ -21,17 +21,17 @@ export const useCartStore = create<CartState>()(
       count: 0,
       addItem: (product) =>
         set((state) => {
-          const existing = state.items.find((i) => i.name === product.name);
+          const existing = state.items.find((i) => i.id === product.id);
           const items = existing
             ? state.items.map((i) =>
-                i.name === product.name ? { ...i, quantity: i.quantity + 1 } : i,
+                i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i,
               )
             : [...state.items, { ...product, quantity: 1 }];
           return { items, count: items.reduce((sum, i) => sum + i.quantity, 0) };
         }),
-      removeItem: (name) =>
+      removeItem: (id) =>
         set((state) => {
-          const items = state.items.filter((i) => i.name !== name);
+          const items = state.items.filter((i) => i.id !== id);
           return { items, count: items.reduce((sum, i) => sum + i.quantity, 0) };
         }),
       clearCart: () => set({ items: [], count: 0 }),

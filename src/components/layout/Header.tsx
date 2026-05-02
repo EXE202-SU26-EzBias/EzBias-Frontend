@@ -12,9 +12,7 @@ const Header = () => {
   const { user, isAuthenticated } = useAuthStore();
   const openLogin = useUiStore((s) => s.openLogin);
 
-  const initials = user?.name
-    ? user.name.slice(0, 2).toUpperCase()
-    : user?.email.slice(0, 2).toUpperCase();
+  const initials = (user?.name ?? user?.email ?? '??').slice(0, 2).toUpperCase();
 
   return (
     <div className="sticky top-0 z-[100]">
@@ -144,12 +142,14 @@ const Header = () => {
               {link.label}
             </Link>
           ))}
-          <button
-            onClick={() => { openLogin(); setIsOpen(false); }}
-            className="mt-3 inline-flex h-10 items-center justify-center rounded-full border border-[#ad93e6] bg-white px-6 text-sm font-semibold text-[#ad93e6]"
-          >
-            SIGN UP
-          </button>
+          {!isAuthenticated && (
+            <button
+              onClick={() => { openLogin(); setIsOpen(false); }}
+              className="mt-3 inline-flex h-10 items-center justify-center rounded-full border border-[#ad93e6] bg-white px-6 text-sm font-semibold text-[#ad93e6]"
+            >
+              SIGN UP
+            </button>
+          )}
         </div>
       </nav>
     </div>

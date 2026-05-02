@@ -1,22 +1,20 @@
 import type { Auction } from '../../types/landing';
+import { formatCurrency } from '../../utils/formatters';
 
 interface AuctionCardProps extends Auction {
   onBid: () => void;
 }
-
-const fmt = (v: number) => v.toLocaleString('vi-VN') + ' VNĐ';
 
 const AuctionCard = ({ artist, name, currentBid, timer, isUrgent, image, onBid }: AuctionCardProps) => (
   <article className="overflow-hidden rounded-xl border border-[rgba(230,230,230,0.5)] bg-white shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]">
     {/* Image */}
     <div className="relative aspect-square overflow-hidden">
       <div
-        className="absolute inset-0 grid place-items-center text-xl font-bold tracking-wide text-[#ad93e6]"
-        style={
-          image
-            ? { background: `center/cover url(${image})` }
-            : { background: 'linear-gradient(135deg, #f0edf7 0%, #fcf6e8 100%)' }
-        }
+        className={[
+          'absolute inset-0 grid place-items-center text-xl font-bold tracking-wide text-[#ad93e6]',
+          image ? 'bg-center bg-cover' : 'bg-gradient-to-br from-[#f0edf7] to-[#fcf6e8]',
+        ].join(' ')}
+        style={image ? { backgroundImage: `url(${image})` } : undefined}
       >
         {!image && <span>{artist}</span>}
       </div>
@@ -50,7 +48,7 @@ const AuctionCard = ({ artist, name, currentBid, timer, isUrgent, image, onBid }
       <div className="flex items-center justify-between gap-2 pt-1">
         <div>
           <p className="text-[12px] text-[#737373]">Current Bid</p>
-          <p className="text-[18px] font-bold leading-tight text-[#121212]">{fmt(currentBid)}</p>
+          <p className="text-[18px] font-bold leading-tight text-[#121212]">{formatCurrency(currentBid)}</p>
         </div>
         <button
           onClick={onBid}
