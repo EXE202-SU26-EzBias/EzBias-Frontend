@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
+import { useUiStore } from '../../stores/ui.store';
+import LoginModal from '../shared/LoginModal';
+import RegisterModal from '../shared/RegisterModal';
+import Toast from '../ui/Toast';
 import Footer from './Footer';
 import Header from './Header';
-import LoginModal from '../ui/LoginModal';
-import Toast from '../ui/Toast';
-import { useUiStore } from '../../stores/ui.store';
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -19,6 +20,7 @@ const PageLayout = ({ children }: PageLayoutProps) => {
       <main>{children}</main>
       <Footer />
       <LoginModal />
+      <RegisterModal />
       <Toast message={toastMessage} visible={toastVisible} />
     </>
   );

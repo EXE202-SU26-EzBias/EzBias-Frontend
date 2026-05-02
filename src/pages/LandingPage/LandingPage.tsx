@@ -1,16 +1,17 @@
 import { useRef } from 'react';
-import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import Header from '../../components/layout/Header';
+import LoginModal from '../../components/shared/LoginModal';
+import RegisterModal from '../../components/shared/RegisterModal';
 import Toast from '../../components/ui/Toast';
-import LoginModal from '../../components/ui/LoginModal';
+import { useUiStore } from '../../stores/ui.store';
+import AuctionsSection from './AuctionsSection';
+import FandomSection from './FandomSection';
+import FeaturesSection from './FeaturesSection';
 import HeroSection from './HeroSection';
 import MarqueeStrip from './MarqueeStrip';
-import TrendingSection from './TrendingSection';
-import FandomSection from './FandomSection';
-import AuctionsSection from './AuctionsSection';
-import FeaturesSection from './FeaturesSection';
 import NewsletterCTA from './NewsletterCTA';
-import { useUiStore } from '../../stores/ui.store';
+import TrendingSection from './TrendingSection';
 
 const LandingPage = () => {
   const trendingRef = useRef<HTMLElement>(null);
@@ -32,6 +33,7 @@ const LandingPage = () => {
       </main>
       <Footer />
       <LoginModal />
+      <RegisterModal />
       <Toast message={toastMessage} visible={toastVisible} />
     </>
   );

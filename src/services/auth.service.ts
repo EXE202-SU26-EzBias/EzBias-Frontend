@@ -11,3 +11,13 @@ export function useLogin() {
       http.post<LoginResponse>('/auth/login', payload).then((r) => r.data),
   });
 }
+
+interface RegisterPayload { fullName: string; email: string; password: string; }
+interface RegisterResponse { user: AuthUser; accessToken: string; }
+
+export function useRegister() {
+  return useMutation({
+    mutationFn: (payload: RegisterPayload) =>
+      http.post<RegisterResponse>('/auth/register', payload).then((r) => r.data),
+  });
+}

@@ -1,8 +1,8 @@
-import { useUiStore } from '../../stores/ui.store';
 import { useLoginForm } from '../../features/auth/useLoginForm';
+import { useUiStore } from '../../stores/ui.store';
 
 const LoginModal = () => {
-  const { isLoginOpen, closeLogin } = useUiStore();
+  const { isLoginOpen, closeLogin, openRegister } = useUiStore();
   const { register, onSubmit, errors, isPending } = useLoginForm();
 
   if (!isLoginOpen) return null;
@@ -19,20 +19,16 @@ const LoginModal = () => {
       aria-modal="true"
       aria-label="Login"
     >
-      <div className="flex h-[512px] w-full max-w-[720px] overflow-hidden rounded-xl bg-[#fcfeff] shadow-[0_4px_28.6px_-4px_rgba(0,0,0,0.16)]">
+      <div className="flex h-[400px] w-full max-w-[720px] overflow-hidden rounded-xl bg-[#fcfeff] shadow-[0_4px_28.6px_-4px_rgba(0,0,0,0.16)]">
         {/* Image panel */}
         <div className="hidden w-[297px] shrink-0 sm:block">
-          <img
-            src="/background.jpg"
-            alt=""
-            className="h-full w-full object-cover object-left"
-          />
+          <img src="/background.jpg" alt="" className="h-full w-full object-cover object-left" />
         </div>
 
         {/* Form */}
         <form
           onSubmit={onSubmit}
-          className="relative flex flex-1 flex-col items-center px-10 py-12 font-sans"
+          className="relative flex flex-1 flex-col justify-center items-center px-10 py-12 font-sans"
         >
           <button
             type="button"
@@ -52,9 +48,7 @@ const LoginModal = () => {
             {...register('email')}
             className="mb-1 h-[32.5px] w-[300px] rounded-[10px] bg-[rgba(176,186,195,0.4)] px-5 text-[10px] text-black/80 outline-none focus:shadow-[0_0_0_2px_rgba(155,132,236,0.4)]"
           />
-          {errors.email && (
-            <p className="mb-2 w-[300px] text-[9px] text-red-500">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="mb-2 w-[300px] text-[9px] text-red-500">{errors.email.message}</p>}
 
           <label className="mb-1.5 w-[300px] text-[10px] font-medium text-[#7c838a]">Password</label>
           <input
@@ -63,9 +57,7 @@ const LoginModal = () => {
             {...register('password')}
             className="mb-1 h-[32.5px] w-[300px] rounded-[10px] bg-[rgba(176,186,195,0.4)] px-5 text-[10px] text-black/80 outline-none focus:shadow-[0_0_0_2px_rgba(155,132,236,0.4)]"
           />
-          {errors.password && (
-            <p className="mb-2 w-[300px] text-[9px] text-red-500">{errors.password.message}</p>
-          )}
+          {errors.password && <p className="mb-2 w-[300px] text-[9px] text-red-500">{errors.password.message}</p>}
 
           <button
             type="submit"
@@ -77,24 +69,10 @@ const LoginModal = () => {
 
           <p className="mb-4 text-[9px] text-[#7c838a]">
             Don&apos;t have a account?{' '}
-            <span className="cursor-pointer text-[#9b84ec]">Sign Up</span>
+            <span className="cursor-pointer text-[#9b84ec]" onClick={openRegister}>
+              Sign Up
+            </span>
           </p>
-
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              className="h-[27px] rounded-[7.5px] border border-[#7c838a] bg-white px-2 text-[7px] font-medium text-[#7c838a]"
-            >
-              G&nbsp;&nbsp;Sign up with Google
-            </button>
-            <span className="text-[13px] font-medium text-[#b0bac3]">- OR -</span>
-            <button
-              type="button"
-              className="h-[27px] rounded-[7.5px] border border-[#7c838a] bg-white px-2 text-[7px] font-medium text-[#7c838a]"
-            >
-              f&nbsp;&nbsp;Sign up with Facebook
-            </button>
-          </div>
         </form>
       </div>
     </div>
