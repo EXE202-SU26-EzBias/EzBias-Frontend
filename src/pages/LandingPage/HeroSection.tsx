@@ -6,7 +6,7 @@ interface HeroSectionProps {
   auctionsRef: RefObject<HTMLElement | null>;
 }
 
-const scrollTo = (ref: RefObject<HTMLElement | null>) =>
+const scrollToSection = (ref: RefObject<HTMLElement | null>) =>
   ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
 const HeroSection = ({ trendingRef, auctionsRef }: HeroSectionProps) => (
@@ -59,13 +59,13 @@ const HeroSection = ({ trendingRef, auctionsRef }: HeroSectionProps) => (
       {/* CTAs */}
       <div className="flex w-full flex-col gap-3 pt-2 sm:w-auto sm:flex-row">
         <button
-          onClick={() => scrollTo(trendingRef)}
+          onClick={() => scrollToSection(trendingRef)}
           className="inline-flex h-11 items-center justify-center rounded-full bg-[#ad93e6] px-8 text-sm font-semibold text-white transition-colors hover:bg-[#9d7ed9]"
         >
           Shop Now
         </button>
         <button
-          onClick={() => scrollTo(auctionsRef)}
+          onClick={() => scrollToSection(auctionsRef)}
           className="inline-flex h-11 items-center justify-center rounded-full border border-[#ad93e6] bg-white px-8 text-sm font-semibold text-[#ad93e6] transition-colors hover:bg-[#ad93e6] hover:text-white"
         >
           Live Auctions

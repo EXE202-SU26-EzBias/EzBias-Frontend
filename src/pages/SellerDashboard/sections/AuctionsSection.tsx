@@ -1,12 +1,9 @@
 import React from 'react';
-import type { Auction, AuctionStatus, SellerData } from '../../../types/seller';
+import type { SellerAuction, AuctionStatus } from '../../../types/seller';
+import { useSellerDashboard } from '../../../services/seller.service';
+import { formatCurrency } from '../../../utils/formatters';
 import { Icons } from '../sellerIcons';
-import { fmt } from '../sellerMockData';
 import SellerTopbar from '../SellerTopbar';
-
-interface AuctionsSectionProps {
-  data: SellerData;
-}
 
 const statusBadge: Record<AuctionStatus, string> = {
   live:  'bg-[#f0fdf4] text-[#166534]',
@@ -18,7 +15,10 @@ const statusLabel: Record<AuctionStatus, string> = {
   ended: 'Ended',
 };
 
-const AuctionsSection = React.memo(function AuctionsSection({ data }: AuctionsSectionProps) {
+const AuctionsSection = React.memo(function AuctionsSection() {
+  const { data } = useSellerDashboard();
+  if (!data) return null;
+
   return (
     <div>
       <SellerTopbar title="Auctions" sub="Track live and ended auctions you host" />
@@ -45,24 +45,24 @@ const AuctionsSection = React.memo(function AuctionsSection({ data }: AuctionsSe
               </tr>
             </thead>
             <tbody>
-              {data.auctions.map((a: Auction, idx) => (
-                <tr key={a.id} className="hover:bg-[rgba(173,147,230,0.05)]">
-                  <td className={`px-4 py-[14px] text-[#737373] align-middle font-medium ${idx < data.auctions.length - 1 ? 'border-b border-[rgba(230,230,230,0.5)]' : ''}`}>
+              {data.auctions.map((a: SellerAuction) => (
+                <tr key={a.id} className="hover:bg-[rgba(173,147,230,0.05)] border-b border-[rgba(230,230,230,0.5)] last:border-b-0">
+                  <td className="px-4 py-[14px] text-[#737373] align-middle font-medium">
                     {a.id}
                   </td>
-                  <td className={`px-4 py-[14px] text-[#121212] align-middle font-medium ${idx < data.auctions.length - 1 ? 'border-b border-[rgba(230,230,230,0.5)]' : ''}`}>
+                  <td className="px-4 py-[14px] text-[#121212] align-middle font-medium">
                     {a.name}
                   </td>
-                  <td className={`px-4 py-[14px] text-[#121212] align-middle font-semibold ${idx < data.auctions.length - 1 ? 'border-b border-[rgba(230,230,230,0.5)]' : ''}`}>
-                    {fmt(a.bid)}
+                  <td className="px-4 py-[14px] text-[#121212] align-middle font-semibold">
+                    {formatCurrency(a.bid)}
                   </td>
-                  <td className={`px-4 py-[14px] text-[#121212] align-middle ${idx < data.auctions.length - 1 ? 'border-b border-[rgba(230,230,230,0.5)]' : ''}`}>
+                  <td className="px-4 py-[14px] text-[#121212] align-middle">
                     {a.bids}
                   </td>
-                  <td className={`px-4 py-[14px] text-[#121212] align-middle ${idx < data.auctions.length - 1 ? 'border-b border-[rgba(230,230,230,0.5)]' : ''}`}>
+                  <td className="px-4 py-[14px] text-[#121212] align-middle">
                     {a.end}
                   </td>
-                  <td className={`px-4 py-[14px] align-middle ${idx < data.auctions.length - 1 ? 'border-b border-[rgba(230,230,230,0.5)]' : ''}`}>
+                  <td className="px-4 py-[14px] align-middle">
                     <span className={`inline-flex items-center gap-1 px-[10px] py-0.5 rounded-full text-[11px] font-semibold ${statusBadge[a.status]}`}>
                       {statusLabel[a.status]}
                     </span>

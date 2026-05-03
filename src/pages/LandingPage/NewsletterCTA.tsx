@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useUiStore } from '../../stores/ui.store';
+import { useSubscribeNewsletter } from '../../services/newsletter.service';
 
 const newsletterSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -11,6 +12,7 @@ type NewsletterFormData = z.infer<typeof newsletterSchema>;
 
 const NewsletterCTA = () => {
   const showToast = useUiStore((s) => s.showToast);
+  const { mutate: subscribe, isPending } = useSubscribeNewsletter();
   const {
     register,
     handleSubmit,
@@ -19,14 +21,15 @@ const NewsletterCTA = () => {
   } = useForm<NewsletterFormData>({ resolver: zodResolver(newsletterSchema) });
 
   const onSubmit = handleSubmit((data) => {
-    showToast(`Subscribed ${data.email} — see you in the inbox`);
-    reset();
+    subscribe(data.email, {
+      onSuccess: () => { showToast(`Subscribed ${data.email} — see you in the inbox`); reset(); },
+      onError: () => showToast('Subscription failed. Please try again.'),
+    });
   });
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 pb-20 pt-8">
       <div className="newsletter-bg relative overflow-hidden rounded-2xl border border-[rgba(230,230,230,0.5)] shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-        {/* Blur orbs */}
         <div
           className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[rgba(173,147,230,0.25)] blur-[60px]"
           aria-hidden="true"
@@ -36,7 +39,6 @@ const NewsletterCTA = () => {
           aria-hidden="true"
         />
 
-        {/* Content */}
         <div className="relative mx-auto flex max-w-[720px] flex-col items-center gap-3 px-6 py-16 text-center">
           <span className="text-xs font-semibold uppercase tracking-[0.6px] text-[#ad93e6]">
             Join the Stan Squad
@@ -62,7 +64,8 @@ const NewsletterCTA = () => {
               />
               <button
                 type="submit"
-                className="inline-flex h-11 items-center justify-center rounded-full bg-[#ad93e6] px-8 text-sm font-semibold text-white transition-colors hover:bg-[#9d7ed9] max-sm:w-full"
+                disabled={isPending}
+                className="inline-flex h-11 items-center justify-center rounded-full bg-[#ad93e6] px-8 text-sm font-semibold text-white transition-colors hover:bg-[#9d7ed9] max-sm:w-full disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 Join Free
               </button>

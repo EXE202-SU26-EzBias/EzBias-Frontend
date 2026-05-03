@@ -8,7 +8,7 @@ const OrderConfirmationPage = () => {
     <PageLayout>
       <div className="mx-auto flex min-h-[60vh] max-w-[480px] flex-col items-center justify-center px-4 py-16 text-center">
         <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[rgba(155,132,236,0.12)]">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9b84ec" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9b84ec" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
             <polyline points="22 4 12 14.01 9 11.01" />
           </svg>

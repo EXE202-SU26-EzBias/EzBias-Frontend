@@ -1,16 +1,16 @@
 import React, { useMemo, useState } from 'react';
-import type { Listing, ListingStatus, SellerData } from '../../../types/seller';
+import type { Listing, ListingStatus } from '../../../types/seller';
+import { useSellerDashboard } from '../../../services/seller.service';
 import ListingsTable from '../ListingsTable';
 import { Icons } from '../sellerIcons';
 import SellerTopbar from '../SellerTopbar';
 
-interface ListingsSectionProps {
-  data: SellerData;
-}
-
 type StatusFilter = 'all' | ListingStatus;
 
-const ListingsSection = React.memo(function ListingsSection({ data }: ListingsSectionProps) {
+const ListingsSection = React.memo(function ListingsSection() {
+  const { data } = useSellerDashboard();
+  if (!data) return null;
+
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 

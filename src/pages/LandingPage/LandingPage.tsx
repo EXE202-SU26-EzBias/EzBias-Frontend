@@ -4,6 +4,7 @@ import Header from '../../components/layout/Header';
 import LoginModal from '../../components/shared/LoginModal';
 import RegisterModal from '../../components/shared/RegisterModal';
 import Toast from '../../components/ui/Toast';
+import { useShallow } from 'zustand/react/shallow';
 import { useUiStore } from '../../stores/ui.store';
 import AuctionsSection from './AuctionsSection';
 import FandomSection from './FandomSection';
@@ -16,8 +17,9 @@ import TrendingSection from './TrendingSection';
 const LandingPage = () => {
   const trendingRef = useRef<HTMLElement>(null);
   const auctionsRef = useRef<HTMLElement>(null);
-  const toastMessage = useUiStore((s) => s.toastMessage);
-  const toastVisible = useUiStore((s) => s.toastVisible);
+  const { toastMessage, toastVisible } = useUiStore(
+    useShallow((s) => ({ toastMessage: s.toastMessage, toastVisible: s.toastVisible }))
+  );
 
   return (
     <>

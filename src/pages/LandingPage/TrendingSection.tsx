@@ -7,9 +7,9 @@ interface TrendingSectionProps {
   sectionRef: RefObject<HTMLElement | null>;
 }
 
-const TrendingSection = ({ sectionRef }: TrendingSectionProps) => {
-  const products: Product[] = [];
+const products: Product[] = [];
 
+const TrendingSection = ({ sectionRef }: TrendingSectionProps) => {
   return (
     <section ref={sectionRef} className="mx-auto max-w-[1400px] px-6 py-16" aria-label="Trending Now">
       <div className="mb-8 flex items-center justify-between">
@@ -22,9 +22,11 @@ const TrendingSection = ({ sectionRef }: TrendingSectionProps) => {
         </Link>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {products.map((p) => (
-          <ProductCard key={p.name} {...p} />
-        ))}
+        {products.length === 0 ? (
+          <p className="col-span-full py-12 text-center text-sm text-[#737373]">Trending items coming soon.</p>
+        ) : (
+          products.map((p) => <ProductCard key={p.id} {...p} />)
+        )}
       </div>
     </section>
   );

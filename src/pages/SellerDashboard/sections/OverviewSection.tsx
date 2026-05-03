@@ -1,5 +1,5 @@
 import React from 'react';
-import type { SellerData } from '../../../types/seller';
+import { useSellerDashboard } from '../../../services/seller.service';
 import ActivityFeed from '../ActivityFeed';
 import KpiCard from '../KpiCard';
 import OrdersTable from '../OrdersTable';
@@ -7,11 +7,10 @@ import RevenueChart from '../RevenueChart';
 import { Icons } from '../sellerIcons';
 import SellerTopbar from '../SellerTopbar';
 
-interface OverviewSectionProps {
-  data: SellerData;
-}
+const OverviewSection = React.memo(function OverviewSection() {
+  const { data } = useSellerDashboard();
+  if (!data) return null;
 
-const OverviewSection = React.memo(function OverviewSection({ data }: OverviewSectionProps) {
   return (
     <div>
       <SellerTopbar title="Overview" sub="How your store is performing right now" />
@@ -20,7 +19,9 @@ const OverviewSection = React.memo(function OverviewSection({ data }: OverviewSe
         <span className="text-[#ad93e6] flex-shrink-0">{Icons.info}</span>
         <span>
           Your <strong>CORTIS Pin Set</strong> listing is in draft.{' '}
-          <a href="#" className="text-[#ad93e6] font-semibold">Review and publish →</a>
+          <button type="button" className="text-[#ad93e6] font-semibold hover:underline">
+            Review and publish →
+          </button>
         </span>
       </div>
 

@@ -1,9 +1,7 @@
 import type { SellerData } from '../../types/seller';
 
-export const fmt = (v: number): string => v.toLocaleString('vi-VN') + ' VNĐ';
-
 export const SELLER_DATA: SellerData = {
-  user: { name: 'HYBE Official Store', initials: 'HY', bg: '#9b84ec', role: 'Brand · Verified' },
+  user: { name: 'HYBE Official Store', initials: 'HY', bg: '#9b84ec', role: 'Brand · Verified', email: 'store@hybe.com' },
   kpis: [
     { label: 'Revenue (30d)',   value: '284,500 VNĐ', delta: '+12.4% vs prior', up: true,  icon: 'wallet' },
     { label: 'Orders (30d)',    value: '1,284',        delta: '+8.1% vs prior',  up: true,  icon: 'bag'    },
@@ -47,9 +45,9 @@ export const SELLER_DATA: SellerData = {
     { id: 'P-07', date: 'Apr 10, 2026', amount: '14,210 VNĐ', method: 'Wise · ••••8821', status: 'Paid' },
   ],
   feed: [
-    { who: 'armyforever_94', what: 'placed a bid of',        target: '450 VNĐ',              time: 'Just now',    icon: 'gavel' },
-    { who: 'bunnyhug_2024',  what: 'purchased',              target: 'NewJeans OMG Album',   time: '12 min ago',  icon: 'bag'   },
-    { who: 'stay_2024',      what: 'left a 5★ review on',    target: 'Stray Kids 5★★★★★',   time: '1 hour ago',  icon: 'star'  },
-    { who: 'k_collector',    what: 'asked a question about', target: 'BTS Proof Album',      time: '3 hours ago', icon: 'msg'   },
+    { id: 'f-1', who: 'armyforever_94', what: 'placed a bid of',        target: '450 VNĐ',              time: 'Just now',    icon: 'gavel' },
+    { id: 'f-2', who: 'bunnyhug_2024',  what: 'purchased',              target: 'NewJeans OMG Album',   time: '12 min ago',  icon: 'bag'   },
+    { id: 'f-3', who: 'stay_2024',      what: 'left a 5★ review on',    target: 'Stray Kids 5★★★★★',   time: '1 hour ago',  icon: 'star'  },
+    { id: 'f-4', who: 'k_collector',    what: 'asked a question about', target: 'BTS Proof Album',      time: '3 hours ago', icon: 'msg'   },
   ],
 };

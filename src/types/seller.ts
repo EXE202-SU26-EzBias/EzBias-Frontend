@@ -1,12 +1,14 @@
 export type ListingStatus = 'live' | 'paused' | 'draft' | 'out';
 export type OrderStatus = 'processing' | 'shipped' | 'delivered';
 export type AuctionStatus = 'live' | 'ended';
+export type PayoutStatus = 'Paid' | 'Pending' | 'Failed';
 
 export interface SellerUser {
   name: string;
   initials: string;
   bg: string;
   role: string;
+  email?: string;
 }
 
 export interface Kpi {
@@ -40,7 +42,7 @@ export interface Order {
   status: OrderStatus;
 }
 
-export interface Auction {
+export interface SellerAuction {
   id: string;
   name: string;
   bid: number;
@@ -54,10 +56,11 @@ export interface Payout {
   date: string;
   amount: string;
   method: string;
-  status: string;
+  status: PayoutStatus;
 }
 
 export interface FeedItem {
+  id: string;
   who: string;
   what: string;
   target: string;
@@ -71,7 +74,11 @@ export interface SellerData {
   chart: ChartPoint[];
   listings: Listing[];
   orders: Order[];
-  auctions: Auction[];
+  auctions: SellerAuction[];
   payouts: Payout[];
   feed: FeedItem[];
 }
+
+export type PageId =
+  | 'overview' | 'listings' | 'orders' | 'auctions'
+  | 'analytics' | 'payouts' | 'settings';

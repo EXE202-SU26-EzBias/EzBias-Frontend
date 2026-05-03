@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import type { SellerData } from '../../../types/seller';
+import { useSellerDashboard } from '../../../services/seller.service';
 import SellerTopbar from '../SellerTopbar';
 
-interface SettingsSectionProps {
-  data: SellerData;
-}
+const SettingsSection = React.memo(function SettingsSection() {
+  const { data } = useSellerDashboard();
+  if (!data) return null;
 
-const SettingsSection = React.memo(function SettingsSection({ data }: SettingsSectionProps) {
   const [storeName, setStoreName] = useState(data.user.name);
-  const [email, setEmail] = useState('hybe-official@ezbias.com');
+  const [email, setEmail] = useState(data.user.email ?? '');
   const [about, setAbout] = useState('Official HYBE merchandise store. Authentic K-pop goods from BTS, NewJeans, ILLIT, and more.');
 
   return (
@@ -25,10 +24,11 @@ const SettingsSection = React.memo(function SettingsSection({ data }: SettingsSe
         <div className="p-5">
           <div className="grid grid-cols-2 gap-4 mb-4 max-[700px]:grid-cols-1">
             <div>
-              <label className="text-[11px] text-[#737373] font-medium mb-1 block">
+              <label htmlFor="store-name" className="text-[11px] text-[#737373] font-medium mb-1 block">
                 Store name
               </label>
               <input
+                id="store-name"
                 type="text"
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
@@ -36,10 +36,11 @@ const SettingsSection = React.memo(function SettingsSection({ data }: SettingsSe
               />
             </div>
             <div>
-              <label className="text-[11px] text-[#737373] font-medium mb-1 block">
+              <label htmlFor="contact-email" className="text-[11px] text-[#737373] font-medium mb-1 block">
                 Contact email
               </label>
               <input
+                id="contact-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -48,10 +49,11 @@ const SettingsSection = React.memo(function SettingsSection({ data }: SettingsSe
             </div>
           </div>
           <div className="mb-6">
-            <label className="text-[11px] text-[#737373] font-medium mb-1 block">
+            <label htmlFor="store-about" className="text-[11px] text-[#737373] font-medium mb-1 block">
               About your store
             </label>
             <textarea
+              id="store-about"
               value={about}
               onChange={(e) => setAbout(e.target.value)}
               rows={4}

@@ -1,12 +1,18 @@
 import React from 'react';
-import type { Payout, SellerData } from '../../../types/seller';
+import type { Payout, PayoutStatus } from '../../../types/seller';
+import { useSellerDashboard } from '../../../services/seller.service';
 import SellerTopbar from '../SellerTopbar';
 
-interface PayoutsSectionProps {
-  data: SellerData;
-}
+const payoutStatusBadge: Record<PayoutStatus, string> = {
+  Paid:    'bg-[#f0fdf4] text-[#166534]',
+  Pending: 'bg-[#fff7ed] text-[#b45309]',
+  Failed:  'bg-[#fef2f2] text-[#ef4343]',
+};
 
-const PayoutsSection = React.memo(function PayoutsSection({ data }: PayoutsSectionProps) {
+const PayoutsSection = React.memo(function PayoutsSection() {
+  const { data } = useSellerDashboard();
+  if (!data) return null;
+
   return (
     <div>
       <SellerTopbar title="Payouts" sub="Withdraw earnings and manage payout methods" />
@@ -61,22 +67,22 @@ const PayoutsSection = React.memo(function PayoutsSection({ data }: PayoutsSecti
               </tr>
             </thead>
             <tbody>
-              {data.payouts.map((p: Payout, idx) => (
-                <tr key={p.id} className="hover:bg-[rgba(173,147,230,0.05)]">
-                  <td className={`px-4 py-[14px] text-[#737373] align-middle font-medium ${idx < data.payouts.length - 1 ? 'border-b border-[rgba(230,230,230,0.5)]' : ''}`}>
+              {data.payouts.map((p: Payout) => (
+                <tr key={p.id} className="hover:bg-[rgba(173,147,230,0.05)] border-b border-[rgba(230,230,230,0.5)] last:border-b-0">
+                  <td className="px-4 py-[14px] text-[#737373] align-middle font-medium">
                     {p.id}
                   </td>
-                  <td className={`px-4 py-[14px] text-[#121212] align-middle ${idx < data.payouts.length - 1 ? 'border-b border-[rgba(230,230,230,0.5)]' : ''}`}>
+                  <td className="px-4 py-[14px] text-[#121212] align-middle">
                     {p.date}
                   </td>
-                  <td className={`px-4 py-[14px] text-[#121212] align-middle font-semibold ${idx < data.payouts.length - 1 ? 'border-b border-[rgba(230,230,230,0.5)]' : ''}`}>
+                  <td className="px-4 py-[14px] text-[#121212] align-middle font-semibold">
                     {p.amount}
                   </td>
-                  <td className={`px-4 py-[14px] text-[#737373] align-middle ${idx < data.payouts.length - 1 ? 'border-b border-[rgba(230,230,230,0.5)]' : ''}`}>
+                  <td className="px-4 py-[14px] text-[#737373] align-middle">
                     {p.method}
                   </td>
-                  <td className={`px-4 py-[14px] align-middle ${idx < data.payouts.length - 1 ? 'border-b border-[rgba(230,230,230,0.5)]' : ''}`}>
-                    <span className="inline-flex items-center gap-1 px-[10px] py-0.5 rounded-full text-[11px] font-semibold bg-[#f0fdf4] text-[#166534]">
+                  <td className="px-4 py-[14px] align-middle">
+                    <span className={`inline-flex items-center gap-1 px-[10px] py-0.5 rounded-full text-[11px] font-semibold ${payoutStatusBadge[p.status]}`}>
                       {p.status}
                     </span>
                   </td>

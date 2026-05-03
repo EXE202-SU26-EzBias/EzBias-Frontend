@@ -1,11 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import type { Order, OrderStatus, SellerData } from '../../../types/seller';
+import type { Order, OrderStatus } from '../../../types/seller';
+import { useSellerDashboard } from '../../../services/seller.service';
 import OrdersTable from '../OrdersTable';
 import SellerTopbar from '../SellerTopbar';
-
-interface OrdersSectionProps {
-  data: SellerData;
-}
 
 type ChipFilter = 'all' | OrderStatus;
 
@@ -15,7 +12,10 @@ interface Chip {
   count: number;
 }
 
-const OrdersSection = React.memo(function OrdersSection({ data }: OrdersSectionProps) {
+const OrdersSection = React.memo(function OrdersSection() {
+  const { data } = useSellerDashboard();
+  if (!data) return null;
+
   const [filter, setFilter] = useState<ChipFilter>('all');
 
   const chips: Chip[] = useMemo(() => [
