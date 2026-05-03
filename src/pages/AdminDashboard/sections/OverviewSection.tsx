@@ -1,0 +1,62 @@
+import React from 'react';
+import { useAdminDashboard } from '../../../services/admin.service';
+import KpiCard from '../../SellerDashboard/KpiCard';
+import RevenueChart from '../../SellerDashboard/RevenueChart';
+import ActivityFeed from '../../SellerDashboard/ActivityFeed';
+import OrdersTable from '../../SellerDashboard/OrdersTable';
+import SellerTopbar from '../../SellerDashboard/SellerTopbar';
+
+const OverviewSection = React.memo(function OverviewSection() {
+  const { data } = useAdminDashboard();
+  if (!data) return null;
+
+  return (
+    <div>
+      <SellerTopbar title="Platform Overview" sub="Real-time health of the marketplace" />
+
+      <div className="grid grid-cols-4 gap-4 mb-6 max-[1100px]:grid-cols-2 max-[600px]:grid-cols-1">
+        {data.kpis.map((kpi) => (
+          <KpiCard key={kpi.label} kpi={kpi} />
+        ))}
+      </div>
+
+      <div className="grid grid-cols-[1.6fr_1fr] gap-4 mb-6 max-[1100px]:grid-cols-1">
+        <div className="bg-white border border-[rgba(230,230,230,0.5)] rounded-xl shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]">
+          <div className="flex items-center justify-between px-5 py-[18px] border-b border-[rgba(230,230,230,0.5)] gap-3 flex-wrap">
+            <div>
+              <h2 className="text-[16px] font-bold text-[#121212] m-0">Revenue trend</h2>
+              <p className="text-[12px] text-[#737373] mt-0.5 mb-0">Last 7 days</p>
+            </div>
+          </div>
+          <div className="p-5">
+            <RevenueChart data={data.chart} />
+          </div>
+        </div>
+
+        <div className="bg-white border border-[rgba(230,230,230,0.5)] rounded-xl shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]">
+          <div className="flex items-center justify-between px-5 py-[18px] border-b border-[rgba(230,230,230,0.5)] gap-3 flex-wrap">
+            <div>
+              <h2 className="text-[16px] font-bold text-[#121212] m-0">Activity</h2>
+              <p className="text-[12px] text-[#737373] mt-0.5 mb-0">Latest actions on the platform</p>
+            </div>
+          </div>
+          <div className="p-5">
+            <ActivityFeed items={data.feed} />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-[rgba(230,230,230,0.5)] rounded-xl shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] mb-6">
+        <div className="flex items-center justify-between px-5 py-[18px] border-b border-[rgba(230,230,230,0.5)] gap-3 flex-wrap">
+          <div>
+            <h2 className="text-[16px] font-bold text-[#121212] m-0">Recent orders</h2>
+            <p className="text-[12px] text-[#737373] mt-0.5 mb-0">Last 5 orders across the platform</p>
+          </div>
+        </div>
+        <OrdersTable orders={data.orders.slice(0, 5)} />
+      </div>
+    </div>
+  );
+});
+
+export default OverviewSection;

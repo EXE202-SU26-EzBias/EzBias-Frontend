@@ -11,6 +11,7 @@ const AuctionDetailPage = lazy(() => import('./pages/AuctionPage/AuctionDetailPa
 const AboutPage = lazy(() => import('./pages/AboutUsPage/AboutUsPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage/ContactPage'));
 const SellerDashboard = lazy(() => import('./pages/SellerDashboard/SellerDashboard'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard/AdminDashboard'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage/CheckoutPage'));
 const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage/OrderConfirmationPage'));
 
@@ -36,6 +37,7 @@ function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/seller" element={<SellerDashboard />} />
+              <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
             </Routes>
