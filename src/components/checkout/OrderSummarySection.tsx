@@ -1,4 +1,4 @@
-import type { CartItem } from '../../stores/cart.store';
+import type { CartItem } from '../../types/cart';
 import type { OrderTotal } from '../../types/checkout';
 import OrderItemList from './OrderItemList';
 import OrderTotals from './OrderTotals';
@@ -6,7 +6,7 @@ import OrderTotals from './OrderTotals';
 interface OrderSummarySectionProps {
   items: CartItem[];
   totals: OrderTotal;
-  onRemoveItem: (id: string) => void;
+  onRemoveItem: (cartItemId: number) => void;
 }
 
 const OrderSummarySection = ({ items, totals, onRemoveItem }: OrderSummarySectionProps) => (

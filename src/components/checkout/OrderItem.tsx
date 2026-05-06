@@ -1,11 +1,11 @@
-import type { CartItem } from '../../stores/cart.store';
+import type { CartItem } from '../../types/cart';
 import type { ArtistAccentMap } from '../../types/checkout';
 import { formatCurrency } from '../../utils/formatters';
 
 interface OrderItemProps {
   item: CartItem;
   accentMap: ArtistAccentMap;
-  onRemove: (id: string) => void;
+  onRemove: (cartItemId: number) => void;
 }
 
 const TrashIcon = () => (
@@ -25,13 +25,13 @@ const BoxIcon = () => (
 );
 
 const OrderItem = ({ item, accentMap, onRemove }: OrderItemProps) => {
-  const accent = accentMap[item.artist.toUpperCase()] ?? accentMap['DEFAULT'];
+  const accent = accentMap['DEFAULT'];
 
   return (
     <div className="flex items-center gap-3 py-3">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[rgba(176,186,195,0.2)]">
-        {item.image ? (
-          <img src={item.image} alt={item.name} className="h-full w-full rounded-lg object-cover" />
+        {item.productImage ? (
+          <img src={item.productImage} alt={item.productName} className="h-full w-full rounded-lg object-cover" />
         ) : (
           <BoxIcon />
         )}
@@ -42,21 +42,21 @@ const OrderItem = ({ item, accentMap, onRemove }: OrderItemProps) => {
           className="w-fit rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
           style={{ background: accent.bg, color: accent.text }}
         >
-          {item.artist}
+          Item
         </span>
-        <span className="truncate text-[13px] font-medium text-[#121212]">{item.name}</span>
+        <span className="truncate text-[13px] font-medium text-[#121212]">{item.productName}</span>
         <span className="text-[11px] text-[#737373]">Qty: {item.quantity}</span>
       </div>
 
       <div className="flex shrink-0 flex-col items-end gap-1">
         <span className="text-[13px] font-semibold text-[#121212]">
-          {formatCurrency(item.price * item.quantity)}
+          {formatCurrency(item.unitPrice * item.quantity)}
         </span>
         <button
           type="button"
-          onClick={() => onRemove(item.id)}
+          onClick={() => onRemove(item.cartItemId)}
           className="text-[#b0bac3] transition-colors hover:text-red-400"
-          aria-label={`Remove ${item.name}`}
+          aria-label={`Remove ${item.productName}`}
         >
           <TrashIcon />
         </button>

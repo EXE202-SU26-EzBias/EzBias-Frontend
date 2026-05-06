@@ -12,7 +12,7 @@ export interface ShippingFormValues {
 export interface PlaceOrderPayload {
   shippingDetails: ShippingFormValues;
   paymentMethod: PaymentMethod;
-  items: Array<{ productId: string; quantity: number; price: number }>;
+  items: Array<{ productId: number; quantity: number; price: number }>;
 }
 
 export interface PlaceOrderResponse {

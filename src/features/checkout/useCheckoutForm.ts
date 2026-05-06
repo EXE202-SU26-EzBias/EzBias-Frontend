@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
+import { useCart, useClearCart } from '../../services/cart.service';
 import { usePlaceOrder } from '../../services/order.service';
-import { useCartStore } from '../../stores/cart.store';
 import { useUiStore } from '../../stores/ui.store';
 import type { PaymentMethod, ShippingFormValues } from '../../types/checkout';
 
@@ -19,10 +19,12 @@ const shippingSchema = z.object({
 
 export function useCheckoutForm() {
   const navigate = useNavigate();
-  const items = useCartStore((s) => s.items);
-  const clearCart = useCartStore((s) => s.clearCart);
+  const { data: cartData } = useCart();
+  const { mutate: clearCart } = useClearCart();
   const showToast = useUiStore((s) => s.showToast);
   const { mutate: placeOrder, isPending } = usePlaceOrder();
+
+  const items = cartData?.items ?? [];
 
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null);
 
@@ -44,7 +46,7 @@ export function useCheckoutForm() {
       {
         shippingDetails,
         paymentMethod: selectedPayment,
-        items: items.map((i) => ({ productId: i.id, quantity: i.quantity, price: i.price })),
+        items: items.map((i) => ({ productId: i.productId, quantity: i.quantity, price: i.unitPrice })),
       },
       {
         onSuccess: (res) => {

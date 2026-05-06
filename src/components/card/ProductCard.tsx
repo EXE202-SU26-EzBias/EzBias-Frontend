@@ -49,7 +49,7 @@ const ProductCard = ({ id, artist, name, price, image, isBoosted, stock }: Produ
           <span className="text-sm font-bold text-[#121212]">{formatCurrency(price)}</span>
           <button
             disabled={isOutOfStock}
-            onClick={() => handleAdd({ id, artist, name, price, image, isBoosted, stock })}
+            onClick={() => handleAdd(id, name)}
             className={[
               'inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-medium transition-colors',
               isOutOfStock

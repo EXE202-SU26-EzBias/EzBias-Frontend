@@ -1,11 +1,10 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useCartStore } from '../../stores/cart.store';
+import { useAddCartItem } from '../../services/cart.service';
 import { useUiStore } from '../../stores/ui.store';
-import type { Product } from '../../types/landing';
 
 export function useAddToCart() {
   const [added, setAdded] = useState(false);
-  const addItem = useCartStore((s) => s.addItem);
+  const { mutate: addCartItem } = useAddCartItem();
   const showToast = useUiStore((s) => s.showToast);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -16,14 +15,23 @@ export function useAddToCart() {
   }, []);
 
   const handleAdd = useCallback(
-    (product: Product) => {
-      addItem(product);
-      showToast(`Added "${product.name}" to cart`);
-      setAdded(true);
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setAdded(false), 1500);
+    (productId: number, productName: string) => {
+      addCartItem(
+        { productId, quantity: 1 },
+        {
+          onSuccess: () => {
+            showToast(`Added "${productName}" to cart`);
+            setAdded(true);
+            if (timerRef.current) clearTimeout(timerRef.current);
+            timerRef.current = setTimeout(() => setAdded(false), 1500);
+          },
+          onError: () => {
+            showToast('Failed to add item. Please try again.');
+          },
+        },
+      );
     },
-    [addItem, showToast]
+    [addCartItem, showToast],
   );
 
   return { added, handleAdd };

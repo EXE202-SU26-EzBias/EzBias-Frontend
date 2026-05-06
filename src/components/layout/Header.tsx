@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NAV_LINKS } from '../../constants/landing';
+import { useCart } from '../../services/cart.service';
 import { useAuthStore } from '../../stores/auth.store';
-import { useCartStore } from '../../stores/cart.store';
 import { useUiStore } from '../../stores/ui.store';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { pathname } = useLocation();
-  const count = useCartStore((s) => s.count);
+  const { data: cartData } = useCart();
+  const count = cartData?.items.reduce((sum, i) => sum + i.quantity, 0) ?? 0;
   const { user, isAuthenticated } = useAuthStore();
   const openLogin = useUiStore((s) => s.openLogin);
 
