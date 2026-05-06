@@ -41,14 +41,16 @@ const LoginModal = () => {
 
           <h2 className="mb-8 text-[13px] font-semibold text-black">Login your Account</h2>
 
-          <label className="mb-1.5 w-[300px] text-[10px] font-medium text-[#7c838a]">Email</label>
+          <label className="mb-1.5 w-[300px] text-[10px] font-medium text-[#7c838a]">Email or Username</label>
           <input
-            type="email"
-            placeholder="Enter your Email here"
-            {...register('email')}
+            type="text"
+            placeholder="Enter your Email or Username"
+            {...register('emailOrUsername')}
             className="mb-1 h-[32.5px] w-[300px] rounded-[10px] bg-[rgba(176,186,195,0.4)] px-5 text-[10px] text-black/80 outline-none focus:shadow-[0_0_0_2px_rgba(155,132,236,0.4)]"
           />
-          {errors.email && <p className="mb-2 w-[300px] text-[9px] text-red-500">{errors.email.message}</p>}
+          {errors.emailOrUsername && (
+            <p className="mb-2 w-[300px] text-[9px] text-red-500">{errors.emailOrUsername.message}</p>
+          )}
 
           <label className="mb-1.5 w-[300px] text-[10px] font-medium text-[#7c838a]">Password</label>
           <input

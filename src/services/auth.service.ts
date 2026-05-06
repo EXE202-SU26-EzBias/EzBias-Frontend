@@ -1,23 +1,73 @@
 import { useMutation } from '@tanstack/react-query';
 import { http } from '../lib/axios';
-import type { AuthUser } from '../types/auth';
+import type { AuthResponse, AuthUser } from '../types/auth';
 
-interface LoginPayload { email: string; password: string; }
-interface LoginResponse { user: AuthUser; accessToken: string; }
+interface LoginPayload {
+  emailOrUsername: string;
+  password: string;
+}
+interface LoginApiResponse {
+  accessToken: string;
+  expiresInSeconds?: number;
+  userId: number;
+  username: string;
+  email: string;
+  role?: string;
+}
 
 export function useLogin() {
   return useMutation({
     mutationFn: (payload: LoginPayload) =>
-      http.post<LoginResponse>('/auth/login', payload).then((r) => r.data),
+      http.post<LoginApiResponse>('/api/auth/login', payload).then((r) => {
+        const data = r.data;
+        const user: AuthUser = {
+          userId: data.userId,
+          email: data.email,
+          username: data.username,
+          role: data.role,
+        };
+        const mapped: AuthResponse = {
+          user,
+          accessToken: data.accessToken,
+          expiresInSeconds: data.expiresInSeconds,
+        };
+        return mapped;
+      }),
   });
 }
 
-interface RegisterPayload { fullName: string; email: string; password: string; }
-interface RegisterResponse { user: AuthUser; accessToken: string; }
+interface RegisterPayload {
+  fullName: string;
+  username: string;
+  email: string;
+  password: string;
+}
+interface RegisterApiResponse {
+  accessToken: string;
+  expiresInSeconds?: number;
+  userId: number;
+  username: string;
+  email: string;
+  role?: string;
+}
 
 export function useRegister() {
   return useMutation({
     mutationFn: (payload: RegisterPayload) =>
-      http.post<RegisterResponse>('/auth/register', payload).then((r) => r.data),
+      http.post<RegisterApiResponse>('/api/auth/register', payload).then((r) => {
+        const data = r.data;
+        const user: AuthUser = {
+          userId: data.userId,
+          email: data.email,
+          username: data.username,
+          role: data.role,
+        };
+        const mapped: AuthResponse = {
+          user,
+          accessToken: data.accessToken,
+          expiresInSeconds: data.expiresInSeconds,
+        };
+        return mapped;
+      }),
   });
 }

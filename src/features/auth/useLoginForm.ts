@@ -1,12 +1,20 @@
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useLogin } from '../../services/auth.service';
 import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 
+const usernameRegex = /^[a-zA-Z0-9._]{3,20}$/;
+
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email'),
+  emailOrUsername: z
+    .string()
+    .min(1, 'Email or username is required')
+    .refine(
+      (value) => z.string().email().safeParse(value).success || usernameRegex.test(value),
+      'Please enter a valid email or username',
+    ),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 

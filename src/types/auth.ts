@@ -1,6 +1,12 @@
 export interface AuthUser {
-  id: string;
+  userId: number;
   email: string;
-  name?: string;
+  username: string;
   role?: string;
+}
+
+export interface AuthResponse {
+  user: AuthUser;
+  accessToken: string;
+  expiresInSeconds?: number;
 }

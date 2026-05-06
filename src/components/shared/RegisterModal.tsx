@@ -51,6 +51,16 @@ const RegisterModal = () => {
           />
           {errors.fullName && <p className="mb-2 w-[300px] text-[9px] text-red-500">{errors.fullName.message}</p>}
 
+          {/* UserName */}
+          <label className="mb-1.5 w-[300px] text-[10px] font-medium text-[#7c838a]">Username</label>
+          <input
+            type="text"
+            placeholder="Enter your Username here"
+            {...register('username')}
+            className="mb-1 h-[32.5px] w-[300px] rounded-[10px] bg-[rgba(176,186,195,0.4)] px-5 text-[10px] text-black/80 outline-none focus:shadow-[0_0_0_2px_rgba(155,132,236,0.4)]"
+          />
+          {errors.username && <p className="mb-2 w-[300px] text-[9px] text-red-500">{errors.username.message}</p>}
+
           {/* Email */}
           <label className="mb-1.5 w-[300px] text-[10px] font-medium text-[#7c838a]">Email</label>
           <input
@@ -79,7 +89,9 @@ const RegisterModal = () => {
             {...register('confirmPassword')}
             className="mb-1 h-[32.5px] w-[300px] rounded-[10px] bg-[rgba(176,186,195,0.4)] px-5 text-[10px] text-black/80 outline-none focus:shadow-[0_0_0_2px_rgba(155,132,236,0.4)]"
           />
-          {errors.confirmPassword && <p className="mb-2 w-[300px] text-[9px] text-red-500">{errors.confirmPassword.message}</p>}
+          {errors.confirmPassword && (
+            <p className="mb-2 w-[300px] text-[9px] text-red-500">{errors.confirmPassword.message}</p>
+          )}
 
           <button
             type="submit"
