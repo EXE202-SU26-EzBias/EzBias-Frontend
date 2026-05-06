@@ -9,6 +9,7 @@ interface AuthState {
   accessToken: string | null
   isAuthenticated: boolean
   setAuth: (payload: { user: AuthUser; accessToken: string }) => void
+  setAccessToken: (accessToken: string) => void
   setUser: (user: AuthUser) => void
   clear: () => void
 }
@@ -21,15 +22,16 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       setAuth: ({ user, accessToken }) =>
         set({ user, accessToken, isAuthenticated: true }),
+      setAccessToken: (accessToken) => set({ accessToken }),
       setUser: (user) => set({ user }),
       clear: () => set({ user: null, accessToken: null, isAuthenticated: false }),
     }),
     {
       name: 'ezbias.auth',
       storage: createJSONStorage(() => localStorage),
+      // accessToken is intentionally excluded — memory-only, not persisted to localStorage
       partialize: (state) => ({
         user: state.user,
-        accessToken: state.accessToken,
         isAuthenticated: state.isAuthenticated,
       }),
     },
