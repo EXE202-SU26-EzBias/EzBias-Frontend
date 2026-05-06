@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useCartStore } from '../../stores/cart.store';
-import { useAuthStore } from '../../stores/auth.store';
-import { useUiStore } from '../../stores/ui.store';
 import { NAV_LINKS } from '../../constants/landing';
+import { useAuthStore } from '../../stores/auth.store';
+import { useCartStore } from '../../stores/cart.store';
+import { useUiStore } from '../../stores/ui.store';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,14 +12,11 @@ const Header = () => {
   const { user, isAuthenticated } = useAuthStore();
   const openLogin = useUiStore((s) => s.openLogin);
 
-  const initials = (user?.name ?? user?.email ?? '??').slice(0, 2).toUpperCase();
+  const initials = (user?.username ?? user?.email ?? '??').slice(0, 2).toUpperCase();
 
   return (
     <div className="sticky top-0 z-[100]">
-      <header
-        className="border-b border-[#e6e6e6] bg-white/60 backdrop-blur-sm"
-        role="banner"
-      >
+      <header className="border-b border-[#e6e6e6] bg-white/60 backdrop-blur-sm" role="banner">
         <div className="mx-auto flex h-[65px] w-full max-w-[1920px] items-center justify-between px-8">
           {/* Logo */}
           <Link to="/" className="flex items-center" aria-label="EZBias Home">
@@ -51,22 +48,16 @@ const Header = () => {
 
           {/* Right actions */}
           <div className="flex items-center gap-3">
-            <Link
-              to="/seller"
-              className="hidden text-[13px] font-semibold text-[#ad93e6] border border-dashed border-[rgba(173,147,230,0.2)] bg-[rgba(173,147,230,0.05)] px-3 py-1.5 rounded-full transition-all hover:bg-[rgba(173,147,230,0.12)] hover:border-solid lg:inline-flex"
-            >
-              Sell on EzBias
-            </Link>
-
             {isAuthenticated && user ? (
-              <div
-                className="grid h-9 w-9 cursor-pointer place-items-center rounded-full text-xs font-bold text-white shadow-[0_0_0_2px_#ad93e6,0_0_0_4px_#fff]"
+              <Link
+                to="/seller"
+                className="grid h-9 w-9 place-items-center rounded-full text-xs font-bold text-white shadow-[0_0_0_2px_#ad93e6,0_0_0_4px_#fff]"
                 style={{ backgroundColor: '#7c3aed' }}
-                title={user.name ?? user.email}
-                aria-label={`Logged in as ${user.name ?? user.email}`}
+                title={user.username ?? user.email}
+                aria-label={`Logged in as ${user.username ?? user.email}`}
               >
                 {initials}
-              </div>
+              </Link>
             ) : (
               <button
                 onClick={openLogin}
@@ -144,7 +135,10 @@ const Header = () => {
           ))}
           {!isAuthenticated && (
             <button
-              onClick={() => { openLogin(); setIsOpen(false); }}
+              onClick={() => {
+                openLogin();
+                setIsOpen(false);
+              }}
               className="mt-3 inline-flex h-10 items-center justify-center rounded-full border border-[#ad93e6] bg-white px-6 text-sm font-semibold text-[#ad93e6]"
             >
               SIGN UP

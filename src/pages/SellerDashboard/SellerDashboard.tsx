@@ -1,6 +1,9 @@
 import { lazy, Suspense, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { PageId } from '../../types/seller';
 import { useSellerDashboard } from '../../services/seller.service';
+import { useAuthStore } from '../../stores/auth.store';
+import { useLogout } from '../../services/auth.service';
 import SellerSidebar from './SellerSidebar';
 
 const OverviewSection  = lazy(() => import('./sections/OverviewSection'));
@@ -53,8 +56,20 @@ export default function SellerDashboard() {
   const [page, setPage] = useState<PageId>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { data, isLoading } = useSellerDashboard();
+  const authUser = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
+  const { mutate: logout, isPending: loggingOut } = useLogout();
 
   if (isLoading || !data) return <PageLoader />;
+
+  const displayName = authUser?.username ?? authUser?.email ?? 'Seller';
+  const sidebarUser = {
+    name: displayName,
+    initials: displayName.slice(0, 2).toUpperCase(),
+    bg: '#9b84ec',
+    role: authUser?.role ?? 'Seller',
+    email: authUser?.email,
+  };
 
   const counts = {
     listings: data.listings.length,
@@ -72,10 +87,12 @@ export default function SellerDashboard() {
       <SellerSidebar
         active={page}
         onNav={(id) => { setPage(id); setSidebarOpen(false); }}
-        user={data.user}
+        user={sidebarUser}
         counts={counts}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        onLogout={() => logout(undefined, { onSettled: () => navigate('/') })}
+        loggingOut={loggingOut}
       />
       <main className="px-8 py-6 pb-16 min-w-0 max-[600px]:px-5">
         <button

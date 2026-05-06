@@ -46,9 +46,11 @@ interface SellerSidebarProps {
   counts: { listings: number; orders: number };
   isOpen: boolean;
   onClose: () => void;
+  onLogout: () => void;
+  loggingOut?: boolean;
 }
 
-const SellerSidebar = React.memo(function SellerSidebar({ active, onNav, user, counts, isOpen, onClose }: SellerSidebarProps) {
+const SellerSidebar = React.memo(function SellerSidebar({ active, onNav, user, counts, isOpen, onClose, onLogout, loggingOut }: SellerSidebarProps) {
   return (
     <aside className={`w-[240px] bg-white border-r border-[#e6e6e6] px-4 py-5 flex flex-col gap-2 sticky top-0 h-screen overflow-y-auto max-[900px]:fixed max-[900px]:inset-y-0 max-[900px]:left-0 max-[900px]:z-50 max-[900px]:transition-transform ${isOpen ? 'max-[900px]:translate-x-0' : 'max-[900px]:-translate-x-full'}`}>
       <button
@@ -93,17 +95,29 @@ const SellerSidebar = React.memo(function SellerSidebar({ active, onNav, user, c
         </div>
       ))}
 
-      <div className="mt-auto pt-3 border-t border-[#e6e6e6] flex items-center gap-[10px] px-3">
-        <div
-          className="w-8 h-8 rounded-full grid place-items-center text-white text-[11px] font-bold flex-shrink-0"
-          style={{ backgroundColor: user.bg }}
+      <div className="mt-auto pt-3 border-t border-[#e6e6e6] flex flex-col gap-2">
+        <div className="flex items-center gap-[10px] px-3">
+          <div
+            className="w-8 h-8 rounded-full grid place-items-center text-white text-[11px] font-bold flex-shrink-0"
+            style={{ backgroundColor: user.bg }}
+          >
+            {user.initials}
+          </div>
+          <div className="min-w-0">
+            <p className="text-[13px] font-semibold text-[#121212] m-0 truncate">{user.name}</p>
+            <p className="text-[11px] text-[#737373] m-0">{user.role}</p>
+          </div>
+        </div>
+        <button
+          onClick={onLogout}
+          disabled={loggingOut}
+          className="flex items-center gap-[10px] px-3 py-[10px] rounded-[10px] text-[13px] font-medium w-full text-left border-none bg-transparent cursor-pointer text-red-500 hover:bg-red-50 disabled:opacity-50 transition-all"
         >
-          {user.initials}
-        </div>
-        <div className="min-w-0">
-          <p className="text-[13px] font-semibold text-[#121212] m-0 truncate">{user.name}</p>
-          <p className="text-[11px] text-[#737373] m-0">{user.role}</p>
-        </div>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          {loggingOut ? 'Signing out…' : 'Sign out'}
+        </button>
       </div>
     </aside>
   );

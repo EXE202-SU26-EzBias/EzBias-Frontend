@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { http } from '../lib/axios';
 import type { AuthResponse, AuthUser } from '../types/auth';
+import { useAuthStore } from '../stores/auth.store';
 
 interface LoginPayload {
   emailOrUsername: string;
@@ -42,6 +43,14 @@ interface RegisterPayload {
   email: string;
   password: string;
 }
+export function useLogout() {
+  const clear = useAuthStore((s) => s.clear);
+  return useMutation({
+    mutationFn: () => http.post('/api/auth/logout').catch(() => {}),
+    onSettled: () => clear(),
+  });
+}
+
 interface RegisterApiResponse {
   accessToken: string;
   expiresInSeconds?: number;
