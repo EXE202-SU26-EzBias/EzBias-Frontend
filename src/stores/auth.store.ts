@@ -1,17 +1,17 @@
-import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
-import type { AuthUser } from '../types/auth'
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import type { AuthUser } from '../types/auth';
 
-export type { AuthUser }
+export type { AuthUser };
 
 interface AuthState {
-  user: AuthUser | null
-  accessToken: string | null
-  isAuthenticated: boolean
-  setAuth: (payload: { user: AuthUser; accessToken: string }) => void
-  setAccessToken: (accessToken: string) => void
-  setUser: (user: AuthUser) => void
-  clear: () => void
+  user: AuthUser | null;
+  accessToken: string | null;
+  isAuthenticated: boolean;
+  setAuth: (payload: { user: AuthUser; accessToken: string }) => void;
+  setAccessToken: (accessToken: string) => void;
+  setUser: (user: AuthUser) => void;
+  clear: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -20,8 +20,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       accessToken: null,
       isAuthenticated: false,
-      setAuth: ({ user, accessToken }) =>
-        set({ user, accessToken, isAuthenticated: true }),
+      setAuth: ({ user, accessToken }) => set({ user, accessToken, isAuthenticated: true }),
       setAccessToken: (accessToken) => set({ accessToken }),
       setUser: (user) => set({ user }),
       clear: () => set({ user: null, accessToken: null, isAuthenticated: false }),
@@ -29,11 +28,10 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'ezbias.auth',
       storage: createJSONStorage(() => localStorage),
-      // accessToken is intentionally excluded — memory-only, not persisted to localStorage
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
     },
   ),
-)
+);

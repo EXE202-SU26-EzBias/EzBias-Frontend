@@ -1,9 +1,6 @@
-import axios, {
-  AxiosError,
-  type InternalAxiosRequestConfig,
-} from "axios";
-import { useAuthStore } from "../stores/auth.store";
-import { refreshAccessToken } from "./refresh";
+import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { useAuthStore } from '../stores/auth.store';
+import { refreshAccessToken } from './refresh';
 
 // Extend InternalAxiosRequestConfig to track retry state
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
@@ -13,19 +10,18 @@ interface RetryableRequestConfig extends InternalAxiosRequestConfig {
 export const http = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 15_000,
-  headers: { "Content-Type": "application/json" },
+  headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
 
 http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = useAuthStore.getState().accessToken;
   if (token) {
-    config.headers.set("Authorization", `Bearer ${token}`);
+    config.headers.set('Authorization', `Bearer ${token}`);
   }
   return config;
 });
 
-// Refresh + retry queue pattern for concurrent 401s
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (token: string) => void;
@@ -48,22 +44,16 @@ http.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryableRequestConfig | undefined;
 
-    // Only attempt refresh on 401, and only once per request
-    if (
-      error.response?.status !== 401 ||
-      !originalRequest ||
-      originalRequest._retry
-    ) {
+    if (error.response?.status !== 401 || !originalRequest || originalRequest._retry) {
       return Promise.reject(error);
     }
 
-    // If a refresh is already in flight, queue this request
     if (isRefreshing) {
       return new Promise<string>((resolve, reject) => {
         failedQueue.push({ resolve, reject });
       })
         .then((token) => {
-          originalRequest.headers.set("Authorization", `Bearer ${token}`);
+          originalRequest.headers.set('Authorization', `Bearer ${token}`);
           return http(originalRequest);
         })
         .catch((err) => Promise.reject(err));
@@ -77,7 +67,7 @@ http.interceptors.response.use(
       useAuthStore.getState().setAccessToken(newToken);
       processQueue(null, newToken);
 
-      originalRequest.headers.set("Authorization", `Bearer ${newToken}`);
+      originalRequest.headers.set('Authorization', `Bearer ${newToken}`);
       return http(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError, null);
