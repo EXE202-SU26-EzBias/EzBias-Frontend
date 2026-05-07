@@ -1,10 +1,10 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAddCartItem } from '../../services/cart.service';
 import { useUiStore } from '../../stores/ui.store';
 
 export function useAddToCart() {
   const [added, setAdded] = useState(false);
-  const { mutate: addCartItem } = useAddCartItem();
+  const { mutate: addCartItem, isPending } = useAddCartItem();
   const showToast = useUiStore((s) => s.showToast);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -15,9 +15,10 @@ export function useAddToCart() {
   }, []);
 
   const handleAdd = useCallback(
-    (productId: number, productName: string) => {
+    (productId: number, productName: string, quantity: number) => {
+      const safeQuantity = Number.isFinite(quantity) ? Math.max(1, Math.floor(quantity)) : 1;
       addCartItem(
-        { productId, quantity: 1 },
+        { productId, quantity: safeQuantity },
         {
           onSuccess: () => {
             showToast(`Added "${productName}" to cart`);
@@ -34,5 +35,5 @@ export function useAddToCart() {
     [addCartItem, showToast],
   );
 
-  return { added, handleAdd };
+  return { added, isPending, handleAdd };
 }

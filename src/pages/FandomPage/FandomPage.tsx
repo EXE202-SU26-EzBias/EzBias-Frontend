@@ -1,21 +1,28 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import ProductCard from '../../components/card/ProductCard';
 import PageLayout from '../../components/layout/PageLayout';
 import Tabs from '../../components/ui/Tabs';
-import type { Product } from '../../types/landing';
+import { useFandomProducts, useFandoms } from '../../services/fandom.service';
 
 const ALL_TAB = 'All';
 
 const FandomPage = () => {
-  const tabs: string[] = [];
   const [activeTab, setActiveTab] = useState(ALL_TAB);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const products: Product[] = [];
+  const { data: fandoms = [], isLoading: fandomsLoading } = useFandoms();
+  const activeFandoms = useMemo(() => fandoms.filter((f) => f.isActive), [fandoms]);
+  const activeFandom = activeFandoms.find((f) => f.name === activeTab);
+  const { data: products = [], isLoading: productsLoading } = useFandomProducts(activeFandom?.id);
 
+  const tabs = useMemo(() => [ALL_TAB, ...activeFandoms.map((f) => f.name)], [activeFandoms]);
+
+  const browsable = products.filter((p) => !p.isAuction);
   const filtered = searchTerm.trim()
-    ? products.filter((p) => p.name.toLowerCase().includes(searchTerm.trim().toLowerCase()))
-    : products;
+    ? browsable.filter((p) => p.name.toLowerCase().includes(searchTerm.trim().toLowerCase()))
+    : browsable;
+
+  const isLoading = fandomsLoading || productsLoading;
 
   return (
     <PageLayout>
@@ -27,7 +34,9 @@ const FandomPage = () => {
 
         {tabs.length > 0 && (
           <div className="mb-6">
-            <label htmlFor="fandom-product-search" className="sr-only">Search products</label>
+            <label htmlFor="fandom-product-search" className="sr-only">
+              Search products
+            </label>
             <input
               id="fandom-product-search"
               type="text"
@@ -50,7 +59,13 @@ const FandomPage = () => {
           />
         )}
 
-        {filtered.length > 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="h-72 animate-pulse rounded-xl bg-[#f0edf7]" />
+            ))}
+          </div>
+        ) : filtered.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4" role="list">
             {filtered.map((product) => (
               <ProductCard key={product.id} {...product} />

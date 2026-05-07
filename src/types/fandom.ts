@@ -1,18 +1,19 @@
 export interface Fandom {
-  id: string;
+  id: number;
   name: string;
-  items: number;
-  accent: string;
-  glyph: string;
+  isActive: boolean;
 }
 
 export interface FandomProduct {
-  id: string;
+  id: number;
+  sellerId: number;
+  fandomId: number;
   artist: string;
   name: string;
+  type: string;
   price: number;
-  image?: string;
-  isBoosted?: boolean;
-  stock?: number;
-  fandomId: string;
+  stock: number;
+  primaryImageUrl?: string;
+  isAuction: boolean;
+  status: number;
 }

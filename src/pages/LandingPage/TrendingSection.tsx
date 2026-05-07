@@ -1,13 +1,13 @@
 import type { RefObject } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../../components/card/ProductCard';
-import type { Product } from '../../types/landing';
+import type { FandomProduct } from '../../types/fandom';
 
 interface TrendingSectionProps {
   sectionRef: RefObject<HTMLElement | null>;
 }
 
-const products: Product[] = [];
+const products: FandomProduct[] = [];
 
 const TrendingSection = ({ sectionRef }: TrendingSectionProps) => {
   return (
