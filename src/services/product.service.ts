@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { http } from '../lib/axios';
+import type { ProductStatus } from '../constants/product';
 import type { SellerProduct } from '../types/seller';
 
 export const productKeys = {
@@ -17,6 +18,14 @@ export interface ProductPayload {
   price: number;
   stock: number;
   description: string;
+  primaryImageUrl: string;
+}
+
+export interface UpdateProductPayload {
+  price: number;
+  stock: number;
+  description: string;
+  status: ProductStatus;
   primaryImageUrl: string;
 }
 
@@ -48,7 +57,7 @@ export function useCreateProduct() {
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: ProductPayload }) =>
+    mutationFn: ({ id, payload }: { id: number; payload: UpdateProductPayload }) =>
       http.put<SellerProduct>(`/api/products/${id}`, payload).then((r) => r.data),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: productKeys.list() });
