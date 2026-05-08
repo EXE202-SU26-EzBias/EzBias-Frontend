@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import { useSellerDashboard } from '../../../services/seller.service';
+import { useAuthStore } from '../../../stores/auth.store';
 import SellerTopbar from '../SellerTopbar';
 
 const SettingsSection = React.memo(function SettingsSection() {
-  const { data } = useSellerDashboard();
-  if (!data) return null;
-
-  const [storeName, setStoreName] = useState(data.user.name);
-  const [email, setEmail] = useState(data.user.email ?? '');
-  const [about, setAbout] = useState('Official HYBE merchandise store. Authentic K-pop goods from BTS, NewJeans, ILLIT, and more.');
+  const authUser = useAuthStore((s) => s.user);
+  const [storeName, setStoreName] = useState(authUser?.username ?? authUser?.email ?? '');
+  const [email, setEmail] = useState(authUser?.email ?? '');
+  const [about, setAbout] = useState('');
 
   return (
     <div>

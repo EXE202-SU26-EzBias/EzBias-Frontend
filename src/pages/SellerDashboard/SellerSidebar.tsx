@@ -1,6 +1,15 @@
 import React from 'react';
-import type { PageId, SellerUser } from '../../types/seller';
 import { Icons } from './sellerIcons';
+
+type PageId = 'overview' | 'listings' | 'orders' | 'auctions' | 'analytics' | 'payouts' | 'settings';
+
+interface SellerUser {
+  name: string;
+  initials: string;
+  bg: string;
+  role: string;
+  email?: string;
+}
 
 interface NavItem {
   id: PageId;

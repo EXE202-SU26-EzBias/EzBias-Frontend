@@ -1,6 +1,13 @@
 import React from 'react';
-import type { Kpi } from '../../types/seller';
 import { Icons } from './sellerIcons';
+
+interface Kpi {
+  label: string;
+  value: string;
+  delta: string;
+  up: boolean;
+  icon: 'wallet' | 'bag' | 'eye' | 'spark';
+}
 
 interface KpiCardProps {
   kpi: Kpi;

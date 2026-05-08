@@ -1,10 +1,11 @@
 import { lazy, Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { PageId } from '../../types/seller';
-import { useSellerDashboard } from '../../services/seller.service';
+import { useProducts } from '../../services/product.service';
 import { useAuthStore } from '../../stores/auth.store';
 import { useLogout } from '../../services/auth.service';
 import SellerSidebar from './SellerSidebar';
+
+type PageId = 'overview' | 'listings' | 'orders' | 'auctions' | 'analytics' | 'payouts' | 'settings';
 
 const OverviewSection  = lazy(() => import('./sections/OverviewSection'));
 const ListingsSection  = lazy(() => import('./sections/ListingsSection'));
@@ -23,14 +24,6 @@ const PAGE_META: Record<PageId, { title: string; sub: string }> = {
   payouts:   { title: 'Payouts',       sub: 'Withdraw earnings and manage payout methods' },
   settings:  { title: 'Store profile', sub: 'Public information about your store' },
 };
-
-function PageLoader() {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <span className="h-6 w-6 animate-spin rounded-full border-2 border-[#e6e6e6] border-t-[#ad93e6]" />
-    </div>
-  );
-}
 
 function SectionLoader() {
   return (
@@ -55,12 +48,10 @@ function renderSection(page: PageId) {
 export default function SellerDashboard() {
   const [page, setPage] = useState<PageId>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { data, isLoading } = useSellerDashboard();
+  const { data: products = [] } = useProducts();
   const authUser = useAuthStore((s) => s.user);
   const navigate = useNavigate();
   const { mutate: logout, isPending: loggingOut } = useLogout();
-
-  if (isLoading || !data) return <PageLoader />;
 
   const displayName = authUser?.username ?? authUser?.email ?? 'Seller';
   const sidebarUser = {
@@ -72,8 +63,8 @@ export default function SellerDashboard() {
   };
 
   const counts = {
-    listings: data.listings.length,
-    orders: data.orders.filter((o) => o.status !== 'delivered').length,
+    listings: products.length,
+    orders: 0,
   };
 
   return (

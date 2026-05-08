@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useAdminDashboard } from '../../../services/admin.service';
-import type { Listing, ListingStatus } from '../../../types/seller';
+import type { Listing, ListingStatus } from '../../../types/admin';
 import ListingsTable from '../../SellerDashboard/ListingsTable';
 import { AdminIcons } from '../adminIcons';
 import SellerTopbar from '../../SellerDashboard/SellerTopbar';

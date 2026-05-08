@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAdminDashboard } from '../../../services/admin.service';
-import type { AuctionStatus, SellerAuction } from '../../../types/seller';
+import type { AuctionStatus, SellerAuction } from '../../../types/admin';
 import SellerTopbar from '../../SellerDashboard/SellerTopbar';
 import { formatCurrency } from '../../../utils/formatters';
 

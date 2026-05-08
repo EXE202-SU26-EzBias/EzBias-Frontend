@@ -1,5 +1,3 @@
-import type { Kpi, ChartPoint, FeedItem, Order, Listing, SellerAuction } from './seller';
-
 export type AdminPageId =
   | 'overview' | 'users' | 'sellers' | 'listings'
   | 'orders' | 'auctions' | 'payouts' | 'analytics';
@@ -8,6 +6,59 @@ export type UserRole = 'buyer' | 'seller';
 export type UserStatus = 'active' | 'suspended';
 export type SellerVerifyStatus = 'active' | 'pending' | 'suspended';
 export type PayoutQueueStatus = 'pending' | 'approved' | 'rejected';
+
+export type ListingStatus = 'live' | 'paused' | 'draft' | 'out';
+export type OrderStatus = 'processing' | 'shipped' | 'delivered';
+export type AuctionStatus = 'live' | 'ended';
+
+export interface Kpi {
+  label: string;
+  value: string;
+  delta: string;
+  up: boolean;
+  icon: 'wallet' | 'bag' | 'eye' | 'spark';
+}
+
+export interface ChartPoint {
+  label: string;
+  value: number;
+}
+
+export interface FeedItem {
+  id: string;
+  who: string;
+  what: string;
+  target: string;
+  time: string;
+  icon: 'gavel' | 'bag' | 'star' | 'msg';
+}
+
+export interface Order {
+  id: string;
+  item: string;
+  buyer: string;
+  total: number;
+  status: OrderStatus;
+}
+
+export interface Listing {
+  id: string;
+  name: string;
+  artist: string;
+  price: number;
+  stock: number;
+  views: number;
+  status: ListingStatus;
+}
+
+export interface SellerAuction {
+  id: string;
+  name: string;
+  bid: number;
+  bids: number;
+  end: string;
+  status: AuctionStatus;
+}
 
 export interface AdminUser {
   id: string;

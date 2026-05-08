@@ -1,5 +1,9 @@
 import React from 'react';
-import type { ChartPoint } from '../../types/seller';
+
+interface ChartPoint {
+  label: string;
+  value: number;
+}
 
 interface RevenueChartProps {
   data: ChartPoint[];

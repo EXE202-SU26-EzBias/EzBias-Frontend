@@ -1,6 +1,15 @@
 import React from 'react';
-import type { Order, OrderStatus } from '../../types/seller';
 import { formatCurrency } from '../../utils/formatters';
+
+type OrderStatus = 'processing' | 'shipped' | 'delivered';
+
+interface Order {
+  id: string;
+  item: string;
+  buyer: string;
+  total: number;
+  status: OrderStatus;
+}
 
 interface OrdersTableProps {
   orders: Order[];
@@ -34,18 +43,10 @@ const OrdersTable = React.memo(function OrdersTable({ orders }: OrdersTableProps
         <tbody>
           {orders.map((o) => (
             <tr key={o.id} className="hover:bg-[rgba(173,147,230,0.05)] border-b border-[rgba(230,230,230,0.5)] last:border-b-0">
-              <td className="px-4 py-[14px] text-[#121212] align-middle font-medium">
-                {o.id}
-              </td>
-              <td className="px-4 py-[14px] text-[#121212] align-middle">
-                {o.item}
-              </td>
-              <td className="px-4 py-[14px] text-[#737373] align-middle">
-                {o.buyer}
-              </td>
-              <td className="px-4 py-[14px] text-[#121212] align-middle font-semibold">
-                {formatCurrency(o.total)}
-              </td>
+              <td className="px-4 py-[14px] text-[#121212] align-middle font-medium">{o.id}</td>
+              <td className="px-4 py-[14px] text-[#121212] align-middle">{o.item}</td>
+              <td className="px-4 py-[14px] text-[#737373] align-middle">{o.buyer}</td>
+              <td className="px-4 py-[14px] text-[#121212] align-middle font-semibold">{formatCurrency(o.total)}</td>
               <td className="px-4 py-[14px] align-middle">
                 <span className={`inline-flex items-center gap-1 px-[10px] py-0.5 rounded-full text-[11px] font-semibold ${statusBadge[o.status]}`}>
                   {statusLabel[o.status]}

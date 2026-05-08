@@ -1,6 +1,14 @@
 import React from 'react';
-import type { FeedItem } from '../../types/seller';
 import { Icons } from './sellerIcons';
+
+interface FeedItem {
+  id: string;
+  who: string;
+  what: string;
+  target: string;
+  time: string;
+  icon: 'gavel' | 'bag' | 'star' | 'msg';
+}
 
 interface ActivityFeedProps {
   items: FeedItem[];

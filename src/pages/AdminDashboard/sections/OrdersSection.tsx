@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useAdminDashboard } from '../../../services/admin.service';
-import type { OrderStatus } from '../../../types/seller';
+import type { OrderStatus } from '../../../types/admin';
 import OrdersTable from '../../SellerDashboard/OrdersTable';
 import SellerTopbar from '../../SellerDashboard/SellerTopbar';
 
