@@ -1,7 +1,8 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { http } from '../lib/axios';
-import type { AuthResponse, AuthUser } from '../types/auth';
 import { useAuthStore } from '../stores/auth.store';
+import type { AuthResponse, AuthUser } from '../types/auth';
+import { cartKeys } from './cart.service';
 
 interface LoginPayload {
   emailOrUsername: string;
@@ -45,9 +46,13 @@ interface RegisterPayload {
 }
 export function useLogout() {
   const clear = useAuthStore((s) => s.clear);
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => http.post('/api/auth/logout').catch(() => {}),
-    onSettled: () => clear(),
+    onSettled: () => {
+      clear();
+      queryClient.removeQueries({ queryKey: cartKeys.detail() });
+    },
   });
 }
 
