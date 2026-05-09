@@ -39,7 +39,6 @@ export function useCheckoutForm() {
   const onSubmit = handleSubmit((form) => {
     createOrder(
       {
-        source: 'cart',
         cartItemIds: items.map((i) => i.cartItemId),
         addressSnap: {
           fullName: form.fullName,

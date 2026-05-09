@@ -9,13 +9,7 @@ export interface ShippingFormValues {
 
 export type OrderSource = 'cart' | 'auction';
 
-export type OrderStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'shipped'
-  | 'delivered'
-  | 'completed'
-  | 'cancelled';
+export type OrderStatus = 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'completed' | 'cancelled';
 
 export interface AddressSnap {
   fullName: string;
@@ -26,7 +20,6 @@ export interface AddressSnap {
 }
 
 export interface CreateOrderPayload {
-  source: OrderSource;
   addressSnap: AddressSnap;
   cartItemIds?: number[];
   auctionId?: number;
