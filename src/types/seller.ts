@@ -1,4 +1,5 @@
-import type { ProductCondition } from '../constants/product';
+import type { AuctionStatus } from '../constants/auction';
+import type { ProductCondition, ProductStatus } from '../constants/product';
 
 export interface SellerProduct {
   id: number;
@@ -13,6 +14,19 @@ export interface SellerProduct {
   description: string;
   primaryImageUrl: string;
   isAuction: boolean;
-  status: number;
+  status: ProductStatus;
   createdAt: string;
+}
+
+// Re-export so existing imports of SellerAuctionStatus keep working
+export type { AuctionStatus as SellerAuctionStatus };
+
+export interface SellerAuction {
+  auctionId: number;
+  productId: number;
+  floorPrice: number;
+  currentBid: number;
+  status: AuctionStatus;
+  endsAt: string;
+  createdAt?: string;
 }

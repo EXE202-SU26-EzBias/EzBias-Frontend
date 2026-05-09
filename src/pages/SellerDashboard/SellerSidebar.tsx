@@ -43,7 +43,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Account',
     items: [
-      { id: 'settings',  label: 'Store profile',  icon: Icons.cog   },
+      { id: 'settings',  label: 'User profile',   icon: Icons.cog   },
     ],
   },
 ];

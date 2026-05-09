@@ -26,8 +26,8 @@ function PageLoader() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
-        <BrowserRouter>
+      <BrowserRouter>
+        <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<LandingPage />} />
@@ -42,8 +42,8 @@ function App() {
               <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
             </Routes>
           </Suspense>
-        </BrowserRouter>
-      </ErrorBoundary>
+        </ErrorBoundary>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }

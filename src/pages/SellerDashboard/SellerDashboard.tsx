@@ -1,8 +1,10 @@
 import { lazy, Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Toast from '../../components/ui/Toast';
+import { useLogout } from '../../services/auth.service';
 import { useProducts } from '../../services/product.service';
 import { useAuthStore } from '../../stores/auth.store';
-import { useLogout } from '../../services/auth.service';
+import { useUiStore } from '../../stores/ui.store';
 import SellerSidebar from './SellerSidebar';
 
 type PageId = 'overview' | 'listings' | 'orders' | 'auctions' | 'analytics' | 'payouts' | 'settings';
@@ -22,7 +24,7 @@ const PAGE_META: Record<PageId, { title: string; sub: string }> = {
   auctions:  { title: 'Auctions',      sub: 'Track live and ended auctions you host' },
   analytics: { title: 'Analytics',     sub: 'Trends, top performers, conversion' },
   payouts:   { title: 'Payouts',       sub: 'Withdraw earnings and manage payout methods' },
-  settings:  { title: 'Store profile', sub: 'Public information about your store' },
+  settings:  { title: 'User profile',  sub: 'Manage your account details' },
 };
 
 function SectionLoader() {
@@ -50,6 +52,8 @@ export default function SellerDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { data: products = [] } = useProducts();
   const authUser = useAuthStore((s) => s.user);
+  const toastMessage = useUiStore((s) => s.toastMessage);
+  const toastVisible = useUiStore((s) => s.toastVisible);
   const navigate = useNavigate();
   const { mutate: logout, isPending: loggingOut } = useLogout();
 
@@ -99,6 +103,7 @@ export default function SellerDashboard() {
           {renderSection(page)}
         </Suspense>
       </main>
+      <Toast message={toastMessage} visible={toastVisible} />
     </div>
   );
 }
