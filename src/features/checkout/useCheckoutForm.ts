@@ -1,12 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useCart, useClearCart } from '../../services/cart.service';
-import { usePlaceOrder } from '../../services/order.service';
+import { useCreateOrder } from '../../services/order.service';
 import { useUiStore } from '../../stores/ui.store';
-import type { PaymentMethod, ShippingFormValues } from '../../types/checkout';
+import type { ShippingFormValues } from '../../types/checkout';
 
 const shippingSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -22,11 +21,9 @@ export function useCheckoutForm() {
   const { data: cartData } = useCart();
   const { mutate: clearCart } = useClearCart();
   const showToast = useUiStore((s) => s.showToast);
-  const { mutate: placeOrder, isPending } = usePlaceOrder();
+  const { mutate: createOrder, isPending } = useCreateOrder();
 
   const items = cartData?.items ?? [];
-
-  const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null);
 
   const {
     register,
@@ -37,22 +34,26 @@ export function useCheckoutForm() {
     mode: 'onChange',
   });
 
-  const isReadyToOrder = isValid && selectedPayment !== null && items.length > 0;
+  const isReadyToOrder = isValid && items.length > 0;
 
-  const onSubmit = handleSubmit((shippingDetails) => {
-    if (!selectedPayment) return;
-
-    placeOrder(
+  const onSubmit = handleSubmit((form) => {
+    createOrder(
       {
-        shippingDetails,
-        paymentMethod: selectedPayment,
-        items: items.map((i) => ({ productId: i.productId, quantity: i.quantity, price: i.unitPrice })),
+        source: 'cart',
+        cartItemIds: items.map((i) => i.cartItemId),
+        addressSnap: {
+          fullName: form.fullName,
+          phone: form.phoneNumber,
+          address: form.address,
+          city: form.city,
+          zip: form.zipCode,
+        },
       },
       {
         onSuccess: (res) => {
           clearCart();
           showToast('Order placed successfully!');
-          navigate(`/order-confirmation/${res.orderId}`);
+          navigate(`/order-confirmation/${res.id}`);
         },
         onError: () => {
           showToast('Failed to place order. Please try again.');
@@ -65,8 +66,6 @@ export function useCheckoutForm() {
     register,
     errors,
     onSubmit,
-    selectedPayment,
-    setSelectedPayment,
     isReadyToOrder,
     isSubmitting: isPending,
   };

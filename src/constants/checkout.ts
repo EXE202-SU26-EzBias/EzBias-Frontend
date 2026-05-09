@@ -1,11 +1,7 @@
-import type { ArtistAccentMap, PaymentMethodOption } from '../types/checkout';
+import type { ArtistAccentMap } from '../types/checkout';
 
 export const SHIPPING_FEE = 30_000;
 export const FREE_SHIPPING_THRESHOLD = 500_000;
-
-export const PAYMENT_METHOD_OPTIONS: PaymentMethodOption[] = [
-  { value: 'bank_transfer', label: 'Bank Transfer', description: 'Transfer to our account' },
-];
 
 export const ARTIST_ACCENT_MAP: ArtistAccentMap = {
   BTS: { bg: 'rgba(80, 120, 220, 0.12)', text: '#5078DC' },

@@ -21,15 +21,7 @@ const ShoppingBagIcon = () => (
 
 const CheckoutPage = () => {
   const { items, totals, removeItem } = useOrderSummary();
-  const {
-    register,
-    errors,
-    onSubmit,
-    selectedPayment,
-    setSelectedPayment,
-    isReadyToOrder,
-    isSubmitting,
-  } = useCheckoutForm();
+  const { register, errors, onSubmit, isReadyToOrder, isSubmitting } = useCheckoutForm();
 
   return (
     <PageLayout>
@@ -53,8 +45,6 @@ const CheckoutPage = () => {
           <ShippingSection
             register={register}
             errors={errors}
-            selectedPayment={selectedPayment}
-            onPaymentChange={setSelectedPayment}
             isReadyToOrder={isReadyToOrder}
             isSubmitting={isSubmitting}
             onSubmit={onSubmit}

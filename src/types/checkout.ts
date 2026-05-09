@@ -1,5 +1,3 @@
-export type PaymentMethod = 'cash_on_delivery' | 'bank_transfer' | 'credit_card';
-
 export interface ShippingFormValues {
   fullName: string;
   email: string;
@@ -9,16 +7,41 @@ export interface ShippingFormValues {
   phoneNumber: string;
 }
 
-export interface PlaceOrderPayload {
-  shippingDetails: ShippingFormValues;
-  paymentMethod: PaymentMethod;
-  items: Array<{ productId: number; quantity: number; price: number }>;
+export type OrderSource = 'cart' | 'auction';
+
+export type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'shipped'
+  | 'delivered'
+  | 'completed'
+  | 'cancelled';
+
+export interface AddressSnap {
+  fullName: string;
+  phone: string;
+  address: string;
+  city: string;
+  zip: string;
 }
 
-export interface PlaceOrderResponse {
-  orderId: string;
-  status: 'pending' | 'confirmed';
+export interface CreateOrderPayload {
+  source: OrderSource;
+  addressSnap: AddressSnap;
+  cartItemIds?: number[];
+  auctionId?: number;
+}
+
+export interface CreateOrderResponse {
+  id: number;
+  userId: number;
+  sellerId: number;
+  source: OrderSource;
+  auctionId?: number;
+  shippingFee: number;
   total: number;
+  status: OrderStatus;
+  addressSnap: AddressSnap;
   createdAt: string;
 }
 
@@ -26,12 +49,6 @@ export interface OrderTotal {
   subtotal: number;
   shippingFee: number;
   total: number;
-}
-
-export interface PaymentMethodOption {
-  value: PaymentMethod;
-  label: string;
-  description: string;
 }
 
 export interface ArtistAccent {

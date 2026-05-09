@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { http } from '../lib/axios';
-import type { PlaceOrderPayload, PlaceOrderResponse } from '../types/checkout';
+import type { CreateOrderPayload, CreateOrderResponse } from '../types/checkout';
 
 export const orderKeys = {
   all: ['orders'] as const,
@@ -8,11 +8,11 @@ export const orderKeys = {
   detail: (id: string) => [...orderKeys.all, 'detail', id] as const,
 };
 
-export function usePlaceOrder() {
+export function useCreateOrder() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: PlaceOrderPayload) =>
-      http.post<PlaceOrderResponse>('/orders', payload).then((r) => r.data),
+    mutationFn: (payload: CreateOrderPayload) =>
+      http.post<CreateOrderResponse>('/api/orders', payload).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orderKeys.list() });
     },
