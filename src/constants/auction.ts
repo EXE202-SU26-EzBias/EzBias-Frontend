@@ -3,6 +3,17 @@
 // 6=winner_failed, 7=sold, 8=canceled
 export type AuctionStatus = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
+export const AUCTION_STATUS = {
+  DRAFT: 1,
+  LIVE: 2,
+  EXTENDED: 3,
+  ENDED_NO_WINNER: 4,
+  ENDED_PENDING_PAYMENT: 5,
+  WINNER_FAILED: 6,
+  SOLD: 7,
+  CANCELLED: 8,
+} as const satisfies Record<string, AuctionStatus>;
+
 export const AUCTION_STATUS_LABELS: Record<AuctionStatus, string> = {
   1: 'Draft',
   2: 'Live',

@@ -5,7 +5,7 @@ import { useAuctions } from '../../services/auction.service';
 
 const AuctionPage = () => {
   const navigate = useNavigate();
-  const { data: auctions = [], isLoading } = useAuctions();
+  const { data: auctions = [], isLoading, isError } = useAuctions();
 
   return (
     <PageLayout>
@@ -19,18 +19,29 @@ const AuctionPage = () => {
           <div className="flex justify-center py-20">
             <span className="h-8 w-8 animate-spin rounded-full border-2 border-[#e6e6e6] border-t-[#ad93e6]" />
           </div>
+        ) : isError ? (
+          <p className="py-16 text-center text-sm text-[#ef4343]">
+            Failed to load auctions. Please try again.
+          </p>
         ) : auctions.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3" role="list">
             {auctions.map((auction) => (
               <AuctionCard
-                key={auction.id}
-                {...auction}
-                onBid={() => navigate(`/auction/${auction.id}`)}
+                key={auction.auctionId}
+                id={String(auction.auctionId)}
+                artist={auction.product.artist}
+                name={auction.product.name}
+                currentBid={auction.currentBid}
+                endsAt={auction.endsAt}
+                image={auction.product.primaryImageUrl}
+                onBid={() => navigate(`/auction/${auction.auctionId}`)}
               />
             ))}
           </div>
         ) : (
-          <p className="py-16 text-center text-sm text-[#737373]">No live auctions right now. Check back soon!</p>
+          <p className="py-16 text-center text-sm text-[#737373]">
+            No live auctions right now. Check back soon!
+          </p>
         )}
       </div>
     </PageLayout>

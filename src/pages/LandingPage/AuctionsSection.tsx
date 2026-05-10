@@ -1,16 +1,16 @@
 import type { RefObject } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AuctionCard from '../../components/card/AuctionCard';
-import { useUiStore } from '../../stores/ui.store';
-import type { Auction } from '../../types/landing';
+import { useAuctions } from '../../services/auction.service';
 
 interface AuctionsSectionProps {
   sectionRef: RefObject<HTMLElement | null>;
 }
 
 const AuctionsSection = ({ sectionRef }: AuctionsSectionProps) => {
-  const showToast = useUiStore((s) => s.showToast);
-  const auctions: Auction[] = [];
+  const navigate = useNavigate();
+  const { data: auctions = [], isLoading, isError } = useAuctions();
+  const preview = auctions.slice(0, 3);
 
   return (
     <section
@@ -40,15 +40,39 @@ const AuctionsSection = ({ sectionRef }: AuctionsSectionProps) => {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {auctions.map((a) => (
-            <AuctionCard
-              key={a.id}
-              {...a}
-              onBid={() => showToast(`Opened bid window for "${a.name}"`)}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-72 animate-pulse rounded-xl border border-[rgba(230,230,230,0.5)] bg-[#f4f3f7]"
+              />
+            ))}
+          </div>
+        ) : isError ? (
+          <p className="py-12 text-center text-sm text-[#ef4343]">
+            Failed to load auctions. Please try again.
+          </p>
+        ) : preview.length === 0 ? (
+          <p className="py-12 text-center text-sm text-[#737373]">
+            No live auctions right now. Check back soon!
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {preview.map((auction) => (
+              <AuctionCard
+                key={auction.auctionId}
+                id={String(auction.auctionId)}
+                artist={auction.product.artist}
+                name={auction.product.name}
+                currentBid={auction.currentBid}
+                endsAt={auction.endsAt}
+                image={auction.product.primaryImageUrl}
+                onBid={() => navigate(`/auction/${auction.auctionId}`)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

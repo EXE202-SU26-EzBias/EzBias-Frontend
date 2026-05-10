@@ -1,33 +1,45 @@
-export interface Auction {
-  id: string;
-  artist: string;
+export type AuctionStatus = number;
+
+export interface AuctionSeller {
+  id: number;
+  username: string;
+  fullName: string;
+  avatarUrl: string;
+  avgSellerRating: number;
+  totalRatings: number;
+}
+
+export interface AuctionProduct {
+  id: number;
   name: string;
+  artist: string;
+  type: string;
+  price: number;
+  stock: number;
+  primaryImageUrl: string;
+  status: number;
+  fandomId: number;
+}
+
+export interface Auction {
+  auctionId: number;
+  productId: number;
+  sellerId: number;
+  floorPrice: number;
   currentBid: number;
-  timer: string;
-  isUrgent: boolean;
-  image?: string;
+  status: AuctionStatus;
+  endsAt: string;
+  seller: AuctionSeller;
+  product: AuctionProduct;
 }
 
 export interface BidEntry {
-  id: string;
-  username: string;
-  avatar?: string;
-  avatarBg?: string;
+  id: number;
+  userId: number;
   amount: number;
-  placedAt: string;
-  isWinning: boolean;
+  createdAt: string;
 }
 
-export interface AuctionDetail {
-  id: string;
-  name: string;
-  artist: string;
-  image?: string;
-  description?: string;
-  isLive: boolean;
-  currentBid: number;
-  floorPrice: number;
-  endsAt: string;
-  bids: BidEntry[];
-  sellerId: string;
+export interface AuctionDetail extends Auction {
+  bids?: BidEntry[];
 }
