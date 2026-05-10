@@ -9,31 +9,33 @@ export interface ShippingFormValues {
 
 export type OrderSource = 'cart' | 'auction';
 
-export type OrderStatus = 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'completed' | 'cancelled';
-
 export interface AddressSnap {
-  fullName: string;
+  fullname: string;
   phone: string;
   address: string;
   city: string;
   zip: string;
 }
 
+export interface CreateOrderItem {
+  cartItemId: number;
+  quantity: number;
+}
+
 export interface CreateOrderPayload {
   addressSnap: AddressSnap;
-  cartItemIds?: number[];
-  auctionId?: number;
+  items: CreateOrderItem[];
 }
 
 export interface CreateOrderResponse {
   id: number;
   userId: number;
   sellerId: number;
-  source: OrderSource;
+  source: number;
   auctionId?: number;
   shippingFee: number;
   total: number;
-  status: OrderStatus;
+  status: number;
   addressSnap: AddressSnap;
   createdAt: string;
 }
@@ -50,3 +52,5 @@ export interface ArtistAccent {
 }
 
 export type ArtistAccentMap = Record<string, ArtistAccent>;
+
+export type { Order as BuyerOrder } from './order';

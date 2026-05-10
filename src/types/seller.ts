@@ -30,3 +30,5 @@ export interface SellerAuction {
   endsAt: string;
   createdAt?: string;
 }
+
+export type { Order as SellerOrder } from './order';

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Toast from '../../components/ui/Toast';
 import { useLogout } from '../../services/auth.service';
 import { useProducts } from '../../services/product.service';
+import { useSellerOrders } from '../../services/seller-order.service';
 import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 import SellerSidebar from './SellerSidebar';
@@ -51,6 +52,8 @@ export default function SellerDashboard() {
   const [page, setPage] = useState<PageId>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { data: products = [] } = useProducts();
+  // TanStack Query deduplicates this with the same call in OrdersSection
+  const { data: sellerOrders = [] } = useSellerOrders();
   const authUser = useAuthStore((s) => s.user);
   const toastMessage = useUiStore((s) => s.toastMessage);
   const toastVisible = useUiStore((s) => s.toastVisible);
@@ -68,7 +71,7 @@ export default function SellerDashboard() {
 
   const counts = {
     listings: products.length,
-    orders: 0,
+    orders: sellerOrders.length,
   };
 
   return (
