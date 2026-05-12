@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import { useCart, useClearCart } from '../../services/cart.service';
+import { useCart } from '../../services/cart.service';
 import { useCreateOrder } from '../../services/order.service';
 import { useUiStore } from '../../stores/ui.store';
 import type { ShippingFormValues } from '../../types/checkout';
@@ -18,8 +18,7 @@ const shippingSchema = z.object({
 
 export function useCheckoutForm() {
   const navigate = useNavigate();
-  const { data: cartData } = useCart();
-  const { mutate: clearCart } = useClearCart();
+  const { data: cartData, refetch: refetchCart } = useCart();
   const showToast = useUiStore((s) => s.showToast);
   const { mutate: createOrder, isPending } = useCreateOrder();
 
@@ -50,7 +49,7 @@ export function useCheckoutForm() {
       },
       {
         onSuccess: (res) => {
-          clearCart();
+          refetchCart();
           showToast('Order placed successfully!');
           navigate(`/order-confirmation/${res.id}`);
         },
