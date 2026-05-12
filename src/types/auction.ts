@@ -42,4 +42,21 @@ export interface BidEntry {
 
 export interface AuctionDetail extends Auction {
   bids?: BidEntry[];
+  winnerId?: number | null;
+}
+
+export interface BidderProfile {
+  id: number;
+  username: string;
+  avatarUrl: string | null;
+  avatarBg: string | null;
+}
+
+export interface BidHistoryEntry {
+  bidId: number;
+  auctionId: number;
+  amount: number;
+  isWinning: boolean;
+  placedAt: string;
+  bidder: BidderProfile;
 }

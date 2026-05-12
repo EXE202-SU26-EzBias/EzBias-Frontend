@@ -9,9 +9,9 @@ import Badge from '../../components/ui/Badge';
 import { RocketIcon, TrendIcon } from '../../components/ui/Icon';
 import { AUCTION_STATUS } from '../../constants/auction';
 import { useCountdown } from '../../features/auction/useCountdown';
-import { useAuctionDetail, usePlaceBid } from '../../services/auction.service';
+import { useAuctionDetail, useBidHistory, usePlaceBid } from '../../services/auction.service';
 import { useAuthStore } from '../../stores/auth.store';
-import { formatCurrency, formatTimeAgo } from '../../utils/formatters';
+import { formatCurrency } from '../../utils/formatters';
 
 const AuctionDetailPage = () => {
   const { id = '' } = useParams<{ id: string }>();
@@ -19,13 +19,13 @@ const AuctionDetailPage = () => {
   const auctionId = Number(id);
   const { data: auction, isLoading } = useAuctionDetail(auctionId);
   const { mutate: placeBid, isPending: placing } = usePlaceBid(auctionId);
+  const { data: bids = [], isLoading: bidsLoading, isError: bidsError } = useBidHistory(auctionId);
   const { hours, minutes, secs } = useCountdown(auction?.endsAt);
   const [bidInput, setBidInput] = useState('');
 
   const currentUserId = useAuthStore((s) => s.user?.userId);
   const isLive = auction?.status === AUCTION_STATUS.LIVE || auction?.status === AUCTION_STATUS.EXTENDED;
-  const topBid = auction?.bids?.[0];
-  const userWon = auction?.status === AUCTION_STATUS.ENDED_PENDING_PAYMENT && topBid?.userId === currentUserId;
+  const userWon = auction?.status === AUCTION_STATUS.ENDED_PENDING_PAYMENT && auction?.winnerId === currentUserId;
 
   const handleBidInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBidInput(e.target.value.replace(/\D/g, ''));
@@ -36,14 +36,6 @@ const AuctionDetailPage = () => {
     if (!amount) return;
     placeBid(amount, { onSuccess: () => setBidInput('') });
   };
-
-  const bids = (auction?.bids ?? []).map((b, i) => ({
-    id: String(b.id),
-    user: `User #${b.userId}`,
-    timeAgo: formatTimeAgo(b.createdAt),
-    amount: formatCurrency(b.amount),
-    isWinning: i === 0,
-  }));
 
   return (
     <PageLayout>
@@ -125,7 +117,7 @@ const AuctionDetailPage = () => {
               </div>
             </div>
 
-            <BidHistory bids={bids} />
+            <BidHistory bids={bids} isLoading={bidsLoading} isError={bidsError} />
 
             {userWon && (
               <AuctionWonModal
