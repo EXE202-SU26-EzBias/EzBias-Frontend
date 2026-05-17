@@ -26,6 +26,7 @@ export interface Order {
   sellerId: number;
   source: number;
   auctionId: number | null;
+  paymentId: number | null;
   total: number;
   status: number;
   addressSnap: string;

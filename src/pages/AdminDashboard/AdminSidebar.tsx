@@ -6,7 +6,7 @@ interface NavItem {
   id: AdminPageId;
   label: string;
   icon: React.ReactNode;
-  pipKey?: 'users' | 'orders' | 'payouts';
+  pipKey?: 'users' | 'orders' | 'payouts' | 'disputes';
 }
 
 interface NavGroup {
@@ -28,6 +28,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: 'listings',  label: 'Listings',  icon: AdminIcons.list                             },
       { id: 'orders',    label: 'Orders',    icon: AdminIcons.bag,    pipKey: 'orders'         },
+      { id: 'disputes',  label: 'Disputes',  icon: AdminIcons.flag,   pipKey: 'disputes'        },
       { id: 'auctions',  label: 'Auctions',  icon: AdminIcons.gavel                            },
     ],
   },
@@ -50,7 +51,7 @@ const ADMIN_USER = { name: 'Super Admin', initials: 'SA', bg: '#7c3aed', role: '
 interface AdminSidebarProps {
   active: AdminPageId;
   onNav: (id: AdminPageId) => void;
-  counts: { users: number; orders: number; payouts: number };
+  counts: { users: number; orders: number; payouts: number; disputes: number };
   isOpen: boolean;
   onClose: () => void;
 }

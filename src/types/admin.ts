@@ -1,6 +1,7 @@
 export type AdminPageId =
   | 'overview' | 'users' | 'sellers' | 'listings'
-  | 'orders' | 'auctions' | 'payouts' | 'analytics';
+  | 'orders' | 'auctions' | 'payouts' | 'analytics'
+  | 'disputes';
 
 export type UserRole = 'buyer' | 'seller';
 export type UserStatus = 'active' | 'suspended';

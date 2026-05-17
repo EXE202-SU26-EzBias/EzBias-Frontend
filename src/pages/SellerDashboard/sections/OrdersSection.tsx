@@ -4,6 +4,7 @@ import { useSellerOrders, useShipSellerOrder } from '../../../services/seller-or
 import { useUiStore } from '../../../stores/ui.store';
 import type { SellerOrder } from '../../../types/seller';
 import OrdersTable from '../OrdersTable';
+import RequestRefundModal from '../RequestRefundModal';
 import SellerTopbar from '../SellerTopbar';
 
 type Tab = 'selling' | 'buying';
@@ -12,6 +13,7 @@ const OrdersSection = React.memo(function OrdersSection() {
   const [tab, setTab] = useState<Tab>('selling');
   const [shipTarget, setShipTarget] = useState<number | null>(null);
   const [carrier, setCarrier] = useState('');
+  const [refundTarget, setRefundTarget] = useState<SellerOrder | null>(null);
   const showToast = useUiStore((s) => s.showToast);
 
   const { data: sellerOrders = [], isLoading: sellerLoading, isError: sellerError } = useSellerOrders();
@@ -38,6 +40,10 @@ const OrdersSection = React.memo(function OrdersSection() {
     },
     [confirmOrder, showToast],
   );
+
+  const handleRequestRefund = useCallback((order: SellerOrder) => {
+    setRefundTarget(order);
+  }, []);
 
   const confirmingId = confirmPending ? confirmingOrderId : undefined;
 
@@ -89,9 +95,14 @@ const OrdersSection = React.memo(function OrdersSection() {
             onShip={setShipTarget}
             onConfirm={handleConfirm}
             confirmingId={confirmingId}
+            onRequestRefund={handleRequestRefund}
           />
         )}
       </div>
+
+      {refundTarget !== null && (
+        <RequestRefundModal order={refundTarget} onClose={() => setRefundTarget(null)} />
+      )}
 
       {shipTarget !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">

@@ -51,7 +51,7 @@ const Header = () => {
           <div className="flex items-center gap-3">
             {isAuthenticated && user ? (
               <Link
-                to="/seller"
+                to={user.role === 'Admin' ? '/admin' : '/seller'}
                 className="grid h-9 w-9 place-items-center rounded-full text-xs font-bold text-white shadow-[0_0_0_2px_#ad93e6,0_0_0_4px_#fff]"
                 style={{ backgroundColor: '#7c3aed' }}
                 title={user.username ?? user.email}

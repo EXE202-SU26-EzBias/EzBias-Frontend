@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState } from 'react';
 import type { AdminPageId } from '../../types/admin';
+import { useDisputes } from '../../services/dispute.service';
 import AdminSidebar from './AdminSidebar';
 
 const OverviewSection  = lazy(() => import('./sections/OverviewSection'));
@@ -10,6 +11,7 @@ const OrdersSection    = lazy(() => import('./sections/OrdersSection'));
 const AuctionsSection  = lazy(() => import('./sections/AuctionsSection'));
 const PayoutsSection   = lazy(() => import('./sections/PayoutsSection'));
 const AnalyticsSection = lazy(() => import('./sections/AnalyticsSection'));
+const DisputesSection  = lazy(() => import('./sections/DisputesSection'));
 
 const PAGE_META: Record<AdminPageId, { title: string; sub: string }> = {
   overview:  { title: 'Platform Overview',   sub: 'Real-time health of the marketplace'              },
@@ -20,6 +22,7 @@ const PAGE_META: Record<AdminPageId, { title: string; sub: string }> = {
   auctions:  { title: 'Auctions',            sub: 'Monitor all live and ended auctions'              },
   payouts:   { title: 'Payout Queue',        sub: 'Approve or reject seller withdrawal requests'     },
   analytics: { title: 'Analytics',           sub: 'Platform trends, top sellers, top products'       },
+  disputes:  { title: 'Disputes',            sub: 'Review and action buyer dispute requests'          },
 };
 
 function PageLoader() {
@@ -48,6 +51,7 @@ function renderSection(page: AdminPageId) {
     case 'auctions':  return <AuctionsSection />;
     case 'payouts':   return <PayoutsSection />;
     case 'analytics': return <AnalyticsSection />;
+    case 'disputes':  return <DisputesSection />;
   }
 }
 
@@ -57,7 +61,8 @@ export default function AdminDashboard() {
   const [page, setPage] = useState<AdminPageId>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const counts = { users: 0, orders: 0, payouts: 0 };
+  const { data: disputes = [] } = useDisputes();
+  const counts = { users: 0, orders: 0, payouts: 0, disputes: disputes.filter((d) => d.status === 0).length };
 
   return (
     <div className="grid grid-cols-[240px_1fr] min-h-screen bg-[rgba(244,243,247,0.4)] max-[900px]:grid-cols-1">
