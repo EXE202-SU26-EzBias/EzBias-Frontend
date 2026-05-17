@@ -1,6 +1,5 @@
 import { lazy, Suspense, useState } from 'react';
 import type { AdminPageId } from '../../types/admin';
-import { useAdminDashboard } from '../../services/admin.service';
 import AdminSidebar from './AdminSidebar';
 
 const OverviewSection  = lazy(() => import('./sections/OverviewSection'));
@@ -57,15 +56,8 @@ export { PAGE_META };
 export default function AdminDashboard() {
   const [page, setPage] = useState<AdminPageId>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { data, isLoading } = useAdminDashboard();
 
-  if (isLoading || !data) return <PageLoader />;
-
-  const counts = {
-    users:   data.users.filter((u) => u.status === 'suspended').length,
-    orders:  data.orders.filter((o) => o.status === 'processing').length,
-    payouts: data.payouts.filter((p) => p.status === 'pending').length,
-  };
+  const counts = { users: 0, orders: 0, payouts: 0 };
 
   return (
     <div className="grid grid-cols-[240px_1fr] min-h-screen bg-[rgba(244,243,247,0.4)] max-[900px]:grid-cols-1">
