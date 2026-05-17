@@ -21,7 +21,7 @@ const PlaceOrderButton = ({ isReady, isSubmitting }: PlaceOrderButtonProps) => (
     </button>
     {!isReady && (
       <p className="text-center text-[11px] text-[#737373]">
-        Fill in shipping details and select a payment method to continue.
+        Fill in all shipping details to continue.
       </p>
     )}
   </div>

@@ -22,7 +22,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       setAuth: ({ user, accessToken }) => set({ user, accessToken, isAuthenticated: true }),
       setAccessToken: (accessToken) => set({ accessToken }),
-      setUser: (user) => set({ user }),
+      setUser: (user) => { if (!user) return; set({ user }); },
       clear: () => set({ user: null, accessToken: null, isAuthenticated: false }),
     }),
     {
@@ -30,6 +30,7 @@ export const useAuthStore = create<AuthState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
+        accessToken: state.accessToken,
         isAuthenticated: state.isAuthenticated,
       }),
     },

@@ -2,6 +2,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ErrorBoundary from './components/layout/ErrorBoundary';
+import ProtectedRoute from './components/layout/ProtectedRoute';
 import { queryClient } from './lib/queryClient';
 
 const LandingPage = lazy(() => import('./pages/LandingPage/LandingPage'));
@@ -14,6 +15,7 @@ const SellerDashboard = lazy(() => import('./pages/SellerDashboard/SellerDashboa
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard/AdminDashboard'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage/CheckoutPage'));
 const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage/OrderConfirmationPage'));
+const PaymentPage = lazy(() => import('./pages/PaymentPage/PaymentPage'));
 
 function PageLoader() {
   return (
@@ -36,10 +38,11 @@ function App() {
               <Route path="/auction/:id" element={<AuctionDetailPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
-              <Route path="/seller" element={<SellerDashboard />} />
+              <Route path="/seller" element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
               <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
               <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
+              <Route path="/payment/:paymentId" element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
             </Routes>
           </Suspense>
         </ErrorBoundary>

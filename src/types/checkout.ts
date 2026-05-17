@@ -28,16 +28,7 @@ export interface CreateOrderPayload {
 }
 
 export interface CreateOrderResponse {
-  id: number;
-  userId: number;
-  sellerId: number;
-  source: number;
-  auctionId?: number;
-  shippingFee: number;
-  total: number;
-  status: number;
-  addressSnap: AddressSnap;
-  createdAt: string;
+  orderIds: number[];
 }
 
 export interface OrderTotal {

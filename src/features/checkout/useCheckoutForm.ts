@@ -1,10 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import { useCart } from '../../services/cart.service';
-import { useCreateOrder } from '../../services/order.service';
+import { http } from '../../lib/axios';
+import { queryClient } from '../../lib/queryClient';
+import { cartKeys, useCart } from '../../services/cart.service';
 import { useUiStore } from '../../stores/ui.store';
+import type { CreateOrderPayload, CreateOrderResponse } from '../../types/checkout';
+import type { PaymentResponse } from '../../types/payment';
 import type { ShippingFormValues } from '../../types/checkout';
 
 const shippingSchema = z.object({
@@ -16,13 +20,31 @@ const shippingSchema = z.object({
   phoneNumber: z.string().min(9, 'Please enter a valid phone number'),
 });
 
+async function createOrderAndPayment(payload: CreateOrderPayload): Promise<PaymentResponse> {
+  const orderRes = await http.post<CreateOrderResponse>('/api/orders', payload).then((r) => r.data);
+  const paymentRes = await http
+    .post<PaymentResponse>('/api/payments', { orderIds: orderRes.orderIds })
+    .then((r) => r.data);
+  return paymentRes;
+}
+
 export function useCheckoutForm() {
   const navigate = useNavigate();
-  const { data: cartData, refetch: refetchCart } = useCart();
+  const { data: cartData } = useCart();
   const showToast = useUiStore((s) => s.showToast);
-  const { mutate: createOrder, isPending } = useCreateOrder();
 
   const items = cartData?.items ?? [];
+
+  const { mutate: placeOrder, isPending: isSubmitting } = useMutation({
+    mutationFn: createOrderAndPayment,
+    onSuccess: (payment) => {
+      queryClient.invalidateQueries({ queryKey: cartKeys.detail() });
+      navigate(`/payment/${payment.paymentId}`);
+    },
+    onError: () => {
+      showToast('Failed to place order. Please try again.');
+    },
+  });
 
   const {
     register,
@@ -36,28 +58,16 @@ export function useCheckoutForm() {
   const isReadyToOrder = isValid && items.length > 0;
 
   const onSubmit = handleSubmit((form) => {
-    createOrder(
-      {
-        items: items.map((i) => ({ cartItemId: i.cartItemId, quantity: i.quantity })),
-        addressSnap: {
-          fullname: form.fullName,
-          phone: form.phoneNumber,
-          address: form.address,
-          city: form.city,
-          zip: form.zipCode,
-        },
+    placeOrder({
+      items: items.map((i) => ({ cartItemId: i.cartItemId, quantity: i.quantity })),
+      addressSnap: {
+        fullname: form.fullName,
+        phone: form.phoneNumber,
+        address: form.address,
+        city: form.city,
+        zip: form.zipCode,
       },
-      {
-        onSuccess: (res) => {
-          refetchCart();
-          showToast('Order placed successfully!');
-          navigate(`/order-confirmation/${res.id}`);
-        },
-        onError: () => {
-          showToast('Failed to place order. Please try again.');
-        },
-      },
-    );
+    });
   });
 
   return {
@@ -65,6 +75,6 @@ export function useCheckoutForm() {
     errors,
     onSubmit,
     isReadyToOrder,
-    isSubmitting: isPending,
+    isSubmitting,
   };
 }
