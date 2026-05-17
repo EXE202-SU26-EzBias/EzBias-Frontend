@@ -38,11 +38,11 @@ function App() {
               <Route path="/auction/:id" element={<AuctionDetailPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
-              <Route path="/seller" element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+              <Route path="/seller" element={<ProtectedRoute requiredRole="User"><SellerDashboard /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute requiredRole="Admin"><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/checkout" element={<ProtectedRoute requiredRole="User"><CheckoutPage /></ProtectedRoute>} />
               <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
-              <Route path="/payment/:paymentId" element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
+              <Route path="/payment/:paymentId" element={<ProtectedRoute requiredRole="User"><PaymentPage /></ProtectedRoute>} />
             </Routes>
           </Suspense>
         </ErrorBoundary>
