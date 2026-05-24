@@ -1,107 +1,13 @@
 export type AdminPageId =
-  | 'overview' | 'users' | 'sellers' | 'listings'
-  | 'orders' | 'auctions' | 'payouts' | 'analytics'
+  | 'overview'
+  | 'users'
+  | 'sellers'
+  | 'listings'
+  | 'orders'
+  | 'auctions'
+  | 'payouts'
+  | 'analytics'
   | 'disputes';
-
-export type UserRole = 'buyer' | 'seller';
-export type UserStatus = 'active' | 'suspended';
-export type SellerVerifyStatus = 'active' | 'pending' | 'suspended';
-export type PayoutQueueStatus = 'pending' | 'approved' | 'rejected';
-
-export type ListingStatus = 'live' | 'paused' | 'draft' | 'out';
-export type OrderStatus = 'processing' | 'shipped' | 'delivered';
-export type AuctionStatus = 'live' | 'ended';
-
-export interface Kpi {
-  label: string;
-  value: string;
-  delta: string;
-  up: boolean;
-  icon: 'wallet' | 'bag' | 'eye' | 'spark';
-}
-
-export interface ChartPoint {
-  label: string;
-  value: number;
-}
-
-export interface FeedItem {
-  id: string;
-  who: string;
-  what: string;
-  target: string;
-  time: string;
-  icon: 'gavel' | 'bag' | 'star' | 'msg';
-}
-
-export interface Order {
-  id: string;
-  item: string;
-  buyer: string;
-  total: number;
-  status: OrderStatus;
-}
-
-export interface Listing {
-  id: string;
-  name: string;
-  artist: string;
-  price: number;
-  stock: number;
-  views: number;
-  status: ListingStatus;
-}
-
-export interface SellerAuction {
-  id: string;
-  name: string;
-  bid: number;
-  bids: number;
-  end: string;
-  status: AuctionStatus;
-}
-
-export interface AdminUser {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  status: UserStatus;
-  joinedAt: string;
-  orders: number;
-}
-
-export interface AdminSeller {
-  id: string;
-  name: string;
-  email: string;
-  status: SellerVerifyStatus;
-  verified: boolean;
-  revenue: number;
-  listings: number;
-  joinedAt: string;
-}
-
-export interface PayoutQueueItem {
-  id: string;
-  seller: string;
-  amount: number;
-  method: string;
-  requestedAt: string;
-  status: PayoutQueueStatus;
-}
-
-export interface AdminData {
-  kpis: Kpi[];
-  chart: ChartPoint[];
-  feed: FeedItem[];
-  orders: Order[];
-  listings: Listing[];
-  auctions: SellerAuction[];
-  payouts: PayoutQueueItem[];
-  users: AdminUser[];
-  sellers: AdminSeller[];
-}
 
 export interface AdminDashboardOverviewResponse {
   totalUsers: number;
@@ -125,3 +31,9 @@ export interface AdminDashboardOverviewResponse {
   pendingRefunds: number;
   pendingPayouts: number;
 }
+
+type NumericKeys<T> = {
+  [K in keyof T]: T[K] extends number ? K : never;
+}[keyof T];
+
+export type AdminOverviewNumericKey = NumericKeys<AdminDashboardOverviewResponse>;

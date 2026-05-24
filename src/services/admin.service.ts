@@ -12,6 +12,5 @@ export function useAdminDashboardOverview() {
     queryKey: adminDashboardKeys.overview(),
     queryFn: () => http.get<AdminDashboardOverviewResponse>('/api/admin/dashboard/overview').then((r) => r.data),
     staleTime: 60_000,
-    refetchOnWindowFocus: true,
   });
 }
