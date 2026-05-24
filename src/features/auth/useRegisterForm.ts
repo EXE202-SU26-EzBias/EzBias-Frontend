@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useRegister } from '../../services/auth.service';
-import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 
 const registerSchema = z
@@ -21,8 +20,8 @@ const registerSchema = z
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export function useRegisterForm() {
-  const setAuth = useAuthStore((s) => s.setAuth);
   const closeRegister = useUiStore((s) => s.closeRegister);
+  const openEmailVerification = useUiStore((s) => s.openEmailVerification);
   const showToast = useUiStore((s) => s.showToast);
   const { mutate: register_, isPending } = useRegister();
 
@@ -36,10 +35,9 @@ export function useRegisterForm() {
     register_(
       { fullName: data.fullName, username: data.username, email: data.email, password: data.password },
       {
-        onSuccess: (res) => {
-          setAuth(res);
+        onSuccess: () => {
           closeRegister();
-          showToast('Account created successfully!');
+          openEmailVerification(data.email);
         },
         onError: () => {
           showToast('Registration failed. Please try again.');

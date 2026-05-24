@@ -44,7 +44,8 @@ http.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryableRequestConfig | undefined;
 
-    if (error.response?.status !== 401 || !originalRequest || originalRequest._retry) {
+    const errMessage = (error.response?.data as { message?: string })?.message ?? '';
+    if (error.response?.status !== 401 || !originalRequest || originalRequest._retry || errMessage.toLowerCase().includes('not verified')) {
       return Promise.reject(error);
     }
 

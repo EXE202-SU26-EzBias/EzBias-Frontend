@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { http } from '../lib/axios';
 import { useAuthStore } from '../stores/auth.store';
-import type { AuthResponse, AuthUser, UserRole } from '../types/auth';
+import type { AuthResponse, AuthUser, UserRole, ForgotPasswordPayload, ResetPasswordPayload, EmailVerificationRequestPayload, EmailVerificationVerifyPayload, MessageResponse } from '../types/auth';
 import { cartKeys } from './cart.service';
 
 interface LoginPayload {
@@ -83,5 +83,33 @@ export function useRegister() {
         };
         return mapped;
       }),
+  });
+}
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: (payload: ForgotPasswordPayload) =>
+      http.post<MessageResponse>('/api/auth/forgot-password', payload).then((r) => r.data),
+  });
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: (payload: ResetPasswordPayload) =>
+      http.post<MessageResponse>('/api/auth/reset-password', payload).then((r) => r.data),
+  });
+}
+
+export function useRequestEmailVerification() {
+  return useMutation({
+    mutationFn: (payload: EmailVerificationRequestPayload) =>
+      http.post<MessageResponse>('/api/auth/email-verification/request', payload).then((r) => r.data),
+  });
+}
+
+export function useVerifyEmail() {
+  return useMutation({
+    mutationFn: (payload: EmailVerificationVerifyPayload) =>
+      http.post<MessageResponse>('/api/auth/email-verification/verify', payload).then((r) => r.data),
   });
 }

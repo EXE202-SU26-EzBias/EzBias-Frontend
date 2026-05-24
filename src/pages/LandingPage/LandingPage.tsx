@@ -2,6 +2,8 @@ import { useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import Footer from '../../components/layout/Footer';
 import Header from '../../components/layout/Header';
+import EmailVerificationModal from '../../components/shared/EmailVerificationModal';
+import ForgotPasswordModal from '../../components/shared/ForgotPasswordModal';
 import LoginModal from '../../components/shared/LoginModal';
 import RegisterModal from '../../components/shared/RegisterModal';
 import Toast from '../../components/ui/Toast';
@@ -35,6 +37,8 @@ const LandingPage = () => {
       <Footer />
       <LoginModal />
       <RegisterModal />
+      <ForgotPasswordModal />
+      <EmailVerificationModal />
       <Toast message={toastMessage} visible={toastVisible} />
     </>
   );

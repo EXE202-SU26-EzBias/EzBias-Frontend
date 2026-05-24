@@ -2,7 +2,7 @@ import { useLoginForm } from '../../features/auth/useLoginForm';
 import { useUiStore } from '../../stores/ui.store';
 
 const LoginModal = () => {
-  const { isLoginOpen, closeLogin, openRegister } = useUiStore();
+  const { isLoginOpen, closeLogin, openRegister, openForgotPassword } = useUiStore();
   const { register, onSubmit, errors, isPending } = useLoginForm();
 
   if (!isLoginOpen) return null;
@@ -69,10 +69,15 @@ const LoginModal = () => {
             {isPending ? 'Logging in…' : 'Login Account'}
           </button>
 
-          <p className="mb-4 text-[9px] text-[#7c838a]">
+          <p className="mb-2 text-[9px] text-[#7c838a]">
             Don&apos;t have a account?{' '}
             <span className="cursor-pointer text-[#9b84ec]" onClick={openRegister}>
               Sign Up
+            </span>
+          </p>
+          <p className="text-[9px] text-[#7c838a]">
+            <span className="cursor-pointer text-[#9b84ec]" onClick={openForgotPassword}>
+              Forgot password?
             </span>
           </p>
         </form>

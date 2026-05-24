@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import { useUiStore } from '../../stores/ui.store';
+import EmailVerificationModal from '../shared/EmailVerificationModal';
+import ForgotPasswordModal from '../shared/ForgotPasswordModal';
 import LoginModal from '../shared/LoginModal';
 import RegisterModal from '../shared/RegisterModal';
 import Toast from '../ui/Toast';
@@ -21,6 +23,8 @@ const PageLayout = ({ children }: PageLayoutProps) => {
       <Footer />
       <LoginModal />
       <RegisterModal />
+      <ForgotPasswordModal />
+      <EmailVerificationModal />
       <Toast message={toastMessage} visible={toastVisible} />
     </>
   );

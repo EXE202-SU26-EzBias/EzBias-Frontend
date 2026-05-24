@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import type { AxiosError } from 'axios';
 import { useLogin } from '../../services/auth.service';
 import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
@@ -23,6 +24,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export function useLoginForm() {
   const setAuth = useAuthStore((s) => s.setAuth);
   const closeLogin = useUiStore((s) => s.closeLogin);
+  const openEmailVerification = useUiStore((s) => s.openEmailVerification);
   const showToast = useUiStore((s) => s.showToast);
   const { mutate: login, isPending } = useLogin();
 
@@ -38,8 +40,16 @@ export function useLoginForm() {
         setAuth(res);
         closeLogin();
       },
-      onError: () => {
-        showToast('Login failed. Please check your credentials.');
+      onError: (err) => {
+        const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? '';
+        if (message.toLowerCase().includes('not verified')) {
+          const email = z.string().email().safeParse(data.emailOrUsername).success
+            ? data.emailOrUsername
+            : '';
+          openEmailVerification(email);
+        } else {
+          showToast('Login failed. Please check your credentials.');
+        }
       },
     });
   });
