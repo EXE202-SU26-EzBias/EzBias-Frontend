@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { z } from 'zod';
 import { useCreateSellerAuction } from '../../services/seller-auction.service';
 import { useUiStore } from '../../stores/ui.store';
@@ -31,7 +31,7 @@ export function useCreateAuctionForm({ products, isProductsLoading, onSuccess }:
   const showToast = useUiStore((s) => s.showToast);
 
   const { register, handleSubmit, formState: { errors } } = useForm<AuctionFormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as Resolver<AuctionFormValues>,
     mode: 'onChange',
     defaultValues: {
       productId: 0,

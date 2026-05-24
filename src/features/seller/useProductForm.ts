@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { z } from 'zod';
 import type { ProductStatus } from '../../constants/product';
 import { useFandoms } from '../../services/fandom.service';
@@ -34,7 +34,7 @@ export function useCreateProductForm(onSuccess: () => void) {
   const showToast = useUiStore((s) => s.showToast);
 
   const { register, handleSubmit, formState: { errors } } = useForm<CreateFormValues>({
-    resolver: zodResolver(createSchema),
+    resolver: zodResolver(createSchema) as Resolver<CreateFormValues>,
     mode: 'onChange',
     defaultValues: {
       fandomId: '',
@@ -77,7 +77,7 @@ export function useUpdateProductForm(product: SellerProduct, onSuccess: () => vo
   const showToast = useUiStore((s) => s.showToast);
 
   const { register, handleSubmit, formState: { errors } } = useForm<UpdateFormValues>({
-    resolver: zodResolver(updateSchema),
+    resolver: zodResolver(updateSchema) as Resolver<UpdateFormValues>,
     mode: 'onChange',
     defaultValues: {
       price: product.price,

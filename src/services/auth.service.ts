@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { http } from '../lib/axios';
 import { useAuthStore } from '../stores/auth.store';
-import type { AuthResponse, AuthUser } from '../types/auth';
+import type { AuthResponse, AuthUser, UserRole } from '../types/auth';
 import { cartKeys } from './cart.service';
 
 interface LoginPayload {
@@ -26,7 +26,7 @@ export function useLogin() {
           userId: data.userId,
           email: data.email,
           username: data.username,
-          role: data.role,
+          role: data.role as UserRole | undefined,
         };
         const mapped: AuthResponse = {
           user,
@@ -74,7 +74,7 @@ export function useRegister() {
           userId: data.userId,
           email: data.email,
           username: data.username,
-          role: data.role,
+          role: data.role as UserRole | undefined,
         };
         const mapped: AuthResponse = {
           user,

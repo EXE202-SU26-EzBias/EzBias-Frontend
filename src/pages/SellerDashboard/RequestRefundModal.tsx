@@ -1,4 +1,3 @@
-import React from 'react';
 import { useRequestRefundForm } from '../../features/dispute/useRequestRefundForm';
 import type { Order } from '../../types/order';
 

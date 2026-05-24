@@ -30,14 +30,6 @@ const PAGE_META: Record<AdminPageId, { title: string; sub: string }> = {
   disputes:  { title: 'Disputes',            sub: 'Review and action buyer dispute requests'          },
 };
 
-function PageLoader() {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <span className="h-6 w-6 animate-spin rounded-full border-2 border-[#e6e6e6] border-t-[#ad93e6]" />
-    </div>
-  );
-}
-
 function SectionLoader() {
   return (
     <div className="flex items-center justify-center py-20">
