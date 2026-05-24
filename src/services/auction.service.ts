@@ -12,7 +12,7 @@ export const auctionKeys = {
 export function useAuctions() {
   return useQuery({
     queryKey: auctionKeys.list(),
-    queryFn: () => http.get('/api/auctions').then((r) => Array.isArray(r.data) ? r.data : (r.data?.data ?? [])),
+    queryFn: () => http.get<Auction[] | { data: Auction[] }>('/api/auctions').then((r) => Array.isArray(r.data) ? r.data : (r.data as { data: Auction[] }).data ?? []),
     staleTime: 10_000,
     refetchInterval: 15_000,
   });
