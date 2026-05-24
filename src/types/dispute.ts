@@ -10,28 +10,52 @@ export interface CreateDisputeItem {
   reason: string;
 }
 
-export interface DisputeResponse {
-  id: number;
-  orderId: number;
-  userId: number;
-  sellerId: number;
-  status: number; // e.g. 0 = Open, 1 = Approved, 2 = Rejected
-  reason: string;
-  details?: string | null;
-  createdAt: string;
+export interface RefundPayoutInfo {
+  buyerId: number;
+  buyerFullName: string;
+  buyerEmail: string;
+  buyerPhone: string;
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountName: string;
 }
 
 export interface DisputeItem {
   id: number;
-  orderId: number;
-  productId: number;
+  orderItemId: number;
   productName: string;
-  quantity: number;
+  orderedQty: number;
   unitPrice: number;
+  requestedQty: number;
+  approvedQty: number | null;
+  note: string;
 }
 
-export interface DisputeDetail extends DisputeResponse {
+export interface DisputeResponse {
+  id: number;
+  orderId: number;
+  initiatorId: number;
+  status: import('../constants/dispute').DisputeStatusValue;
+  reason: string;
+  adminNote: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+  refundPayoutInfo: RefundPayoutInfo | null;
   items: DisputeItem[];
 }
 
-export type { DisputeResponse as Dispute };
+export interface ApprovedItem {
+  orderItemId: number;
+  approvedQty: number;
+  note: string;
+}
+
+export interface ApproveDisputePayload {
+  adminNote: string;
+  approvedItems: ApprovedItem[];
+}
+
+export interface RejectDisputePayload {
+  reason: string;
+}
+

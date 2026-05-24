@@ -1,6 +1,11 @@
 import { lazy, Suspense, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Toast from '../../components/ui/Toast';
+import { useLogout } from '../../services/auth.service';
+import { useOpenDisputeCount } from '../../services/dispute.service';
+import { useAuthStore } from '../../stores/auth.store';
+import { useUiStore } from '../../stores/ui.store';
 import type { AdminPageId } from '../../types/admin';
-import { useDisputes } from '../../services/dispute.service';
 import AdminSidebar from './AdminSidebar';
 
 const OverviewSection  = lazy(() => import('./sections/OverviewSection'));
@@ -61,8 +66,31 @@ export default function AdminDashboard() {
   const [page, setPage] = useState<AdminPageId>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const { data: disputes = [] } = useDisputes();
-  const counts = { users: 0, orders: 0, payouts: 0, disputes: disputes.filter((d) => d.status === 0).length };
+  const authUser = useAuthStore((s) => s.user);
+  const toastMessage = useUiStore((s) => s.toastMessage);
+  const toastVisible = useUiStore((s) => s.toastVisible);
+  const showToast = useUiStore((s) => s.showToast);
+  const navigate = useNavigate();
+  const { mutate: logout, isPending: loggingOut } = useLogout();
+  const { data: openDisputeCount = 0 } = useOpenDisputeCount();
+
+  const ROLE_LABELS: Record<string, string> = { Admin: 'Administrator', User: 'User' };
+
+  const displayName = authUser?.username?.trim() || authUser?.email?.trim() || 'Admin';
+  const sidebarUser = {
+    name: displayName,
+    initials: displayName.slice(0, 2).toUpperCase(),
+    bg: '#7c3aed',
+    role: ROLE_LABELS[authUser?.role ?? ''] ?? 'Administrator',
+    email: authUser?.email,
+  };
+
+  const counts = {
+    users: 0,
+    orders: 0,
+    payouts: 0,
+    disputes: openDisputeCount,
+  };
 
   return (
     <div className="grid grid-cols-[240px_1fr] min-h-screen bg-[rgba(244,243,247,0.4)] max-[900px]:grid-cols-1">
@@ -75,9 +103,17 @@ export default function AdminDashboard() {
       <AdminSidebar
         active={page}
         onNav={(id) => { setPage(id); setSidebarOpen(false); }}
+        user={sidebarUser}
         counts={counts}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        onLogout={() =>
+          logout(undefined, {
+            onSettled: () => navigate('/'),
+            onError: () => showToast('Sign out failed. Please try again.'),
+          })
+        }
+        loggingOut={loggingOut}
       />
       <main className="px-8 py-6 pb-16 min-w-0 max-[600px]:px-5">
         <button
@@ -93,6 +129,7 @@ export default function AdminDashboard() {
           {renderSection(page)}
         </Suspense>
       </main>
+      <Toast message={toastMessage} visible={toastVisible} />
     </div>
   );
 }
