@@ -24,7 +24,7 @@ export function useAuctionDetail(id: number) {
     queryFn: () => http.get<AuctionDetail>(`/api/auctions/${id}`).then((r) => r.data),
     enabled: Number.isFinite(id) && id > 0,
     staleTime: 5_000,
-    refetchInterval: 10_000,
+    refetchInterval: 30_000, // fallback polling — realtime push via SignalR handles instant updates
   });
 }
 
@@ -45,6 +45,6 @@ export function useBidHistory(id: number) {
     queryFn: () => http.get<BidHistoryEntry[]>(`/api/auctions/${id}/bids/history`).then((r) => r.data),
     enabled: Number.isFinite(id) && id > 0,
     staleTime: 5_000,
-    refetchInterval: 10_000,
+    refetchInterval: 30_000, // fallback polling — realtime push via SignalR handles instant updates
   });
 }

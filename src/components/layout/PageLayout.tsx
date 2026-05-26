@@ -15,6 +15,7 @@ interface PageLayoutProps {
 const PageLayout = ({ children }: PageLayoutProps) => {
   const toastMessage = useUiStore((s) => s.toastMessage);
   const toastVisible = useUiStore((s) => s.toastVisible);
+  const toastType = useUiStore((s) => s.toastType);
 
   return (
     <>
@@ -25,7 +26,7 @@ const PageLayout = ({ children }: PageLayoutProps) => {
       <RegisterModal />
       <ForgotPasswordModal />
       <EmailVerificationModal />
-      <Toast message={toastMessage} visible={toastVisible} />
+      <Toast message={toastMessage} visible={toastVisible} type={toastType} />
     </>
   );
 };

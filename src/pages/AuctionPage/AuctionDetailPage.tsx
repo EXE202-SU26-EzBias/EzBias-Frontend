@@ -10,6 +10,7 @@ import Badge from '../../components/ui/Badge';
 import { RocketIcon, TrendIcon } from '../../components/ui/Icon';
 import { AUCTION_STATUS } from '../../constants/auction';
 import { useCountdown } from '../../features/auction/useCountdown';
+import { useAuctionHub } from '../../features/auction/useAuctionHub';
 import { useAuctionDetail, useBidHistory, usePlaceBid } from '../../services/auction.service';
 import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
@@ -24,6 +25,9 @@ const AuctionDetailPage = () => {
   const { data: bids = [], isLoading: bidsLoading, isError: bidsError } = useBidHistory(auctionId);
   const { hours, minutes, secs } = useCountdown(auction?.endsAt);
   const [bidInput, setBidInput] = useState('');
+
+  // Subscribe to realtime bid events via SignalR
+  useAuctionHub(auctionId);
 
   const currentUserId = useAuthStore((s) => s.user?.userId);
   const showToast = useUiStore((s) => s.showToast);
