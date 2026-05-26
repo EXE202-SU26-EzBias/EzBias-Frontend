@@ -50,7 +50,7 @@ export function useCreateAuctionForm({ products, isProductsLoading, onSuccess }:
       { ...values, endsAt: new Date(values.endsAt).toISOString() },
       {
         onSuccess,
-        onError: () => showToast('Failed to create auction. Please try again.'),
+        onError: () => showToast('Failed to create auction. Please try again.', 'error'),
       },
     );
   });

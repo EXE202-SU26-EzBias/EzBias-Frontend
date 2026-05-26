@@ -38,8 +38,8 @@ const PaymentPage = () => {
 
   const handleManualConfirm = () => {
     manualConfirm(paymentId, {
-      onSuccess: () => showToast('Payment confirmed manually.'),
-      onError: () => showToast('Could not confirm payment. Please contact support.'),
+      onSuccess: () => showToast('Payment confirmed manually.', 'success'),
+      onError: () => showToast('Could not confirm payment. Please contact support.', 'error'),
     });
   };
 

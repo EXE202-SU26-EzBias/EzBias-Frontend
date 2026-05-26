@@ -18,7 +18,7 @@ export interface ProductPayload {
   price: number;
   stock: number;
   description: string;
-  primaryImageUrl: string;
+  images: File[];
 }
 
 export interface UpdateProductPayload {
@@ -26,7 +26,8 @@ export interface UpdateProductPayload {
   stock: number;
   description: string;
   status: ProductStatus;
-  primaryImageUrl: string;
+  images?: File[];
+  keepImageUrls?: string[];
 }
 
 export function useProducts() {
@@ -47,7 +48,21 @@ export function useProductDetail(id?: number) {
 export function useCreateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: ProductPayload) => http.post<SellerProduct>('/api/products', payload).then((r) => r.data),
+    mutationFn: (payload: ProductPayload) => {
+      const form = new FormData();
+      form.append('fandomId', payload.fandomId);
+      form.append('artist', payload.artist);
+      form.append('name', payload.name);
+      form.append('type', payload.type);
+      form.append('condition', String(payload.condition));
+      form.append('price', String(payload.price));
+      form.append('stock', String(payload.stock));
+      form.append('description', payload.description);
+      payload.images.forEach((img) => form.append('images', img));
+      return http.post<SellerProduct>('/api/products', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then((r) => r.data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.list() });
     },
@@ -57,8 +72,23 @@ export function useCreateProduct() {
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: UpdateProductPayload }) =>
-      http.put<SellerProduct>(`/api/products/${id}`, payload).then((r) => r.data),
+    mutationFn: ({ id, payload }: { id: number; payload: UpdateProductPayload }) => {
+      const form = new FormData();
+      form.append('price', String(payload.price));
+      form.append('stock', String(payload.stock));
+      form.append('description', payload.description);
+      form.append('status', String(payload.status));
+      payload.images?.forEach((img) => form.append('images', img));
+      // Always send keepImageUrls when defined so BE knows which existing images to retain.
+      // We send a dedicated flag to distinguish "keep all" (undefined) from "keep none" ([]).
+      if (payload.keepImageUrls !== undefined) {
+        form.append('replaceImages', 'true');
+        payload.keepImageUrls.forEach((url) => form.append('keepImageUrls', url));
+      }
+      return http.put<SellerProduct>(`/api/products/${id}`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then((r) => r.data);
+    },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: productKeys.list() });
       queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.id) });

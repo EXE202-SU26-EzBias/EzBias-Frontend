@@ -17,3 +17,21 @@ export interface FandomProduct {
   isAuction: boolean;
   status: number;
 }
+
+export interface FandomProductDetail {
+  id: number;
+  sellerId: number;
+  fandomId: string;
+  artist: string;
+  name: string;
+  type: string;
+  condition: number;
+  price: number;
+  stock: number;
+  description: string;
+  primaryImageUrl: string;
+  imageUrls: string[];
+  isAuction: boolean;
+  status: number;
+  createdAt: string;
+}

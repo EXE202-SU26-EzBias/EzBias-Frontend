@@ -42,7 +42,7 @@ export function useCheckoutForm() {
       navigate(`/payment/${payment.paymentId}`);
     },
     onError: () => {
-      showToast('Failed to place order. Please try again.');
+      showToast('Failed to place order. Please try again.', 'error');
     },
   });
 

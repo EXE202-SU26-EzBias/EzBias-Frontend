@@ -18,8 +18,8 @@ import TrendingSection from './TrendingSection';
 const LandingPage = () => {
   const trendingRef = useRef<HTMLElement>(null);
   const auctionsRef = useRef<HTMLElement>(null);
-  const { toastMessage, toastVisible } = useUiStore(
-    useShallow((s) => ({ toastMessage: s.toastMessage, toastVisible: s.toastVisible })),
+  const { toastMessage, toastVisible, toastType } = useUiStore(
+    useShallow((s) => ({ toastMessage: s.toastMessage, toastVisible: s.toastVisible, toastType: s.toastType })),
   );
 
   return (
@@ -39,7 +39,7 @@ const LandingPage = () => {
       <RegisterModal />
       <ForgotPasswordModal />
       <EmailVerificationModal />
-      <Toast message={toastMessage} visible={toastVisible} />
+      <Toast message={toastMessage} visible={toastVisible} type={toastType} />
     </>
   );
 };

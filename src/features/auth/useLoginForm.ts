@@ -39,6 +39,7 @@ export function useLoginForm() {
       onSuccess: (res) => {
         setAuth(res);
         closeLogin();
+        showToast(`Welcome back, ${res.user.username}!`, 'success');
       },
       onError: (err) => {
         const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? '';
@@ -48,7 +49,7 @@ export function useLoginForm() {
             : '';
           openEmailVerification(email);
         } else {
-          showToast('Login failed. Please check your credentials.');
+          showToast('Login failed. Please check your credentials.', 'error');
         }
       },
     });

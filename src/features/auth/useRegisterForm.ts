@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { AxiosError } from 'axios';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useRegister } from '../../services/auth.service';
@@ -39,8 +40,10 @@ export function useRegisterForm() {
           closeRegister();
           openEmailVerification(data.email);
         },
-        onError: () => {
-          showToast('Registration failed. Please try again.');
+        onError: (error: unknown) => {
+          const axiosError = error as AxiosError<{ message?: string }>;
+          const message = axiosError.response?.data?.message ?? 'Registration failed. Please try again.';
+          showToast(message, 'error');
         },
       },
     );

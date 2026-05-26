@@ -49,7 +49,7 @@ const AuctionsSection = React.memo(function AuctionsSection() {
       setPendingId(id);
       publishMutate(id, {
         onSuccess: () => setPendingId(null),
-        onError: () => { setPendingId(null); showToast('Failed to publish auction.'); },
+        onError: () => { setPendingId(null); showToast('Failed to publish auction.', 'error'); },
       });
     },
     [publishMutate, showToast],
@@ -60,7 +60,7 @@ const AuctionsSection = React.memo(function AuctionsSection() {
       setPendingId(id);
       cancelMutate(id, {
         onSuccess: () => setPendingId(null),
-        onError: () => { setPendingId(null); showToast('Failed to cancel auction.'); },
+        onError: () => { setPendingId(null); showToast('Failed to cancel auction.', 'error'); },
       });
     },
     [cancelMutate, showToast],
@@ -71,7 +71,7 @@ const AuctionsSection = React.memo(function AuctionsSection() {
       setPendingId(id);
       relistMutate(id, {
         onSuccess: () => setPendingId(null),
-        onError: () => { setPendingId(null); showToast('Failed to relist auction.'); },
+        onError: () => { setPendingId(null); showToast('Failed to relist auction.', 'error'); },
       });
     },
     [relistMutate, showToast],

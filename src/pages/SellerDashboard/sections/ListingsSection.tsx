@@ -28,7 +28,8 @@ const ListingsSection = React.memo(function ListingsSection() {
   const handleDelete = useCallback(
     (id: number) =>
       deleteMutation.mutate(id, {
-        onError: () => showToast('Failed to delete listing. Please try again.'),
+        onSuccess: () => showToast('Listing deleted.', 'success'),
+        onError: () => showToast('Failed to delete listing. Please try again.', 'error'),
       }),
     [deleteMutation, showToast],
   );

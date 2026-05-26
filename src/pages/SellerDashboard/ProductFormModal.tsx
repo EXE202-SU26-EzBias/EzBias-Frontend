@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { PRODUCT_CONDITION_LABELS, PRODUCT_STATUS_LABELS, getProductConditionLabel } from '../../constants/product';
 import { useCreateProductForm, useUpdateProductForm } from '../../features/seller/useProductForm';
 import type { SellerProduct } from '../../types/seller';
@@ -15,7 +15,6 @@ const inputCls =
 
 const selectCls = inputCls + ' cursor-pointer';
 
-// Wrapping <label> associates the label text with its input without needing htmlFor/id
 function Field({ label, error, children }: { label: string; error?: { message?: string }; children: ReactNode }) {
   return (
     <label className="flex flex-col gap-1.5">
@@ -37,15 +36,7 @@ function ReadOnly({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-function ModalShell({
-  title,
-  onClose,
-  children,
-}: {
-  title: string;
-  onClose: () => void;
-  children: ReactNode;
-}) {
+function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
@@ -101,10 +92,140 @@ function FormFooter({ onClose, isPending, label }: { onClose: () => void; isPend
   );
 }
 
+// ─── Multi-image picker ───────────────────────────────────────────────────────
+
+const MAX_IMAGES = 8;
+
+function MultiImagePicker({
+  newFiles,
+  existingUrls = [],
+  onAdd,
+  onRemoveNew,
+  onRemoveExisting,
+  error,
+  label = 'Product Images',
+  hint,
+}: {
+  newFiles: File[];
+  existingUrls?: string[];
+  onAdd: (files: File[]) => void;
+  onRemoveNew: (index: number) => void;
+  onRemoveExisting?: (url: string) => void;
+  error?: { message?: string };
+  label?: string;
+  hint?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const totalCount = existingUrls.length + newFiles.length;
+  const canAddMore = totalCount < MAX_IMAGES;
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-bold uppercase tracking-[0.5px] text-[#737373]">{label}</span>
+        <span className="text-[11px] text-[#b3b3b3]">{totalCount} / {MAX_IMAGES}</span>
+      </div>
+
+      {hint && <p className="text-[11px] text-[#b3b3b3]">{hint}</p>}
+
+      <div className="grid grid-cols-4 gap-2">
+        {/* Existing images — removable when onRemoveExisting is provided */}
+        {existingUrls.map((url, i) => (
+          <div key={url} className="relative aspect-square overflow-hidden rounded-lg border border-[#e6e6e6]">
+            <img src={url} alt={`Image ${i + 1}`} className="h-full w-full object-cover" />
+            {i === 0 && (
+              <span className="absolute bottom-0 left-0 right-0 bg-black/50 py-0.5 text-center text-[9px] font-semibold text-white">
+                Primary
+              </span>
+            )}
+            {onRemoveExisting && (
+              <button
+                type="button"
+                aria-label="Remove image"
+                onClick={() => onRemoveExisting(url)}
+                className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-red-500"
+              >
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+        ))}
+
+        {/* New file previews with remove button */}
+        {newFiles.map((file, i) => {
+          const previewUrl = URL.createObjectURL(file);
+          const isFirstNew = existingUrls.length === 0 && i === 0;
+          return (
+            <div key={`new-${i}`} className="relative aspect-square overflow-hidden rounded-lg border border-[#ad93e6]">
+              <img src={previewUrl} alt={`New ${i + 1}`} className="h-full w-full object-cover" />
+              {isFirstNew && (
+                <span className="absolute bottom-0 left-0 right-0 bg-black/50 py-0.5 text-center text-[9px] font-semibold text-white">
+                  Primary
+                </span>
+              )}
+              <button
+                type="button"
+                aria-label="Remove image"
+                onClick={() => onRemoveNew(i)}
+                className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-red-500"
+              >
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          );
+        })}
+
+        {/* Add slot */}
+        {canAddMore && (
+          <button
+            type="button"
+            aria-label="Add image"
+            onClick={() => inputRef.current?.click()}
+            className={[
+              'flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition',
+              error?.message
+                ? 'border-[#ef4343] bg-red-50'
+                : 'border-[#e6e6e6] bg-[#fafafa] hover:border-[#ad93e6] hover:bg-[rgba(173,147,230,0.04)]',
+            ].join(' ')}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span className="text-[9px] font-medium text-[#b3b3b3]">Add</span>
+          </button>
+        )}
+      </div>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          const picked = Array.from(e.target.files ?? []);
+          if (picked.length > 0) {
+            const remaining = MAX_IMAGES - totalCount;
+            onAdd(picked.slice(0, remaining));
+          }
+          e.target.value = '';
+        }}
+      />
+
+      {error?.message && <span className="text-[11px] text-[#ef4343]">{error.message}</span>}
+    </div>
+  );
+}
+
 // ─── Create form ──────────────────────────────────────────────────────────────
 
 function CreateProductModal({ onClose }: { onClose: () => void }) {
-  const { register, onSubmit, errors, isPending, fandoms, isFandomsLoading } = useCreateProductForm(onClose);
+  const { register, onSubmit, errors, isPending, fandoms, isFandomsLoading, setValue, imageFiles } = useCreateProductForm(onClose);
+  const files: File[] = imageFiles ?? [];
 
   return (
     <ModalShell title="New listing" onClose={onClose}>
@@ -135,8 +256,8 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
               </Field>
               <Field label="Condition" error={errors.condition}>
                 <select className={selectCls} {...register('condition')}>
-                  {(Object.entries(PRODUCT_CONDITION_LABELS) as [string, string][]).map(([val, label]) => (
-                    <option key={val} value={val}>{label}</option>
+                  {(Object.entries(PRODUCT_CONDITION_LABELS) as [string, string][]).map(([val, lbl]) => (
+                    <option key={val} value={val}>{lbl}</option>
                   ))}
                 </select>
               </Field>
@@ -151,9 +272,12 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
               </select>
             </Field>
 
-            <Field label="Image URL" error={errors.primaryImageUrl}>
-              <input type="text" placeholder="https://…" className={inputCls} {...register('primaryImageUrl')} />
-            </Field>
+            <MultiImagePicker
+              newFiles={files}
+              onAdd={(picked) => setValue('images', [...files, ...picked], { shouldValidate: true })}
+              onRemoveNew={(i) => setValue('images', files.filter((_, idx) => idx !== i), { shouldValidate: true })}
+              error={errors.images as { message?: string } | undefined}
+            />
 
             <Field label="Description" error={errors.description}>
               <textarea
@@ -174,7 +298,10 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
 // ─── Edit form ────────────────────────────────────────────────────────────────
 
 function EditProductModal({ product, onClose }: { product: SellerProduct; onClose: () => void }) {
-  const { register, onSubmit, errors, isPending } = useUpdateProductForm(product, onClose);
+  const { register, onSubmit, errors, isPending, setValue, imageFiles, keepImageUrls } = useUpdateProductForm(product, onClose);
+  const newFiles: File[] = imageFiles ?? [];
+  // keepImageUrls tracks which existing images to retain
+  const keptUrls: string[] = keepImageUrls ?? [];
 
   return (
     <ModalShell title="Edit listing" onClose={onClose}>
@@ -204,15 +331,21 @@ function EditProductModal({ product, onClose }: { product: SellerProduct; onClos
 
             <Field label="Status" error={errors.status}>
               <select className={selectCls} {...register('status')}>
-                {(Object.entries(PRODUCT_STATUS_LABELS) as [string, string][]).map(([val, label]) => (
-                  <option key={val} value={val}>{label}</option>
+                {(Object.entries(PRODUCT_STATUS_LABELS) as [string, string][]).map(([val, lbl]) => (
+                  <option key={val} value={val}>{lbl}</option>
                 ))}
               </select>
             </Field>
 
-            <Field label="Image URL" error={errors.primaryImageUrl}>
-              <input type="text" placeholder="https://…" className={inputCls} {...register('primaryImageUrl')} />
-            </Field>
+            <MultiImagePicker
+              newFiles={newFiles}
+              existingUrls={keptUrls}
+              onAdd={(picked) => setValue('images', [...newFiles, ...picked], { shouldValidate: true })}
+              onRemoveNew={(i) => setValue('images', newFiles.filter((_, idx) => idx !== i), { shouldValidate: true })}
+              onRemoveExisting={(url) => setValue('keepImageUrls', keptUrls.filter((u) => u !== url), { shouldValidate: true })}
+              error={errors.images as { message?: string } | undefined}
+              label="Product Images"
+            />
 
             <Field label="Description" error={errors.description}>
               <textarea

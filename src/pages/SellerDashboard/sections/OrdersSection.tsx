@@ -27,7 +27,7 @@ const OrdersSection = React.memo(function OrdersSection() {
       { orderId: shipTarget, carrier: carrier.trim() },
       {
         onSuccess: () => { setShipTarget(null); setCarrier(''); },
-        onError: () => showToast('Failed to mark as shipped.'),
+        onError: () => showToast('Failed to mark as shipped.', 'error'),
       },
     );
   }, [shipTarget, carrier, shipOrder, showToast]);
@@ -35,7 +35,7 @@ const OrdersSection = React.memo(function OrdersSection() {
   const handleConfirm = useCallback(
     (orderId: number) => {
       confirmOrder(orderId, {
-        onError: () => showToast('Failed to confirm order.'),
+        onError: () => showToast('Failed to confirm order.', 'error'),
       });
     },
     [confirmOrder, showToast],

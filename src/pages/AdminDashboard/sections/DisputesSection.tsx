@@ -64,26 +64,26 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
   const handleApprove = useCallback(() => {
     const approvedItems = buildApprovedItems(items, approvedQtys, itemNotes);
     if (approvedItems.every((i) => i.approvedQty === 0)) {
-      showToast('At least one item must have approved quantity greater than 0.');
+      showToast('At least one item must have approved quantity greater than 0.', 'error');
       return;
     }
     approve(
       { disputeId: dispute.id, payload: { adminNote, approvedItems } },
       {
-        onSuccess: () => showToast('Dispute approved.'),
-        onError: () => showToast('Action failed. Please try again.'),
+        onSuccess: () => showToast('Dispute approved.', 'success'),
+        onError: () => showToast('Action failed. Please try again.', 'error'),
       },
     );
   }, [approve, dispute.id, adminNote, approvedQtys, itemNotes, items, showToast]);
 
   const handleReject = useCallback(() => {
-    if (!rejectReason.trim()) { showToast('Please enter a reason for rejection.'); return; }
+    if (!rejectReason.trim()) { showToast('Please enter a reason for rejection.', 'error'); return; }
     if (!window.confirm('Reject this dispute? This action cannot be undone.')) return;
     reject(
       { disputeId: dispute.id, payload: { reason: rejectReason.trim() } },
       {
-        onSuccess: () => showToast('Dispute rejected.'),
-        onError: () => showToast('Action failed. Please try again.'),
+        onSuccess: () => showToast('Dispute rejected.', 'success'),
+        onError: () => showToast('Action failed. Please try again.', 'error'),
       },
     );
   }, [reject, dispute.id, rejectReason, showToast]);
@@ -91,8 +91,8 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
   const handleRefund = useCallback(() => {
     if (!window.confirm('Process refund? Payment will be returned to the buyer.')) return;
     refund(dispute.id, {
-      onSuccess: () => showToast('Refund processed.'),
-      onError: () => showToast('Action failed. Please try again.'),
+      onSuccess: () => showToast('Refund processed.', 'success'),
+      onError: () => showToast('Action failed. Please try again.', 'error'),
     });
   }, [refund, dispute.id, showToast]);
 

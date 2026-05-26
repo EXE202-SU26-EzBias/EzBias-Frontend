@@ -15,8 +15,8 @@ export function useEmailVerificationForm() {
 
   const resendCode = () => {
     requestVerification({ email }, {
-      onSuccess: () => showToast('Verification code resent.'),
-      onError: () => showToast('Failed to resend code. Please try again.'),
+      onSuccess: () => showToast('Verification code resent.', 'success'),
+      onError: () => showToast('Failed to resend code. Please try again.', 'error'),
     });
   };
 
@@ -25,10 +25,10 @@ export function useEmailVerificationForm() {
     setCodeError('');
     verifyEmail({ email, code }, {
       onSuccess: () => {
-        showToast('Email verified successfully!');
+        showToast('Email verified successfully!', 'success');
         closeEmailVerification();
       },
-      onError: () => showToast('Invalid or expired code. Please try again.'),
+      onError: () => showToast('Invalid or expired code. Please try again.', 'error'),
     });
   };
 

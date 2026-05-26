@@ -13,6 +13,7 @@ export interface SellerProduct {
   stock: number;
   description: string;
   primaryImageUrl: string;
+  imageUrls: string[];
   isAuction: boolean;
   status: ProductStatus;
   createdAt: string;

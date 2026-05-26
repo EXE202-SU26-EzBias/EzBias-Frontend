@@ -1,14 +1,17 @@
 import { create } from 'zustand';
 
+export type ToastType = 'success' | 'error';
+
 interface UiState {
   toastMessage: string;
+  toastType: ToastType;
   toastVisible: boolean;
   isLoginOpen: boolean;
   isRegisterOpen: boolean;
   isForgotPasswordOpen: boolean;
   isEmailVerificationOpen: boolean;
   pendingVerificationEmail: string;
-  showToast: (message: string) => void;
+  showToast: (message: string, type?: ToastType) => void;
   openLogin: () => void;
   closeLogin: () => void;
   openRegister: () => void;
@@ -23,15 +26,16 @@ let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const useUiStore = create<UiState>((set) => ({
   toastMessage: '',
+  toastType: 'success' as ToastType,
   toastVisible: false,
   isLoginOpen: false,
   isRegisterOpen: false,
   isForgotPasswordOpen: false,
   isEmailVerificationOpen: false,
   pendingVerificationEmail: '',
-  showToast: (message) => {
+  showToast: (message, type = 'success') => {
     if (toastTimer) clearTimeout(toastTimer);
-    set({ toastMessage: message, toastVisible: true });
+    set({ toastMessage: message, toastType: type, toastVisible: true });
     toastTimer = setTimeout(() => set({ toastVisible: false }), 1800);
   },
   openLogin: () => set({ isLoginOpen: true, isRegisterOpen: false, isForgotPasswordOpen: false, isEmailVerificationOpen: false }),
