@@ -1,3 +1,4 @@
+import type { AxiosError } from 'axios';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BidHistory from '../../components/auction/BidHistory';
@@ -11,6 +12,7 @@ import { AUCTION_STATUS } from '../../constants/auction';
 import { useCountdown } from '../../features/auction/useCountdown';
 import { useAuctionDetail, useBidHistory, usePlaceBid } from '../../services/auction.service';
 import { useAuthStore } from '../../stores/auth.store';
+import { useUiStore } from '../../stores/ui.store';
 import { formatCurrency } from '../../utils/formatters';
 
 const AuctionDetailPage = () => {
@@ -24,6 +26,7 @@ const AuctionDetailPage = () => {
   const [bidInput, setBidInput] = useState('');
 
   const currentUserId = useAuthStore((s) => s.user?.userId);
+  const showToast = useUiStore((s) => s.showToast);
   const isLive = auction?.status === AUCTION_STATUS.LIVE || auction?.status === AUCTION_STATUS.EXTENDED;
   const userWon = auction?.status === AUCTION_STATUS.ENDED_PENDING_PAYMENT && auction?.winnerId === currentUserId;
 
@@ -34,7 +37,15 @@ const AuctionDetailPage = () => {
   const handlePlaceBid = () => {
     const amount = Number(bidInput);
     if (!amount) return;
-    placeBid(amount, { onSuccess: () => setBidInput('') });
+    placeBid(amount, {
+      onSuccess: () => setBidInput(''),
+      onError: (err) => {
+        const message =
+          (err as AxiosError<{ message?: string }>).response?.data?.message
+          ?? 'Failed to place bid. Please try again.';
+        showToast(message, 'error');
+      },
+    });
   };
 
   return (
@@ -99,7 +110,7 @@ const AuctionDetailPage = () => {
                       pattern="[0-9]*"
                       value={bidInput}
                       onChange={handleBidInputChange}
-                      placeholder={`${formatCurrency(auction.currentBid + 50000)} or higher`}
+                      placeholder={`${formatCurrency(auction.currentBid + 1000)} or higher`}
                       aria-label="Your bid amount in VND"
                       className="h-10 flex-1 rounded-lg border border-[#e6e6e6] px-4 text-sm text-[#121212] placeholder-[#b3b3b3] outline-none focus:border-[#ad93e6] focus:ring-2 focus:ring-[rgba(173,147,230,0.2)]"
                     />
