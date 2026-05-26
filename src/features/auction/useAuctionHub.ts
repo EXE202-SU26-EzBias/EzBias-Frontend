@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { auctionKeys } from '../../services/auction.service';
 import { useAuthStore } from '../../stores/auth.store';
 
-const HUB_URL = `${import.meta.env.VITE_API_BASE_URL ?? ''}/hubs/auction`;
+const HUB_URL = `${(import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')}/hubs/auction`;
 
 export function useAuctionHub(auctionId: number) {
   const queryClient = useQueryClient();
