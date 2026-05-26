@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { http } from '../lib/axios';
-import type { Fandom, FandomProduct } from '../types/fandom';
+import type { Fandom, FandomProduct, FandomProductDetail } from '../types/fandom';
 
 export const fandomKeys = {
   all: ['fandoms'] as const,
   list: () => [...fandomKeys.all, 'list'] as const,
   products: (id?: number) => [...fandomKeys.all, 'products', id ?? 'all'] as const,
+  productDetail: (id: number) => [...fandomKeys.all, 'product', id] as const,
 };
 
 export function useFandoms() {
@@ -24,5 +25,14 @@ export function useFandomProducts(fandomId?: number) {
           params: fandomId ? { fandomId } : undefined,
         })
         .then((r) => r.data),
+  });
+}
+
+export function useCatalogProductDetail(id: number) {
+  return useQuery({
+    queryKey: fandomKeys.productDetail(id),
+    queryFn: () =>
+      http.get<FandomProductDetail>(`/api/catalog/products/${id}`).then((r) => r.data),
+    enabled: id > 0,
   });
 }

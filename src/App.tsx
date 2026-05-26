@@ -7,6 +7,7 @@ import { queryClient } from './lib/queryClient';
 
 const LandingPage = lazy(() => import('./pages/LandingPage/LandingPage'));
 const FandomPage = lazy(() => import('./pages/FandomPage/FandomPage'));
+const ProductDetailPage = lazy(() => import('./pages/FandomPage/ProductDetailPage'));
 const AuctionPage = lazy(() => import('./pages/AuctionPage/AuctionPage'));
 const AuctionDetailPage = lazy(() => import('./pages/AuctionPage/AuctionDetailPage'));
 const AboutPage = lazy(() => import('./pages/AboutUsPage/AboutUsPage'));
@@ -34,6 +35,7 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/fandoms" element={<FandomPage />} />
+              <Route path="/fandoms/:id" element={<ProductDetailPage />} />
               <Route path="/auction" element={<AuctionPage />} />
               <Route path="/auction/:id" element={<AuctionDetailPage />} />
               <Route path="/about" element={<AboutPage />} />
