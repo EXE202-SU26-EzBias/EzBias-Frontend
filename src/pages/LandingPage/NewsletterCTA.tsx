@@ -22,8 +22,8 @@ const NewsletterCTA = () => {
 
   const onSubmit = handleSubmit((data) => {
     subscribe(data.email, {
-      onSuccess: () => { showToast(`Subscribed ${data.email} — see you in the inbox`); reset(); },
-      onError: () => showToast('Subscription failed. Please try again.'),
+      onSuccess: () => { showToast(`Subscribed ${data.email} — see you in the inbox`, 'success'); reset(); },
+      onError: () => showToast('Subscription failed. Please try again.', 'error'),
     });
   });
 

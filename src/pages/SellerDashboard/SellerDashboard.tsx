@@ -57,6 +57,7 @@ export default function SellerDashboard() {
   const authUser = useAuthStore((s) => s.user);
   const toastMessage = useUiStore((s) => s.toastMessage);
   const toastVisible = useUiStore((s) => s.toastVisible);
+  const toastType = useUiStore((s) => s.toastType);
   const navigate = useNavigate();
   const { mutate: logout, isPending: loggingOut } = useLogout();
 
@@ -106,7 +107,7 @@ export default function SellerDashboard() {
           {renderSection(page)}
         </Suspense>
       </main>
-      <Toast message={toastMessage} visible={toastVisible} />
+      <Toast message={toastMessage} visible={toastVisible} type={toastType} />
     </div>
   );
 }

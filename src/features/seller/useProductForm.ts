@@ -53,7 +53,7 @@ export function useCreateProductForm(onSuccess: () => void) {
     const payload: ProductPayload = { ...values };
     mutate(payload, {
       onSuccess,
-      onError: () => showToast('Failed to create listing. Please try again.'),
+      onError: () => showToast('Failed to create listing. Please try again.', 'error'),
     });
   });
 
@@ -92,7 +92,7 @@ export function useUpdateProductForm(product: SellerProduct, onSuccess: () => vo
     const payload: UpdateProductPayload = { ...values };
     mutate({ id: product.id, payload }, {
       onSuccess,
-      onError: () => showToast('Failed to update listing. Please try again.'),
+      onError: () => showToast('Failed to update listing. Please try again.', 'error'),
     });
   });
 

@@ -42,8 +42,8 @@ export function useUserProfileForm() {
 
   const onSubmit = handleSubmit((values) => {
     mutate(values, {
-      onSuccess: () => showToast('Profile updated successfully.'),
-      onError: () => showToast('Failed to update profile. Please try again.'),
+      onSuccess: () => showToast('Profile updated successfully.', 'success'),
+      onError: () => showToast('Failed to update profile. Please try again.', 'error'),
     });
   });
 

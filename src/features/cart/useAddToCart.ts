@@ -21,13 +21,13 @@ export function useAddToCart() {
         { productId, quantity: safeQuantity },
         {
           onSuccess: () => {
-            showToast(`Added "${productName}" to cart`);
+            showToast(`Added "${productName}" to cart`, 'success');
             setAdded(true);
             if (timerRef.current) clearTimeout(timerRef.current);
             timerRef.current = setTimeout(() => setAdded(false), 1500);
           },
           onError: () => {
-            showToast('Failed to add item. Please try again.');
+            showToast('Failed to add item. Please try again.', 'error');
           },
         },
       );

@@ -23,7 +23,7 @@ export function useForgotPasswordForm() {
     setEmailError('');
     forgotPassword({ email }, {
       onSuccess: () => setStep(2),
-      onError: () => showToast('Failed to send reset code. Please try again.'),
+      onError: () => showToast('Failed to send reset code. Please try again.', 'error'),
     });
   };
 
@@ -34,11 +34,11 @@ export function useForgotPasswordForm() {
     if (!valid) return;
     resetPassword({ email, code, newPassword }, {
       onSuccess: () => {
-        showToast('Password reset successfully. Please log in.');
+        showToast('Password reset successfully. Please log in.', 'success');
         closeForgotPassword();
         openLogin();
       },
-      onError: () => showToast('Invalid or expired code. Please try again.'),
+      onError: () => showToast('Invalid or expired code. Please try again.', 'error'),
     });
   };
 

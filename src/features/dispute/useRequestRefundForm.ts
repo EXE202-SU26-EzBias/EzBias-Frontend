@@ -57,11 +57,11 @@ export function useRequestRefundForm({ order, onSuccess }: UseRequestRefundFormO
 
     mutate(payload, {
       onSuccess: () => {
-        showToast('Dispute submitted successfully.');
+        showToast('Dispute submitted successfully.', 'success');
         queryClient.invalidateQueries({ queryKey: orderKeys.all });
         onSuccess();
       },
-      onError: () => showToast('Failed to submit dispute. Please try again.'),
+      onError: () => showToast('Failed to submit dispute. Please try again.', 'error'),
     });
   }, [order, reason, checkedItems, quantities, mutate, queryClient, onSuccess, showToast]);
 
