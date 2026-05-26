@@ -18,7 +18,7 @@ export interface ProductPayload {
   price: number;
   stock: number;
   description: string;
-  image: File;
+  images: File[];
 }
 
 export interface UpdateProductPayload {
@@ -26,7 +26,8 @@ export interface UpdateProductPayload {
   stock: number;
   description: string;
   status: ProductStatus;
-  image?: File;
+  images?: File[];
+  keepImageUrls?: string[];
 }
 
 export function useProducts() {
@@ -57,7 +58,7 @@ export function useCreateProduct() {
       form.append('price', String(payload.price));
       form.append('stock', String(payload.stock));
       form.append('description', payload.description);
-      form.append('image', payload.image);
+      payload.images.forEach((img) => form.append('images', img));
       return http.post<SellerProduct>('/api/products', form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       }).then((r) => r.data);
@@ -77,7 +78,13 @@ export function useUpdateProduct() {
       form.append('stock', String(payload.stock));
       form.append('description', payload.description);
       form.append('status', String(payload.status));
-      if (payload.image) form.append('image', payload.image);
+      payload.images?.forEach((img) => form.append('images', img));
+      // Always send keepImageUrls when defined so BE knows which existing images to retain.
+      // We send a dedicated flag to distinguish "keep all" (undefined) from "keep none" ([]).
+      if (payload.keepImageUrls !== undefined) {
+        form.append('replaceImages', 'true');
+        payload.keepImageUrls.forEach((url) => form.append('keepImageUrls', url));
+      }
       return http.put<SellerProduct>(`/api/products/${id}`, form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       }).then((r) => r.data);

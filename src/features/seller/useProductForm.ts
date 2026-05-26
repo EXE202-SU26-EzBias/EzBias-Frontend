@@ -14,6 +14,16 @@ import type { SellerProduct } from '../../types/seller';
 
 // ─── Create ──────────────────────────────────────────────────────────────────
 
+const fileSchema = z
+  .instanceof(File)
+  .refine((f) => f.size <= 5 * 1024 * 1024, 'Each image must be under 5 MB')
+  .refine(
+    (f) => ['image/jpeg', 'image/png', 'image/webp'].includes(f.type),
+    'Only JPG, PNG, or WebP allowed',
+  );
+
+// ─── Create ──────────────────────────────────────────────────────────────────
+
 const createSchema = z.object({
   fandomId: z.string().min(1, 'Required'),
   artist: z.string().min(1, 'Required'),
@@ -23,14 +33,10 @@ const createSchema = z.object({
   price: z.coerce.number().refine((v) => v > 0, 'Must be greater than 0'),
   stock: z.coerce.number().refine((v) => v >= 0, 'Cannot be negative'),
   description: z.string(),
-  image: z
-    .instanceof(File, { message: 'Product image is required' })
-    .refine((f) => f.size > 0, 'Product image is required')
-    .refine((f) => f.size <= 5 * 1024 * 1024, 'Image must be under 5 MB')
-    .refine(
-      (f) => ['image/jpeg', 'image/png', 'image/webp'].includes(f.type),
-      'Only JPG, PNG, or WebP allowed',
-    ),
+  images: z
+    .array(fileSchema)
+    .min(1, 'At least one image is required')
+    .max(8, 'Maximum 8 images allowed'),
 });
 
 export type CreateFormValues = z.infer<typeof createSchema>;
@@ -52,13 +58,14 @@ export function useCreateProductForm(onSuccess: () => void) {
       price: 0,
       stock: 0,
       description: '',
+      images: [],
     },
   });
 
-  const imageFile = watch('image');
+  const imageFiles = watch('images');
 
   const onSubmit = handleSubmit((values) => {
-    const payload: ProductPayload = { ...values, image: values.image };
+    const payload: ProductPayload = { ...values, images: values.images };
     mutate(payload, {
       onSuccess: () => {
         showToast('Listing created successfully.', 'success');
@@ -68,7 +75,7 @@ export function useCreateProductForm(onSuccess: () => void) {
     });
   });
 
-  return { register, onSubmit, errors, isPending, fandoms, isFandomsLoading, setValue, imageFile };
+  return { register, onSubmit, errors, isPending, fandoms, isFandomsLoading, setValue, imageFiles };
 }
 
 // ─── Update ──────────────────────────────────────────────────────────────────
@@ -78,14 +85,17 @@ const updateSchema = z.object({
   stock: z.coerce.number().refine((v) => v >= 0, 'Cannot be negative'),
   description: z.string(),
   status: z.coerce.number().refine((v): v is ProductStatus => [1, 2, 3].includes(v), 'Invalid status'),
-  image: z
-    .instanceof(File)
-    .refine((f) => f.size <= 5 * 1024 * 1024, 'Image must be under 5 MB')
-    .refine(
-      (f) => ['image/jpeg', 'image/png', 'image/webp'].includes(f.type),
-      'Only JPG, PNG, or WebP allowed',
-    )
-    .optional(),
+  images: z.array(fileSchema).max(8, 'Maximum 8 images allowed').optional(),
+  keepImageUrls: z.array(z.string()).optional(),
+}).superRefine((data, ctx) => {
+  const total = (data.keepImageUrls?.length ?? 0) + (data.images?.length ?? 0);
+  if (total === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'At least one image is required',
+      path: ['images'],
+    });
+  }
 });
 
 export type UpdateFormValues = z.infer<typeof updateSchema>;
@@ -102,10 +112,17 @@ export function useUpdateProductForm(product: SellerProduct, onSuccess: () => vo
       stock: product.stock,
       description: product.description,
       status: product.status,
+      images: [],
+      keepImageUrls: product.imageUrls?.length
+        ? product.imageUrls
+        : product.primaryImageUrl
+          ? [product.primaryImageUrl]
+          : [],
     },
   });
 
-  const imageFile = watch('image');
+  const imageFiles = watch('images');
+  const keepImageUrls = watch('keepImageUrls');
 
   const onSubmit = handleSubmit((values) => {
     const payload: UpdateProductPayload = {
@@ -113,7 +130,8 @@ export function useUpdateProductForm(product: SellerProduct, onSuccess: () => vo
       stock: values.stock,
       description: values.description,
       status: values.status,
-      image: values.image,
+      images: values.images,
+      keepImageUrls: values.keepImageUrls,
     };
     mutate({ id: product.id, payload }, {
       onSuccess: () => {
@@ -124,5 +142,5 @@ export function useUpdateProductForm(product: SellerProduct, onSuccess: () => vo
     });
   });
 
-  return { register, onSubmit, errors, isPending, setValue, imageFile };
+  return { register, onSubmit, errors, isPending, setValue, imageFiles, keepImageUrls };
 }
