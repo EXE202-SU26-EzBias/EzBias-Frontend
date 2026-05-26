@@ -23,7 +23,14 @@ const createSchema = z.object({
   price: z.coerce.number().refine((v) => v > 0, 'Must be greater than 0'),
   stock: z.coerce.number().refine((v) => v >= 0, 'Cannot be negative'),
   description: z.string(),
-  primaryImageUrl: z.string().min(1, 'Required'),
+  image: z
+    .instanceof(File, { message: 'Product image is required' })
+    .refine((f) => f.size > 0, 'Product image is required')
+    .refine((f) => f.size <= 5 * 1024 * 1024, 'Image must be under 5 MB')
+    .refine(
+      (f) => ['image/jpeg', 'image/png', 'image/webp'].includes(f.type),
+      'Only JPG, PNG, or WebP allowed',
+    ),
 });
 
 export type CreateFormValues = z.infer<typeof createSchema>;
@@ -33,7 +40,7 @@ export function useCreateProductForm(onSuccess: () => void) {
   const { mutate, isPending } = useCreateProduct();
   const showToast = useUiStore((s) => s.showToast);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<CreateFormValues>({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CreateFormValues>({
     resolver: zodResolver(createSchema) as Resolver<CreateFormValues>,
     mode: 'onChange',
     defaultValues: {
@@ -45,19 +52,23 @@ export function useCreateProductForm(onSuccess: () => void) {
       price: 0,
       stock: 0,
       description: '',
-      primaryImageUrl: '',
     },
   });
 
+  const imageFile = watch('image');
+
   const onSubmit = handleSubmit((values) => {
-    const payload: ProductPayload = { ...values };
+    const payload: ProductPayload = { ...values, image: values.image };
     mutate(payload, {
-      onSuccess,
+      onSuccess: () => {
+        showToast('Listing created successfully.', 'success');
+        onSuccess();
+      },
       onError: () => showToast('Failed to create listing. Please try again.', 'error'),
     });
   });
 
-  return { register, onSubmit, errors, isPending, fandoms, isFandomsLoading };
+  return { register, onSubmit, errors, isPending, fandoms, isFandomsLoading, setValue, imageFile };
 }
 
 // ─── Update ──────────────────────────────────────────────────────────────────
@@ -67,7 +78,14 @@ const updateSchema = z.object({
   stock: z.coerce.number().refine((v) => v >= 0, 'Cannot be negative'),
   description: z.string(),
   status: z.coerce.number().refine((v): v is ProductStatus => [1, 2, 3].includes(v), 'Invalid status'),
-  primaryImageUrl: z.string().min(1, 'Required'),
+  image: z
+    .instanceof(File)
+    .refine((f) => f.size <= 5 * 1024 * 1024, 'Image must be under 5 MB')
+    .refine(
+      (f) => ['image/jpeg', 'image/png', 'image/webp'].includes(f.type),
+      'Only JPG, PNG, or WebP allowed',
+    )
+    .optional(),
 });
 
 export type UpdateFormValues = z.infer<typeof updateSchema>;
@@ -76,7 +94,7 @@ export function useUpdateProductForm(product: SellerProduct, onSuccess: () => vo
   const { mutate, isPending } = useUpdateProduct();
   const showToast = useUiStore((s) => s.showToast);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<UpdateFormValues>({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<UpdateFormValues>({
     resolver: zodResolver(updateSchema) as Resolver<UpdateFormValues>,
     mode: 'onChange',
     defaultValues: {
@@ -84,17 +102,27 @@ export function useUpdateProductForm(product: SellerProduct, onSuccess: () => vo
       stock: product.stock,
       description: product.description,
       status: product.status,
-      primaryImageUrl: product.primaryImageUrl,
     },
   });
 
+  const imageFile = watch('image');
+
   const onSubmit = handleSubmit((values) => {
-    const payload: UpdateProductPayload = { ...values };
+    const payload: UpdateProductPayload = {
+      price: values.price,
+      stock: values.stock,
+      description: values.description,
+      status: values.status,
+      image: values.image,
+    };
     mutate({ id: product.id, payload }, {
-      onSuccess,
+      onSuccess: () => {
+        showToast('Listing updated successfully.', 'success');
+        onSuccess();
+      },
       onError: () => showToast('Failed to update listing. Please try again.', 'error'),
     });
   });
 
-  return { register, onSubmit, errors, isPending };
+  return { register, onSubmit, errors, isPending, setValue, imageFile };
 }

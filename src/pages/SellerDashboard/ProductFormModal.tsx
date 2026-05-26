@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { PRODUCT_CONDITION_LABELS, PRODUCT_STATUS_LABELS, getProductConditionLabel } from '../../constants/product';
 import { useCreateProductForm, useUpdateProductForm } from '../../features/seller/useProductForm';
 import type { SellerProduct } from '../../types/seller';
@@ -101,10 +101,80 @@ function FormFooter({ onClose, isPending, label }: { onClose: () => void; isPend
   );
 }
 
-// ─── Create form ──────────────────────────────────────────────────────────────
+// ─── Image picker ─────────────────────────────────────────────────────────────
+
+function ImagePicker({
+  value,
+  currentUrl,
+  onChange,
+  error,
+  label = 'Product Image',
+}: {
+  value: File | undefined;
+  currentUrl?: string;
+  onChange: (file: File) => void;
+  error?: { message?: string };
+  label?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  // new file preview takes priority over existing URL
+  const previewUrl = value ? URL.createObjectURL(value) : currentUrl ?? null;
+  const hasImage = Boolean(previewUrl);
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[11px] font-bold uppercase tracking-[0.5px] text-[#737373]">{label}</span>
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label="Upload product image"
+        onClick={() => inputRef.current?.click()}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click(); }}
+        className={[
+          'relative flex h-36 w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed transition',
+          error?.message
+            ? 'border-[#ef4343] bg-red-50'
+            : 'border-[#e6e6e6] bg-[#fafafa] hover:border-[#ad93e6] hover:bg-[rgba(173,147,230,0.04)]',
+        ].join(' ')}
+      >
+        {hasImage ? (
+          <>
+            <img src={previewUrl!} alt="Preview" className="h-full w-full object-cover" />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition hover:opacity-100">
+              <span className="text-[12px] font-semibold text-white">Change image</span>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-[#b3b3b3]">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="m21 15-5-5L5 21" />
+            </svg>
+            <span className="text-[12px]">Click to upload · JPG, PNG, WebP · max 5 MB</span>
+          </div>
+        )}
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onChange(file);
+          e.target.value = '';
+        }}
+      />
+      {error?.message && <span className="text-[11px] text-[#ef4343]">{error.message}</span>}
+    </div>
+  );
+}
+
+
 
 function CreateProductModal({ onClose }: { onClose: () => void }) {
-  const { register, onSubmit, errors, isPending, fandoms, isFandomsLoading } = useCreateProductForm(onClose);
+  const { register, onSubmit, errors, isPending, fandoms, isFandomsLoading, setValue, imageFile } = useCreateProductForm(onClose);
 
   return (
     <ModalShell title="New listing" onClose={onClose}>
@@ -151,9 +221,11 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
               </select>
             </Field>
 
-            <Field label="Image URL" error={errors.primaryImageUrl}>
-              <input type="text" placeholder="https://…" className={inputCls} {...register('primaryImageUrl')} />
-            </Field>
+            <ImagePicker
+              value={imageFile}
+              onChange={(file) => setValue('image', file, { shouldValidate: true })}
+              error={errors.image}
+            />
 
             <Field label="Description" error={errors.description}>
               <textarea
@@ -174,7 +246,10 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
 // ─── Edit form ────────────────────────────────────────────────────────────────
 
 function EditProductModal({ product, onClose }: { product: SellerProduct; onClose: () => void }) {
-  const { register, onSubmit, errors, isPending } = useUpdateProductForm(product, onClose);
+  const { register, onSubmit, errors, isPending, setValue, imageFile } = useUpdateProductForm(product, onClose);
+
+  // Build preview: new file takes priority, fall back to existing URL
+  const previewSrc = imageFile ? URL.createObjectURL(imageFile) : product.primaryImageUrl;
 
   return (
     <ModalShell title="Edit listing" onClose={onClose}>
@@ -210,9 +285,13 @@ function EditProductModal({ product, onClose }: { product: SellerProduct; onClos
               </select>
             </Field>
 
-            <Field label="Image URL" error={errors.primaryImageUrl}>
-              <input type="text" placeholder="https://…" className={inputCls} {...register('primaryImageUrl')} />
-            </Field>
+            <ImagePicker
+              value={imageFile}
+              currentUrl={previewSrc}
+              onChange={(file) => setValue('image', file, { shouldValidate: true })}
+              error={errors.image}
+              label="Product Image"
+            />
 
             <Field label="Description" error={errors.description}>
               <textarea
