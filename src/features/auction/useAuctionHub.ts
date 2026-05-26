@@ -24,8 +24,9 @@ export function useAuctionHub(auctionId: number) {
       .withUrl(HUB_URL, {
         // Pass JWT if available so the hub can identify the user (optional for public hub)
         accessTokenFactory: () => accessToken ?? '',
-        skipNegotiation: false,
-        transport: signalR.HttpTransportType.WebSockets,
+        // Do NOT lock to WebSockets — let SignalR negotiate the best transport.
+        // Render (and many reverse proxies) may not support WebSocket upgrades,
+        // so falling back to Server-Sent Events or Long Polling is required.
       })
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Warning)
