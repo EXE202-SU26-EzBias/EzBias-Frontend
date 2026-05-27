@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import type { AxiosError } from 'axios';
 import { DISPUTE_STATUS, getDisputeStatusColors, getDisputeStatusLabel } from '../../../constants/dispute';
 import {
   useApproveDispute,
@@ -71,7 +72,10 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
       { disputeId: dispute.id, payload: { adminNote, approvedItems } },
       {
         onSuccess: () => showToast('Dispute approved.', 'success'),
-        onError: () => showToast('Action failed. Please try again.', 'error'),
+        onError: (err) => {
+          const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Action failed. Please try again.';
+          showToast(message, 'error');
+        },
       },
     );
   }, [approve, dispute.id, adminNote, approvedQtys, itemNotes, items, showToast]);
@@ -83,7 +87,10 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
       { disputeId: dispute.id, payload: { reason: rejectReason.trim() } },
       {
         onSuccess: () => showToast('Dispute rejected.', 'success'),
-        onError: () => showToast('Action failed. Please try again.', 'error'),
+        onError: (err) => {
+          const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Action failed. Please try again.';
+          showToast(message, 'error');
+        },
       },
     );
   }, [reject, dispute.id, rejectReason, showToast]);
@@ -92,7 +99,10 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
     if (!window.confirm('Process refund? Payment will be returned to the buyer.')) return;
     refund(dispute.id, {
       onSuccess: () => showToast('Refund processed.', 'success'),
-      onError: () => showToast('Action failed. Please try again.', 'error'),
+      onError: (err) => {
+        const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Action failed. Please try again.';
+        showToast(message, 'error');
+      },
     });
   }, [refund, dispute.id, showToast]);
 

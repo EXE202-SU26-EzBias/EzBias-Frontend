@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { AxiosError } from 'axios';
 import { useForgotPassword, useResetPassword } from '../../services/auth.service';
 import { useUiStore } from '../../stores/ui.store';
 
@@ -23,7 +24,10 @@ export function useForgotPasswordForm() {
     setEmailError('');
     forgotPassword({ email }, {
       onSuccess: () => setStep(2),
-      onError: () => showToast('Failed to send reset code. Please try again.', 'error'),
+      onError: (err) => {
+        const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to send reset code. Please try again.';
+        showToast(message, 'error');
+      },
     });
   };
 
@@ -38,7 +42,10 @@ export function useForgotPasswordForm() {
         closeForgotPassword();
         openLogin();
       },
-      onError: () => showToast('Invalid or expired code. Please try again.', 'error'),
+      onError: (err) => {
+        const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Invalid or expired code. Please try again.';
+        showToast(message, 'error');
+      },
     });
   };
 

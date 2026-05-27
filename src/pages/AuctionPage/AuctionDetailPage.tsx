@@ -32,7 +32,12 @@ const AuctionDetailPage = () => {
   const currentUserId = useAuthStore((s) => s.user?.userId);
   const showToast = useUiStore((s) => s.showToast);
   const isLive = auction?.status === AUCTION_STATUS.LIVE || auction?.status === AUCTION_STATUS.EXTENDED;
-  const userWon = auction?.status === AUCTION_STATUS.ENDED_PENDING_PAYMENT && auction?.winnerId === currentUserId;
+  const userWon = Boolean(
+    auction?.status === AUCTION_STATUS.ENDED_PENDING_PAYMENT &&
+    currentUserId != null &&
+    auction?.winnerId != null &&
+    auction.winnerId === currentUserId
+  );
 
   const handleBidInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBidInput(e.target.value.replace(/\D/g, ''));

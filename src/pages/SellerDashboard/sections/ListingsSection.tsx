@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import type { AxiosError } from 'axios';
 import { useDeleteProduct, useProducts } from '../../../services/product.service';
 import { useUiStore } from '../../../stores/ui.store';
 import type { SellerProduct } from '../../../types/seller';
@@ -29,7 +30,10 @@ const ListingsSection = React.memo(function ListingsSection() {
     (id: number) =>
       deleteMutation.mutate(id, {
         onSuccess: () => showToast('Listing deleted.', 'success'),
-        onError: () => showToast('Failed to delete listing. Please try again.', 'error'),
+        onError: (err) => {
+          const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to delete listing. Please try again.';
+          showToast(message, 'error');
+        },
       }),
     [deleteMutation, showToast],
   );

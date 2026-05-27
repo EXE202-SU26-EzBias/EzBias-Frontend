@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { AxiosError } from 'axios';
 import { useRequestEmailVerification, useVerifyEmail } from '../../services/auth.service';
 import { useUiStore } from '../../stores/ui.store';
 
@@ -16,7 +17,10 @@ export function useEmailVerificationForm() {
   const resendCode = () => {
     requestVerification({ email }, {
       onSuccess: () => showToast('Verification code resent.', 'success'),
-      onError: () => showToast('Failed to resend code. Please try again.', 'error'),
+      onError: (err) => {
+        const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to resend code. Please try again.';
+        showToast(message, 'error');
+      },
     });
   };
 
@@ -28,7 +32,10 @@ export function useEmailVerificationForm() {
         showToast('Email verified successfully!', 'success');
         closeEmailVerification();
       },
-      onError: () => showToast('Invalid or expired code. Please try again.', 'error'),
+      onError: (err) => {
+        const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Invalid or expired code. Please try again.';
+        showToast(message, 'error');
+      },
     });
   };
 

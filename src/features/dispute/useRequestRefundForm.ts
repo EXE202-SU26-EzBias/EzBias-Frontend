@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import type { AxiosError } from 'axios';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCreateDispute } from '../../services/dispute.service';
 import { orderKeys } from '../../services/order.service';
@@ -61,7 +62,10 @@ export function useRequestRefundForm({ order, onSuccess }: UseRequestRefundFormO
         queryClient.invalidateQueries({ queryKey: orderKeys.all });
         onSuccess();
       },
-      onError: () => showToast('Failed to submit dispute. Please try again.', 'error'),
+      onError: (err) => {
+        const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to submit dispute. Please try again.';
+        showToast(message, 'error');
+      },
     });
   }, [order, reason, checkedItems, quantities, mutate, queryClient, onSuccess, showToast]);
 

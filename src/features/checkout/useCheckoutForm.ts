@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import type { AxiosError } from 'axios';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -41,8 +42,9 @@ export function useCheckoutForm() {
       queryClient.invalidateQueries({ queryKey: cartKeys.detail() });
       navigate(`/payment/${payment.paymentId}`);
     },
-    onError: () => {
-      showToast('Failed to place order. Please try again.', 'error');
+    onError: (err) => {
+      const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to place order. Please try again.';
+      showToast(message, 'error');
     },
   });
 

@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { AxiosError } from 'axios';
 import { z } from 'zod';
 import { useUiStore } from '../../stores/ui.store';
 import { useSubscribeNewsletter } from '../../services/newsletter.service';
@@ -23,7 +24,10 @@ const NewsletterCTA = () => {
   const onSubmit = handleSubmit((data) => {
     subscribe(data.email, {
       onSuccess: () => { showToast(`Subscribed ${data.email} — see you in the inbox`, 'success'); reset(); },
-      onError: () => showToast('Subscription failed. Please try again.', 'error'),
+      onError: (err) => {
+        const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Subscription failed. Please try again.';
+        showToast(message, 'error');
+      },
     });
   });
 

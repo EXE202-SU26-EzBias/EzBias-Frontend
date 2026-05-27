@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import type { AxiosError } from 'axios';
 import {
   useCancelSellerAuction,
   usePublishSellerAuction,
@@ -49,7 +50,11 @@ const AuctionsSection = React.memo(function AuctionsSection() {
       setPendingId(id);
       publishMutate(id, {
         onSuccess: () => setPendingId(null),
-        onError: () => { setPendingId(null); showToast('Failed to publish auction.', 'error'); },
+        onError: (err) => {
+          setPendingId(null);
+          const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to publish auction.';
+          showToast(message, 'error');
+        },
       });
     },
     [publishMutate, showToast],
@@ -60,7 +65,11 @@ const AuctionsSection = React.memo(function AuctionsSection() {
       setPendingId(id);
       cancelMutate(id, {
         onSuccess: () => setPendingId(null),
-        onError: () => { setPendingId(null); showToast('Failed to cancel auction.', 'error'); },
+        onError: (err) => {
+          setPendingId(null);
+          const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to cancel auction.';
+          showToast(message, 'error');
+        },
       });
     },
     [cancelMutate, showToast],
@@ -71,7 +80,11 @@ const AuctionsSection = React.memo(function AuctionsSection() {
       setPendingId(id);
       relistMutate(id, {
         onSuccess: () => setPendingId(null),
-        onError: () => { setPendingId(null); showToast('Failed to relist auction.', 'error'); },
+        onError: (err) => {
+          setPendingId(null);
+          const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to relist auction.';
+          showToast(message, 'error');
+        },
       });
     },
     [relistMutate, showToast],
