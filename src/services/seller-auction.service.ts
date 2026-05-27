@@ -63,11 +63,21 @@ export function useCancelSellerAuction() {
   });
 }
 
+export interface RelistSellerAuctionPayload {
+  floorPrice: number;
+  reservePrice: number;
+  endsAt: string;
+  isUrgent: boolean;
+  hasProofImage: boolean;
+  extensionSeconds: number;
+  triggerBeforeEnd: number;
+}
+
 export function useRelistSellerAuction() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (auctionId: number) =>
-      http.post<SellerAuction>(`/api/seller/auctions/${auctionId}/relist`).then((r) => r.data),
+    mutationFn: ({ auctionId, payload }: { auctionId: number; payload: RelistSellerAuctionPayload }) =>
+      http.post<SellerAuction>(`/api/seller/auctions/${auctionId}/relist`, payload).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sellerAuctionKeys.all });
     },
