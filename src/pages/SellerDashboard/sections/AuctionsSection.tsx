@@ -3,12 +3,12 @@ import type { AxiosError } from 'axios';
 import {
   useCancelSellerAuction,
   usePublishSellerAuction,
-  useRelistSellerAuction,
   useSellerAuctions,
 } from '../../../services/seller-auction.service';
 import { useUiStore } from '../../../stores/ui.store';
-import type { SellerAuctionStatus } from '../../../types/seller';
+import type { SellerAuction, SellerAuctionStatus } from '../../../types/seller';
 import AuctionFormModal from '../AuctionFormModal';
+import RelistAuctionModal from '../RelistAuctionModal';
 import AuctionsTable from '../AuctionsTable';
 import { Icons } from '../sellerIcons';
 import SellerTopbar from '../SellerTopbar';
@@ -31,11 +31,11 @@ const AuctionsSection = React.memo(function AuctionsSection() {
   const { data: auctions = [], isLoading, isError } = useSellerAuctions();
   const { mutate: publishMutate, isPending: publishPending } = usePublishSellerAuction();
   const { mutate: cancelMutate,  isPending: cancelPending  } = useCancelSellerAuction();
-  const { mutate: relistMutate,  isPending: relistPending  } = useRelistSellerAuction();
   const showToast = useUiStore((s) => s.showToast);
 
   const [tab, setTab] = useState<FilterTab>('all');
   const [showModal, setShowModal] = useState(false);
+  const [relistTarget, setRelistTarget] = useState<SellerAuction | null>(null);
   const [pendingId, setPendingId] = useState<number | null>(null);
 
   const filtered = useMemo(
@@ -77,20 +77,13 @@ const AuctionsSection = React.memo(function AuctionsSection() {
 
   const handleRelist = useCallback(
     (id: number) => {
-      setPendingId(id);
-      relistMutate(id, {
-        onSuccess: () => setPendingId(null),
-        onError: (err) => {
-          setPendingId(null);
-          const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to relist auction.';
-          showToast(message, 'error');
-        },
-      });
+      const auction = auctions.find((a) => a.auctionId === id);
+      if (auction) setRelistTarget(auction);
     },
-    [relistMutate, showToast],
+    [auctions],
   );
 
-  const isAnyPending = publishPending || cancelPending || relistPending;
+  const isAnyPending = publishPending || cancelPending;
 
   return (
     <div>
@@ -146,6 +139,12 @@ const AuctionsSection = React.memo(function AuctionsSection() {
       </div>
 
       {showModal && <AuctionFormModal onClose={handleCloseModal} />}
+      {relistTarget && (
+        <RelistAuctionModal
+          auction={relistTarget}
+          onClose={() => setRelistTarget(null)}
+        />
+      )}
     </div>
   );
 });
