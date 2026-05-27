@@ -41,6 +41,9 @@ export interface BidEntry {
 }
 
 export interface AuctionDetail extends Auction {
+  reservePrice?: number | null;
+  extensionSeconds: number;
+  triggerBeforeEnd: number;
   bids?: BidEntry[];
   winnerId?: number | null;
 }

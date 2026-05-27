@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import type { AxiosError } from 'axios';
 import { getOrderStatusColors, getOrderStatusLabel } from '../../constants/order';
+import { useCreateOrderPayment } from '../../services/payment.service';
+import { useUiStore } from '../../stores/ui.store';
 import type { SellerOrder } from '../../types/seller';
 import { formatCurrency } from '../../utils/formatters';
 import { parseAddressSnap } from '../../utils/parseAddressSnap';
@@ -73,6 +76,34 @@ function SellingModeAction({ order, onShip }: { order: SellerOrder; onShip?: (id
   return null;
 }
 
+function PayNowButton({ orderId }: { orderId: number }) {
+  const navigate = useNavigate();
+  const showToast = useUiStore((s) => s.showToast);
+  const { mutate: createPayment, isPending } = useCreateOrderPayment();
+
+  const handlePay = () => {
+    createPayment(orderId, {
+      onSuccess: (payment) => navigate(`/payment/${payment.paymentId}`),
+      onError: (err) => {
+        const message = (err as AxiosError<{ message?: string }>).response?.data?.message
+          ?? 'Failed to initiate payment. Please try again.';
+        showToast(message, 'error');
+      },
+    });
+  };
+
+  return (
+    <button
+      type="button"
+      disabled={isPending}
+      onClick={handlePay}
+      className="inline-flex h-7 items-center rounded-lg border border-amber-300 bg-amber-50 px-3 text-[12px] font-semibold text-amber-700 transition-colors hover:bg-amber-100 disabled:opacity-50"
+    >
+      {isPending ? '…' : 'Pay Now'}
+    </button>
+  );
+}
+
 function BuyingModeAction({
   order,
   confirmingId,
@@ -93,6 +124,10 @@ function BuyingModeAction({
         Pay Now
       </Link>
     );
+  }
+  // Auction order: payment not yet created — create it on click
+  if (order.status === 1 && !order.paymentId) {
+    return <PayNowButton orderId={order.id} />;
   }
   if (order.status === 4) {
     const confirming = confirmingId === order.id;

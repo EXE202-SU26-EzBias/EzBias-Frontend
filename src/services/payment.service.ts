@@ -21,6 +21,17 @@ export function useCreatePayment() {
   });
 }
 
+export function useCreateOrderPayment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (orderId: number) =>
+      http.post<PaymentResponse>('/api/payments', { orderIds: [orderId] }).then((r) => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: paymentKeys.list() });
+    },
+  });
+}
+
 export function usePaymentDetail(paymentId: number, options?: { polling?: boolean }) {
   return useQuery({
     queryKey: paymentKeys.detail(paymentId),
