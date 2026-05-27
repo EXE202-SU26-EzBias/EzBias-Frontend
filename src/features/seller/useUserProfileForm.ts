@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { AxiosError } from 'axios';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useUpdateUserProfile, useUserProfile } from '../../services/user.service';
@@ -43,7 +44,10 @@ export function useUserProfileForm() {
   const onSubmit = handleSubmit((values) => {
     mutate(values, {
       onSuccess: () => showToast('Profile updated successfully.', 'success'),
-      onError: () => showToast('Failed to update profile. Please try again.', 'error'),
+      onError: (err) => {
+        const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to update profile. Please try again.';
+        showToast(message, 'error');
+      },
     });
   });
 

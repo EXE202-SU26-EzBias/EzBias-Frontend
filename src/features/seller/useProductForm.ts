@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { AxiosError } from 'axios';
 import { useForm, type Resolver } from 'react-hook-form';
 import { z } from 'zod';
 import type { ProductStatus } from '../../constants/product';
@@ -71,7 +72,10 @@ export function useCreateProductForm(onSuccess: () => void) {
         showToast('Listing created successfully.', 'success');
         onSuccess();
       },
-      onError: () => showToast('Failed to create listing. Please try again.', 'error'),
+      onError: (err) => {
+        const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to create listing. Please try again.';
+        showToast(message, 'error');
+      },
     });
   });
 
@@ -138,7 +142,10 @@ export function useUpdateProductForm(product: SellerProduct, onSuccess: () => vo
         showToast('Listing updated successfully.', 'success');
         onSuccess();
       },
-      onError: () => showToast('Failed to update listing. Please try again.', 'error'),
+      onError: (err) => {
+        const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to update listing. Please try again.';
+        showToast(message, 'error');
+      },
     });
   });
 

@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import type { AxiosError } from 'axios';
 import { useConfirmOrder, useOrders } from '../../../services/order.service';
 import { useSellerOrders, useShipSellerOrder } from '../../../services/seller-order.service';
 import { useUiStore } from '../../../stores/ui.store';
@@ -27,7 +28,10 @@ const OrdersSection = React.memo(function OrdersSection() {
       { orderId: shipTarget, carrier: carrier.trim() },
       {
         onSuccess: () => { setShipTarget(null); setCarrier(''); },
-        onError: () => showToast('Failed to mark as shipped.', 'error'),
+        onError: (err) => {
+          const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to mark as shipped.';
+          showToast(message, 'error');
+        },
       },
     );
   }, [shipTarget, carrier, shipOrder, showToast]);
@@ -35,7 +39,10 @@ const OrdersSection = React.memo(function OrdersSection() {
   const handleConfirm = useCallback(
     (orderId: number) => {
       confirmOrder(orderId, {
-        onError: () => showToast('Failed to confirm order.', 'error'),
+        onError: (err) => {
+          const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to confirm order.';
+          showToast(message, 'error');
+        },
       });
     },
     [confirmOrder, showToast],

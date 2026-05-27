@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { AxiosError } from 'axios';
 import { useForm, type Resolver } from 'react-hook-form';
 import { z } from 'zod';
 import { useCreateSellerAuction } from '../../services/seller-auction.service';
@@ -50,7 +51,10 @@ export function useCreateAuctionForm({ products, isProductsLoading, onSuccess }:
       { ...values, endsAt: new Date(values.endsAt).toISOString() },
       {
         onSuccess,
-        onError: () => showToast('Failed to create auction. Please try again.', 'error'),
+        onError: (err) => {
+          const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Failed to create auction. Please try again.';
+          showToast(message, 'error');
+        },
       },
     );
   });

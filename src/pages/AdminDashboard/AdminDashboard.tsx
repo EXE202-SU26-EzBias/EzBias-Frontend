@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from 'react';
+import type { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Toast from '../../components/ui/Toast';
 import { useLogout } from '../../services/auth.service';
@@ -103,7 +104,10 @@ export default function AdminDashboard() {
         onLogout={() =>
           logout(undefined, {
             onSettled: () => navigate('/'),
-            onError: () => showToast('Sign out failed. Please try again.', 'error'),
+            onError: (err) => {
+              const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Sign out failed. Please try again.';
+              showToast(message, 'error');
+            },
           })
         }
         loggingOut={loggingOut}
