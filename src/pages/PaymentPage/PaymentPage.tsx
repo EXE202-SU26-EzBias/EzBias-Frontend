@@ -3,14 +3,12 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import SepayQRCard from '../../components/payment/SepayQRCard';
 import PaymentStatusBadge from '../../components/payment/PaymentStatusBadge';
 import PageLayout from '../../components/layout/PageLayout';
-import { useManualConfirmPayment, usePaymentDetail } from '../../services/payment.service';
-import { useUiStore } from '../../stores/ui.store';
+import { usePaymentDetail } from '../../services/payment.service';
 
 const PaymentPage = () => {
   const { paymentId: paymentIdParam } = useParams<{ paymentId: string }>();
   const paymentId = Number(paymentIdParam);
   const navigate = useNavigate();
-  const showToast = useUiStore((s) => s.showToast);
 
   useEffect(() => {
     if (!Number.isFinite(paymentId) || paymentId <= 0) {
@@ -19,7 +17,6 @@ const PaymentPage = () => {
   }, [paymentId, navigate]);
 
   const { data, isLoading, isError } = usePaymentDetail(paymentId, { polling: true });
-  const { mutate: manualConfirm, isPending: isConfirming } = useManualConfirmPayment();
 
   const status = data?.status;
   const isPaid = status === 'Paid';
@@ -35,13 +32,6 @@ const PaymentPage = () => {
       }
     }
   }, [isPaid, data, navigate]);
-
-  const handleManualConfirm = () => {
-    manualConfirm(paymentId, {
-      onSuccess: () => showToast('Payment confirmed manually.', 'success'),
-      onError: () => showToast('Could not confirm payment. Please contact support.', 'error'),
-    });
-  };
 
   if (isLoading) {
     return (
@@ -110,21 +100,13 @@ const PaymentPage = () => {
           </p>
         </div>
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+        <div className="mt-8 flex justify-center">
           <Link
             to="/checkout"
             className="rounded-xl border border-[#e6e6e6] px-6 py-2.5 text-center text-[13px] font-medium text-[#737373] transition-colors hover:border-[#c8b8f4] hover:text-[#9b84ec]"
           >
             Cancel
           </Link>
-          <button
-            type="button"
-            onClick={handleManualConfirm}
-            disabled={isConfirming}
-            className="rounded-xl bg-[#f5f3ff] px-6 py-2.5 text-[13px] font-semibold text-[#9b84ec] transition-all hover:bg-[rgba(155,132,236,0.15)] disabled:opacity-50"
-          >
-            {isConfirming ? 'Confirming…' : 'I already paid'}
-          </button>
         </div>
       </div>
     </PageLayout>
