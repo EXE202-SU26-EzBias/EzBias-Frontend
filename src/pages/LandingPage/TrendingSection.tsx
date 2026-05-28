@@ -1,15 +1,20 @@
 import type { RefObject } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../../components/card/ProductCard';
-import type { FandomProduct } from '../../types/fandom';
+import { useFandomProducts } from '../../services/fandom.service';
 
 interface TrendingSectionProps {
   sectionRef: RefObject<HTMLElement | null>;
 }
 
-const products: FandomProduct[] = [];
-
 const TrendingSection = ({ sectionRef }: TrendingSectionProps) => {
+  const { data: allProducts = [], isLoading } = useFandomProducts();
+
+  // Show the 8 most recently listed non-auction products
+  const trending = allProducts
+    .filter((p) => !p.isAuction && p.stock > 0)
+    .slice(0, 8);
+
   return (
     <section ref={sectionRef} className="mx-auto max-w-[1400px] px-6 py-16" aria-label="Trending Now">
       <div className="mb-8 flex items-center justify-between">
@@ -21,13 +26,22 @@ const TrendingSection = ({ sectionRef }: TrendingSectionProps) => {
           View All →
         </Link>
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {products.length === 0 ? (
-          <p className="col-span-full py-12 text-center text-sm text-[#737373]">Trending items coming soon.</p>
-        ) : (
-          products.map((p) => <ProductCard key={p.id} {...p} />)
-        )}
-      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-72 animate-pulse rounded-xl bg-[#f0edf7]" />
+          ))}
+        </div>
+      ) : trending.length === 0 ? (
+        <p className="py-12 text-center text-sm text-[#737373]">Trending items coming soon.</p>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {trending.map((p) => (
+            <ProductCard key={p.id} {...p} />
+          ))}
+        </div>
+      )}
     </section>
   );
 };
