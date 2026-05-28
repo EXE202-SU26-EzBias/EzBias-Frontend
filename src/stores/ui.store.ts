@@ -11,7 +11,7 @@ interface UiState {
   isForgotPasswordOpen: boolean;
   isEmailVerificationOpen: boolean;
   pendingVerificationEmail: string;
-  showToast: (message: string, type?: ToastType) => void;
+  showToast: (message: string, type?: ToastType, duration?: number) => void;
   openLogin: () => void;
   closeLogin: () => void;
   openRegister: () => void;
@@ -33,10 +33,10 @@ export const useUiStore = create<UiState>((set) => ({
   isForgotPasswordOpen: false,
   isEmailVerificationOpen: false,
   pendingVerificationEmail: '',
-  showToast: (message, type = 'success') => {
+  showToast: (message, type = 'success', duration = 1800) => {
     if (toastTimer) clearTimeout(toastTimer);
     set({ toastMessage: message, toastType: type, toastVisible: true });
-    toastTimer = setTimeout(() => set({ toastVisible: false }), 1800);
+    toastTimer = setTimeout(() => set({ toastVisible: false }), duration);
   },
   openLogin: () => set({ isLoginOpen: true, isRegisterOpen: false, isForgotPasswordOpen: false, isEmailVerificationOpen: false }),
   closeLogin: () => set({ isLoginOpen: false }),
