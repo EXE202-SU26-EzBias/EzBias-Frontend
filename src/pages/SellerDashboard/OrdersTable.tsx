@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import type { AxiosError } from 'axios';
 import { getOrderStatusColors, getOrderStatusLabel } from '../../constants/order';
 import { useCreateOrderPayment } from '../../services/payment.service';
+import { useStartConversation } from '../../services/chat.service';
 import { useUiStore } from '../../stores/ui.store';
 import type { SellerOrder } from '../../types/seller';
+import type { Conversation } from '../../types/chat';
+import ChatPanel from '../../components/chat/ChatPanel';
 import { formatCurrency } from '../../utils/formatters';
 import { parseAddressSnap } from '../../utils/parseAddressSnap';
 
@@ -104,6 +108,46 @@ function PayNowButton({ orderId }: { orderId: number }) {
   );
 }
 
+function MessageSellerButton({ sellerId, orderId }: { sellerId: number; orderId: number }) {
+  const [chatConv, setChatConv] = useState<Conversation | null>(null);
+  const showToast = useUiStore((s) => s.showToast);
+  const { mutate: startConversation, isPending } = useStartConversation();
+
+  const handleClick = () => {
+    startConversation(
+      { counterpartId: sellerId, orderId },
+      {
+        onSuccess: (conv) => setChatConv(conv),
+        onError: (err) => {
+          const message = (err as AxiosError<{ message?: string }>).response?.data?.message
+            ?? 'Could not open chat.';
+          showToast(message, 'error');
+        },
+      },
+    );
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        disabled={isPending}
+        onClick={handleClick}
+        className="inline-flex h-7 items-center gap-1 rounded-lg border border-[#e6e6e6] bg-white px-2.5 text-[11px] font-semibold text-[#737373] hover:border-[#ad93e6] hover:text-[#ad93e6] transition-colors disabled:opacity-50"
+      >
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        {isPending ? '…' : 'Message'}
+      </button>
+      {chatConv && createPortal(
+        <ChatPanel conversation={chatConv} onClose={() => setChatConv(null)} />,
+        document.body
+      )}
+    </>
+  );
+}
+
 function BuyingModeAction({
   order,
   confirmingId,
@@ -115,75 +159,80 @@ function BuyingModeAction({
   onConfirm?: (id: number) => void;
   onRequestRefund?: (order: SellerOrder) => void;
 }) {
+  // Message button is always available for active buying orders
+  const msgBtn = order.status < 8
+    ? <MessageSellerButton sellerId={order.sellerId} orderId={order.id} />
+    : null;
+
   if (order.status === 1 && order.paymentId) {
     return (
-      <Link
-        to={`/payment/${order.paymentId}`}
-        className="inline-flex h-7 items-center rounded-lg border border-amber-300 bg-amber-50 px-3 text-[12px] font-semibold text-amber-700 transition-colors hover:bg-amber-100"
-      >
-        Pay Now
-      </Link>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <Link
+          to={`/payment/${order.paymentId}`}
+          className="inline-flex h-7 items-center rounded-lg border border-amber-300 bg-amber-50 px-3 text-[12px] font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+        >
+          Pay Now
+        </Link>
+        {msgBtn}
+      </div>
     );
   }
-  // Auction order: payment not yet created — create it on click
   if (order.status === 1 && !order.paymentId) {
-    return <PayNowButton orderId={order.id} />;
+    return (
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <PayNowButton orderId={order.id} />
+        {msgBtn}
+      </div>
+    );
   }
   if (order.status === 4) {
     const confirming = confirmingId === order.id;
     return (
-      <button
-        type="button"
-        disabled={confirming}
-        onClick={() => onConfirm?.(order.id)}
-        className="h-7 px-3 rounded-lg border border-[#ad93e6] text-[#7c5ac4] text-[12px] font-semibold hover:bg-[rgba(173,147,230,0.1)] transition-colors disabled:opacity-50"
-      >
-        {confirming ? '…' : 'Confirm'}
-      </button>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <button
+          type="button"
+          disabled={confirming}
+          onClick={() => onConfirm?.(order.id)}
+          className="h-7 px-3 rounded-lg border border-[#ad93e6] text-[#7c5ac4] text-[12px] font-semibold hover:bg-[rgba(173,147,230,0.1)] transition-colors disabled:opacity-50"
+        >
+          {confirming ? '…' : 'Confirm'}
+        </button>
+        {msgBtn}
+      </div>
     );
   }
   if (order.status === 5) {
     return (
-      <button
-        type="button"
-        onClick={() => onRequestRefund?.(order)}
-        className="h-8 px-3 rounded-lg border border-[#c2410c] text-[#c2410c] text-[12px] font-semibold hover:bg-[#fff7ed] transition-colors whitespace-nowrap"
-      >
-        Request Refund
-      </button>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <button
+          type="button"
+          onClick={() => onRequestRefund?.(order)}
+          className="h-8 px-3 rounded-lg border border-[#c2410c] text-[#c2410c] text-[12px] font-semibold hover:bg-[#fff7ed] transition-colors whitespace-nowrap"
+        >
+          Request Refund
+        </button>
+        {msgBtn}
+      </div>
     );
   }
   if (order.status === 6) {
     return (
-      <span className="inline-flex items-center gap-1 text-[12px] text-[#c2410c] font-medium">
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        >
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 8v4M12 16h.01" />
-        </svg>
-        Dispute pending
-      </span>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="inline-flex items-center gap-1 text-[12px] text-[#c2410c] font-medium">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 8v4M12 16h.01" />
+          </svg>
+          Dispute pending
+        </span>
+        {msgBtn}
+      </div>
     );
   }
   if (order.status === 9) {
     return (
       <span className="inline-flex items-center gap-1 text-[12px] text-[#166534] font-medium">
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <circle cx="12" cy="12" r="9" />
           <path d="m8 12 3 3 5-5" />
         </svg>
@@ -193,13 +242,16 @@ function BuyingModeAction({
   }
   if (order.carrier && order.status <= 5) {
     return (
-      <span className="text-[#737373] text-[12px]">
-        {order.carrier}
-        {order.trackingNumber && ` · ${order.trackingNumber}`}
-      </span>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="text-[#737373] text-[12px]">
+          {order.carrier}
+          {order.trackingNumber && ` · ${order.trackingNumber}`}
+        </span>
+        {msgBtn}
+      </div>
     );
   }
-  return null;
+  return msgBtn;
 }
 
 const OrdersTable = React.memo(function OrdersTable({

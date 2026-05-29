@@ -3,9 +3,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { NAV_LINKS } from '../../constants/landing';
 import { useCart } from '../../services/cart.service';
 import { useNotificationHub } from '../../services/notification.service';
+import { useChatHub } from '../../features/chat/useChatHub';
 import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 import NotificationBell from '../ui/NotificationBell';
+import ChatInbox from '../chat/ChatInbox';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +21,7 @@ const Header = () => {
 
   // Connect to SignalR notification hub when authenticated
   useNotificationHub();
+  useChatHub();
 
   return (
     <div className="sticky top-0 z-[100]">
@@ -75,6 +78,9 @@ const Header = () => {
 
             {/* Notification bell — only for authenticated users */}
             {isAuthenticated && <NotificationBell />}
+
+            {/* Chat inbox — only for authenticated users */}
+            {isAuthenticated && <ChatInbox />}
 
             {/* Cart */}
             <Link
