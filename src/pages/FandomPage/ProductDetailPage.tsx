@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import type { AxiosError } from 'axios';
+import ChatPanel from '../../components/chat/ChatPanel';
 import PageLayout from '../../components/layout/PageLayout';
 import BackLink from '../../components/ui/BackLink';
 import { useAddToCart } from '../../features/cart/useAddToCart';
 import { useProductQuantity } from '../../features/cart/useProductQuantity';
+import { useStartConversation } from '../../services/chat.service';
 import { useCatalogProductDetail } from '../../services/fandom.service';
+import { useAuthStore } from '../../stores/auth.store';
+import { useUiStore } from '../../stores/ui.store';
 import { formatCurrency } from '../../utils/formatters';
+import type { Conversation } from '../../types/chat';
 
 const CONDITION_LABELS: Record<number, string> = {
   1: 'Brand New',
@@ -20,10 +26,29 @@ const ProductDetailPage = () => {
   const { data: product, isLoading, isError } = useCatalogProductDetail(productId);
 
   const [activeImg, setActiveImg] = useState(0);
+  const [chatConversation, setChatConversation] = useState<Conversation | null>(null);
   const { quantity, maxQuantity, isOutOfStock, increment, decrement } = useProductQuantity(
     product?.stock ?? 0,
   );
   const { added, isPending, handleAdd } = useAddToCart();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const showToast = useUiStore((s) => s.showToast);
+  const { mutate: startConversation, isPending: startingChat } = useStartConversation();
+
+  const handleMessageSeller = () => {
+    if (!product) return;
+    startConversation(
+      { counterpartId: product.sellerId, productId: product.id },
+      {
+        onSuccess: (conv) => setChatConversation(conv),
+        onError: (err) => {
+          const message = (err as AxiosError<{ message?: string }>).response?.data?.message
+            ?? 'Could not open chat. Please try again.';
+          showToast(message, 'error');
+        },
+      },
+    );
+  };
 
   const images =
     product?.imageUrls?.length
@@ -33,6 +58,7 @@ const ProductDetailPage = () => {
         : [];
 
   return (
+    <>
     <PageLayout>
       <div className="mx-auto w-full max-w-[1000px] px-4 py-10 md:py-14">
         <BackLink to="/fandoms" label="Back to Fandoms" />
@@ -189,11 +215,33 @@ const ProductDetailPage = () => {
                   This item is available via auction only
                 </p>
               )}
+
+              {/* Message Seller */}
+              {isAuthenticated && (
+                <button
+                  type="button"
+                  disabled={startingChat}
+                  onClick={handleMessageSeller}
+                  className="inline-flex h-10 w-fit items-center gap-2 rounded-full border border-[#ad93e6] px-5 text-[13px] font-semibold text-[#ad93e6] transition-colors hover:bg-[rgba(173,147,230,0.08)] disabled:opacity-50"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
+                  {startingChat ? 'Opening…' : 'Message Seller'}
+                </button>
+              )}
             </div>
           </div>
         )}
       </div>
     </PageLayout>
+    {chatConversation && (
+      <ChatPanel
+        conversation={chatConversation}
+        onClose={() => setChatConversation(null)}
+      />
+    )}
+    </>
   );
 };
 
