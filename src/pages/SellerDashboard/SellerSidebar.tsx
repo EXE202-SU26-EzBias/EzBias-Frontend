@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icons } from './sellerIcons';
 
-type PageId = 'overview' | 'listings' | 'orders' | 'auctions' | 'analytics' | 'payouts' | 'settings';
+type PageId = 'overview' | 'listings' | 'orders' | 'auctions' | 'analytics' | 'payouts' | 'settings' | 'chat';
 
 interface SellerUser {
   name: string;
@@ -30,6 +30,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'overview',  label: 'Overview',      icon: Icons.home   },
       { id: 'listings',  label: 'Listings',       icon: Icons.list,  pipKey: 'listings' },
       { id: 'orders',    label: 'Orders',         icon: Icons.bag,   pipKey: 'orders'   },
+      { id: 'chat',      label: 'Messages',       icon: Icons.msg    },
       { id: 'auctions',  label: 'Auctions',       icon: Icons.gavel  },
     ],
   },

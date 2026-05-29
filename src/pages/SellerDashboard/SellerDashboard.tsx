@@ -8,7 +8,7 @@ import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 import SellerSidebar from './SellerSidebar';
 
-type PageId = 'overview' | 'listings' | 'orders' | 'auctions' | 'analytics' | 'payouts' | 'settings';
+type PageId = 'overview' | 'listings' | 'orders' | 'auctions' | 'analytics' | 'payouts' | 'settings' | 'chat';
 
 const OverviewSection  = lazy(() => import('./sections/OverviewSection'));
 const ListingsSection  = lazy(() => import('./sections/ListingsSection'));
@@ -17,6 +17,7 @@ const AuctionsSection  = lazy(() => import('./sections/AuctionsSection'));
 const AnalyticsSection = lazy(() => import('./sections/AnalyticsSection'));
 const PayoutsSection   = lazy(() => import('./sections/PayoutsSection'));
 const SettingsSection  = lazy(() => import('./sections/SettingsSection'));
+const ChatSection      = lazy(() => import('./sections/ChatSection'));
 
 const PAGE_META: Record<PageId, { title: string; sub: string }> = {
   overview:  { title: 'Overview',      sub: 'How your store is performing right now' },
@@ -26,6 +27,7 @@ const PAGE_META: Record<PageId, { title: string; sub: string }> = {
   analytics: { title: 'Analytics',     sub: 'Trends, top performers, conversion' },
   payouts:   { title: 'Payouts',       sub: 'Withdraw earnings and manage payout methods' },
   settings:  { title: 'User profile',  sub: 'Manage your account details' },
+  chat:      { title: 'Messages',      sub: 'Chat with your buyers' },
 };
 
 function SectionLoader() {
@@ -45,6 +47,7 @@ function renderSection(page: PageId) {
     case 'analytics': return <AnalyticsSection />;
     case 'payouts':   return <PayoutsSection />;
     case 'settings':  return <SettingsSection />;
+    case 'chat':      return <ChatSection />;
   }
 }
 
