@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { http } from '../lib/axios';
 import { useAuthStore } from '../stores/auth.store';
+import { useUiStore } from '../stores/ui.store';
 import type { NotificationItem } from '../types/notification';
 
 const HUB_URL = `${(import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')}/hubs/notifications`;
@@ -38,11 +39,15 @@ export function useMarkReadAll() {
   });
 }
 
-/** Connects to NotificationHub and invalidates the notification list on new push. */
+const TOAST_TYPES = new Set(['Outbid', 'AuctionEndingSoon']);
+
+/** Connects to NotificationHub, invalidates the notification list, and shows
+ *  a toast popup for time-sensitive auction events (Outbid, AuctionEndingSoon). */
 export function useNotificationHub() {
   const queryClient = useQueryClient();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const accessToken = useAuthStore((s) => s.accessToken);
+  const showToast = useUiStore((s) => s.showToast);
   const connectionRef = useRef<signalR.HubConnection | null>(null);
 
   useEffect(() => {
@@ -56,12 +61,16 @@ export function useNotificationHub() {
 
     connectionRef.current = connection;
 
-    connection.on('ReceiveNotification', () => {
+    connection.on('ReceiveNotification', (notification: { type: string; title: string; body: string }) => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.list() });
+
+      if (TOAST_TYPES.has(notification.type)) {
+        showToast(`${notification.title} — ${notification.body}`, 'error', 4000);
+      }
     });
 
     connection.start().catch((err) => console.warn('[NotificationHub] connection failed:', err));
 
     return () => { connection.stop(); };
-  }, [isAuthenticated, accessToken, queryClient]);
+  }, [isAuthenticated, accessToken, queryClient, showToast]);
 }
