@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 import { useVideoCallStore } from '../../stores/video-call.store';
@@ -13,7 +13,6 @@ const ICE_SERVERS: RTCIceServer[] = [
 function getIceServers(): RTCIceServer[] {
   const raw = import.meta.env.VITE_WEBRTC_ICE_SERVERS;
   if (!raw) return ICE_SERVERS;
-
   try {
     const parsed = JSON.parse(raw) as RTCIceServer[];
     return Array.isArray(parsed) && parsed.length > 0 ? parsed : ICE_SERVERS;
@@ -23,7 +22,13 @@ function getIceServers(): RTCIceServer[] {
   }
 }
 
-export function useWebRtcCall(call: CallSession | null) {
+interface VideoRefs {
+  localVideoRef: RefObject<HTMLVideoElement | null>;
+  remoteVideoRef: RefObject<HTMLVideoElement | null>;
+}
+
+export function useWebRtcCall(call: CallSession | null, refs: VideoRefs) {
+  const { localVideoRef, remoteVideoRef } = refs;
   const currentUserId = useAuthStore((s) => s.user?.userId);
   const showToast = useUiStore((s) => s.showToast);
   const pendingOffer = useVideoCallStore((s) => s.pendingOffer);
@@ -31,10 +36,7 @@ export function useWebRtcCall(call: CallSession | null) {
   const pendingIceCandidates = useVideoCallStore((s) => s.pendingIceCandidates);
   const clearPendingOffer = useVideoCallStore((s) => s.clearPendingOffer);
   const clearPendingAnswer = useVideoCallStore((s) => s.clearPendingAnswer);
-  const clearIceCandidates = useVideoCallStore((s) => s.clearIceCandidates);
 
-  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [micEnabled, setMicEnabled] = useState(true);
   const [cameraEnabled, setCameraEnabled] = useState(true);
   const [statusText, setStatusText] = useState('Connecting...');
@@ -42,6 +44,8 @@ export function useWebRtcCall(call: CallSession | null) {
   const [hasRemoteMedia, setHasRemoteMedia] = useState(false);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const remoteStreamRef = useRef<MediaStream | null>(null);
   const offerSentRef = useRef(false);
   const answerSentRef = useRef(false);
   const answerAppliedRef = useRef(false);
@@ -55,6 +59,7 @@ export function useWebRtcCall(call: CallSession | null) {
 
   const isCaller = !!call && !!currentUserId && call.callerId === currentUserId;
 
+  // ── Setup: media + peer connection ──────────────────────────────────────────
   useEffect(() => {
     if (!call || !remoteUserId) return;
 
@@ -79,24 +84,41 @@ export function useWebRtcCall(call: CallSession | null) {
         const remote = new MediaStream();
         const pc = new RTCPeerConnection({ iceServers: getIceServers() });
         pcRef.current = pc;
-        setLocalStream(stream);
-        setRemoteStream(remote);
-        setPeerReady(true);
+        localStreamRef.current = stream;
+        remoteStreamRef.current = remote;
+
+        // Attach local preview directly to the element
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
+          localVideoRef.current.play().catch(() => {});
+        }
+        // Pre-attach remote element to the (empty) remote stream
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = remote;
+        }
 
         stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
         pc.ontrack = (event) => {
+          // Add any new tracks to the persistent remote stream
           const incoming = event.streams[0]?.getTracks() ?? [event.track];
           incoming.forEach((track) => {
-            if (!remote.getTracks().some((item) => item.id === track.id)) {
+            if (!remote.getTracks().some((t) => t.id === track.id)) {
               remote.addTrack(track);
             }
           });
-          // Create a NEW MediaStream wrapping the same tracks so React detects
-          // a reference change and re-attaches srcObject + replays the video element.
-          const updated = new MediaStream(remote.getTracks());
-          setRemoteStream(updated);
-          setHasRemoteMedia(updated.getTracks().length > 0);
+
+          // Attach directly to the element — do NOT rely on React state re-render
+          if (remoteVideoRef.current) {
+            if (remoteVideoRef.current.srcObject !== remote) {
+              remoteVideoRef.current.srcObject = remote;
+            }
+            remoteVideoRef.current.volume = 1;
+            remoteVideoRef.current.play().catch((err) =>
+              console.warn('[WebRTC] remote playback blocked:', err));
+          }
+
+          setHasRemoteMedia(remote.getTracks().length > 0);
           setStatusText('Connected');
         };
 
@@ -116,8 +138,14 @@ export function useWebRtcCall(call: CallSession | null) {
         pc.oniceconnectionstatechange = () => {
           if (pc.iceConnectionState === 'checking') setStatusText('Connecting media...');
           if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') setStatusText('Connected');
-          if (pc.iceConnectionState === 'failed') setStatusText('Media connection failed');
+          if (pc.iceConnectionState === 'failed') {
+            setStatusText('Media connection failed');
+            // Attempt ICE restart for the caller
+            if (isCaller) pc.restartIce();
+          }
         };
+
+        setPeerReady(true);
       } catch (err) {
         console.warn('[WebRTC] media setup failed:', err);
         setStatusText('Camera or microphone unavailable');
@@ -133,131 +161,119 @@ export function useWebRtcCall(call: CallSession | null) {
       pcRef.current = null;
       queuedIceCandidatesRef.current = [];
       setPeerReady(false);
-      setLocalStream((stream) => {
-        stream?.getTracks().forEach((track) => track.stop());
-        return null;
-      });
-      setRemoteStream(null);
+      localStreamRef.current?.getTracks().forEach((track) => track.stop());
+      localStreamRef.current = null;
+      remoteStreamRef.current = null;
       setHasRemoteMedia(false);
     };
-  }, [call?.id, remoteUserId, showToast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [call?.id, remoteUserId]);
 
+  // ── Caller: create & send offer once peer is ready ───────────────────────────
   useEffect(() => {
     if (
-      !call ||
-      !remoteUserId ||
-      !isCaller ||
-      call.status === 'Rejected' ||
-      call.status === 'Ended' ||
-      call.status === 'Missed' ||
-      call.status === 'Failed' ||
-      !peerReady ||
-      offerSentRef.current
+      !call || !remoteUserId || !isCaller || !peerReady || offerSentRef.current ||
+      call.status === 'Rejected' || call.status === 'Ended' ||
+      call.status === 'Missed' || call.status === 'Failed'
     ) return;
     const pc = pcRef.current;
     if (!pc) return;
 
-    const sendOffer = async () => {
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      await invokeCallHub('SendOffer', call.id, remoteUserId, offer);
-      offerSentRef.current = true;
-      setStatusText(call.status === 'Ringing' ? 'Ringing...' : 'Calling...');
-    };
-
-    sendOffer().catch((err) => {
-      console.warn('[WebRTC] failed to send offer:', err);
-      showToast('Could not start video call.', 'error');
-    });
+    offerSentRef.current = true;
+    (async () => {
+      try {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        await invokeCallHub('SendOffer', call.id, remoteUserId, offer);
+        setStatusText(call.status === 'Ringing' ? 'Ringing...' : 'Calling...');
+      } catch (err) {
+        offerSentRef.current = false;
+        console.warn('[WebRTC] failed to send offer:', err);
+        showToast('Could not start video call.', 'error');
+      }
+    })();
   }, [call, isCaller, peerReady, remoteUserId, showToast]);
 
+  // ── Callee: answer incoming offer ────────────────────────────────────────────
   useEffect(() => {
     if (!call || isCaller || !peerReady || answerSentRef.current) return;
     if (!pendingOffer || pendingOffer.callId !== call.id) return;
     const pc = pcRef.current;
     if (!pc) return;
 
-    const answerOffer = async () => {
-      await pc.setRemoteDescription(new RTCSessionDescription(pendingOffer.payload.offer));
-      await flushQueuedIceCandidates(pc);
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      await invokeCallHub('SendAnswer', call.id, pendingOffer.fromUserId, answer);
-      answerSentRef.current = true;
-      clearPendingOffer();
-      setStatusText('Connecting...');
-    };
-
-    answerOffer().catch((err) => {
-      console.warn('[WebRTC] failed to answer offer:', err);
-      showToast('Could not answer video call.', 'error');
-    });
+    answerSentRef.current = true;
+    (async () => {
+      try {
+        await pc.setRemoteDescription(new RTCSessionDescription(pendingOffer.payload.offer));
+        await flushQueuedIceCandidates(pc);
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        await invokeCallHub('SendAnswer', call.id, pendingOffer.fromUserId, answer);
+        clearPendingOffer();
+        setStatusText('Connecting...');
+      } catch (err) {
+        answerSentRef.current = false;
+        console.warn('[WebRTC] failed to answer offer:', err);
+        showToast('Could not answer video call.', 'error');
+      }
+    })();
   }, [call, clearPendingOffer, isCaller, peerReady, pendingOffer, showToast]);
 
+  // ── Caller: apply answer ─────────────────────────────────────────────────────
   useEffect(() => {
     if (!call || !isCaller || !peerReady || answerAppliedRef.current) return;
     if (!pendingAnswer || pendingAnswer.callId !== call.id) return;
     const pc = pcRef.current;
     if (!pc) return;
 
+    answerAppliedRef.current = true;
     pc.setRemoteDescription(new RTCSessionDescription(pendingAnswer.payload.answer))
       .then(() => {
         void flushQueuedIceCandidates(pc);
-        answerAppliedRef.current = true;
         clearPendingAnswer();
         setStatusText('Connecting...');
       })
       .catch((err) => {
+        answerAppliedRef.current = false;
         console.warn('[WebRTC] failed to apply answer:', err);
         showToast('Could not connect video call.', 'error');
       });
   }, [call, clearPendingAnswer, isCaller, peerReady, pendingAnswer, showToast]);
 
+  // ── Both: process incoming ICE candidates (append-only, no mid-call clearing) ─
   useEffect(() => {
-    if (!call || !peerReady || pendingIceCandidates.length === processedIceRef.current) return;
+    if (!call || !peerReady) return;
+    if (pendingIceCandidates.length <= processedIceRef.current) return;
     const pc = pcRef.current;
     if (!pc) return;
 
-    const nextCandidates = pendingIceCandidates.slice(processedIceRef.current).filter((signal) => signal.callId === call.id);
+    const next = pendingIceCandidates
+      .slice(processedIceRef.current)
+      .filter((signal) => signal.callId === call.id);
     processedIceRef.current = pendingIceCandidates.length;
 
-    nextCandidates.forEach((signal) => addRemoteIceCandidate(pc, signal.payload.candidate));
-
-    if (processedIceRef.current === pendingIceCandidates.length) {
-      clearIceCandidates();
-      processedIceRef.current = 0;
-    }
-  }, [call, clearIceCandidates, peerReady, pendingIceCandidates]);
+    next.forEach((signal) => addRemoteIceCandidate(pc, signal.payload.candidate));
+  }, [call, peerReady, pendingIceCandidates]);
 
   const toggleMic = () => {
-    localStream?.getAudioTracks().forEach((track) => { track.enabled = !micEnabled; });
+    localStreamRef.current?.getAudioTracks().forEach((track) => { track.enabled = !micEnabled; });
     setMicEnabled((value) => !value);
   };
 
   const toggleCamera = () => {
-    localStream?.getVideoTracks().forEach((track) => { track.enabled = !cameraEnabled; });
+    localStreamRef.current?.getVideoTracks().forEach((track) => { track.enabled = !cameraEnabled; });
     setCameraEnabled((value) => !value);
   };
 
-  return {
-    localStream,
-    remoteStream,
-    hasRemoteMedia,
-    micEnabled,
-    cameraEnabled,
-    statusText,
-    toggleMic,
-    toggleCamera,
-  };
+  return { hasRemoteMedia, micEnabled, cameraEnabled, statusText, toggleMic, toggleCamera };
 
   async function flushQueuedIceCandidates(pc: RTCPeerConnection) {
     if (!pc.remoteDescription || queuedIceCandidatesRef.current.length === 0) return;
-
     const candidates = queuedIceCandidatesRef.current;
     queuedIceCandidatesRef.current = [];
-
     for (const candidate of candidates) {
-      await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      await pc.addIceCandidate(new RTCIceCandidate(candidate))
+        .catch((err) => console.warn('[WebRTC] failed to add queued ICE candidate:', err));
     }
   }
 
@@ -266,7 +282,6 @@ export function useWebRtcCall(call: CallSession | null) {
       queuedIceCandidatesRef.current.push(candidate);
       return;
     }
-
     pc.addIceCandidate(new RTCIceCandidate(candidate))
       .catch((err) => console.warn('[WebRTC] failed to add ICE candidate:', err));
   }
