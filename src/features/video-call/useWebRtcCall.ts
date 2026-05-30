@@ -32,6 +32,7 @@ export function useWebRtcCall(call: CallSession | null) {
   const answerSentRef = useRef(false);
   const answerAppliedRef = useRef(false);
   const processedIceRef = useRef(0);
+  const queuedIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
 
   const remoteUserId = useMemo(() => {
     if (!call || !currentUserId) return null;
@@ -48,6 +49,7 @@ export function useWebRtcCall(call: CallSession | null) {
     answerSentRef.current = false;
     answerAppliedRef.current = false;
     processedIceRef.current = 0;
+    queuedIceCandidatesRef.current = [];
     setPeerReady(false);
     setStatusText(call.status === 'Accepted' ? 'Starting video...' : 'Waiting for answer...');
 
@@ -99,6 +101,7 @@ export function useWebRtcCall(call: CallSession | null) {
       cancelled = true;
       pcRef.current?.close();
       pcRef.current = null;
+      queuedIceCandidatesRef.current = [];
       setPeerReady(false);
       setLocalStream((stream) => {
         stream?.getTracks().forEach((track) => track.stop());
@@ -135,6 +138,7 @@ export function useWebRtcCall(call: CallSession | null) {
 
     const answerOffer = async () => {
       await pc.setRemoteDescription(new RTCSessionDescription(pendingOffer.payload.offer));
+      await flushQueuedIceCandidates(pc);
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
       await invokeCallHub('SendAnswer', call.id, pendingOffer.fromUserId, answer);
@@ -157,6 +161,7 @@ export function useWebRtcCall(call: CallSession | null) {
 
     pc.setRemoteDescription(new RTCSessionDescription(pendingAnswer.payload.answer))
       .then(() => {
+        void flushQueuedIceCandidates(pc);
         answerAppliedRef.current = true;
         clearPendingAnswer();
         setStatusText('Connecting...');
@@ -175,10 +180,7 @@ export function useWebRtcCall(call: CallSession | null) {
     const nextCandidates = pendingIceCandidates.slice(processedIceRef.current).filter((signal) => signal.callId === call.id);
     processedIceRef.current = pendingIceCandidates.length;
 
-    nextCandidates.forEach((signal) => {
-      pc.addIceCandidate(new RTCIceCandidate(signal.payload.candidate))
-        .catch((err) => console.warn('[WebRTC] failed to add ICE candidate:', err));
-    });
+    nextCandidates.forEach((signal) => addRemoteIceCandidate(pc, signal.payload.candidate));
 
     if (processedIceRef.current === pendingIceCandidates.length) {
       clearIceCandidates();
@@ -205,4 +207,25 @@ export function useWebRtcCall(call: CallSession | null) {
     toggleMic,
     toggleCamera,
   };
+
+  async function flushQueuedIceCandidates(pc: RTCPeerConnection) {
+    if (!pc.remoteDescription || queuedIceCandidatesRef.current.length === 0) return;
+
+    const candidates = queuedIceCandidatesRef.current;
+    queuedIceCandidatesRef.current = [];
+
+    for (const candidate of candidates) {
+      await pc.addIceCandidate(new RTCIceCandidate(candidate));
+    }
+  }
+
+  function addRemoteIceCandidate(pc: RTCPeerConnection, candidate: RTCIceCandidateInit) {
+    if (!pc.remoteDescription) {
+      queuedIceCandidatesRef.current.push(candidate);
+      return;
+    }
+
+    pc.addIceCandidate(new RTCIceCandidate(candidate))
+      .catch((err) => console.warn('[WebRTC] failed to add ICE candidate:', err));
+  }
 }
