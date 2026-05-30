@@ -14,7 +14,7 @@ const VideoCallWindow = () => {
   const { mutate: endCall, isPending: ending } = useEndCall();
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
-  const { localStream, remoteStream, micEnabled, cameraEnabled, statusText, toggleMic, toggleCamera } = useWebRtcCall(activeCall);
+  const { localStream, remoteStream, hasRemoteMedia, micEnabled, cameraEnabled, statusText, toggleMic, toggleCamera } = useWebRtcCall(activeCall);
 
   useEffect(() => {
     if (localVideoRef.current) localVideoRef.current.srcObject = localStream;
@@ -51,7 +51,7 @@ const VideoCallWindow = () => {
             playsInline
             className="h-full w-full object-cover"
           />
-          {!remoteStream && (
+          {!hasRemoteMedia && (
             <div className="absolute inset-0 grid place-items-center bg-[#181818]">
               <div className="text-center">
                 <div className="mx-auto mb-3 grid h-20 w-20 place-items-center rounded-full bg-[#ad93e6] text-[22px] font-bold">
