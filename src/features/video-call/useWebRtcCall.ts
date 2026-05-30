@@ -140,7 +140,17 @@ export function useWebRtcCall(call: CallSession | null) {
   }, [call?.id, remoteUserId, showToast]);
 
   useEffect(() => {
-    if (!call || !remoteUserId || !isCaller || call.status !== 'Accepted' || !peerReady || offerSentRef.current) return;
+    if (
+      !call ||
+      !remoteUserId ||
+      !isCaller ||
+      call.status === 'Rejected' ||
+      call.status === 'Ended' ||
+      call.status === 'Missed' ||
+      call.status === 'Failed' ||
+      !peerReady ||
+      offerSentRef.current
+    ) return;
     const pc = pcRef.current;
     if (!pc) return;
 
@@ -149,7 +159,7 @@ export function useWebRtcCall(call: CallSession | null) {
       await pc.setLocalDescription(offer);
       await invokeCallHub('SendOffer', call.id, remoteUserId, offer);
       offerSentRef.current = true;
-      setStatusText('Calling...');
+      setStatusText(call.status === 'Ringing' ? 'Ringing...' : 'Calling...');
     };
 
     sendOffer().catch((err) => {

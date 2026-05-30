@@ -21,7 +21,11 @@ const VideoCallWindow = () => {
   }, [localStream]);
 
   useEffect(() => {
-    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remoteStream;
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+      remoteVideoRef.current.volume = 1;
+      remoteVideoRef.current.play().catch((err) => console.warn('[WebRTC] remote playback blocked:', err));
+    }
   }, [remoteStream]);
 
   if (!activeCall) return null;
