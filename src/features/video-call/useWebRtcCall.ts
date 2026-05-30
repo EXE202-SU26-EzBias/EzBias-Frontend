@@ -86,14 +86,17 @@ export function useWebRtcCall(call: CallSession | null) {
         stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
         pc.ontrack = (event) => {
-          const tracks = event.streams[0]?.getTracks() ?? [event.track];
-          tracks.forEach((track) => {
+          const incoming = event.streams[0]?.getTracks() ?? [event.track];
+          incoming.forEach((track) => {
             if (!remote.getTracks().some((item) => item.id === track.id)) {
               remote.addTrack(track);
             }
           });
-          setRemoteStream(remote);
-          setHasRemoteMedia(remote.getTracks().length > 0);
+          // Create a NEW MediaStream wrapping the same tracks so React detects
+          // a reference change and re-attaches srcObject + replays the video element.
+          const updated = new MediaStream(remote.getTracks());
+          setRemoteStream(updated);
+          setHasRemoteMedia(updated.getTracks().length > 0);
           setStatusText('Connected');
         };
 
