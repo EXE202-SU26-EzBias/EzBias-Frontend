@@ -10,6 +10,19 @@ const ICE_SERVERS: RTCIceServer[] = [
   { urls: 'stun:global.stun.twilio.com:3478' },
 ];
 
+function getIceServers(): RTCIceServer[] {
+  const raw = import.meta.env.VITE_WEBRTC_ICE_SERVERS;
+  if (!raw) return ICE_SERVERS;
+
+  try {
+    const parsed = JSON.parse(raw) as RTCIceServer[];
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : ICE_SERVERS;
+  } catch (err) {
+    console.warn('[WebRTC] invalid VITE_WEBRTC_ICE_SERVERS value:', err);
+    return ICE_SERVERS;
+  }
+}
+
 export function useWebRtcCall(call: CallSession | null) {
   const currentUserId = useAuthStore((s) => s.user?.userId);
   const showToast = useUiStore((s) => s.showToast);
@@ -26,6 +39,7 @@ export function useWebRtcCall(call: CallSession | null) {
   const [cameraEnabled, setCameraEnabled] = useState(true);
   const [statusText, setStatusText] = useState('Connecting...');
   const [peerReady, setPeerReady] = useState(false);
+  const [hasRemoteMedia, setHasRemoteMedia] = useState(false);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const offerSentRef = useRef(false);
@@ -51,6 +65,7 @@ export function useWebRtcCall(call: CallSession | null) {
     processedIceRef.current = 0;
     queuedIceCandidatesRef.current = [];
     setPeerReady(false);
+    setHasRemoteMedia(false);
     setStatusText(call.status === 'Accepted' ? 'Starting video...' : 'Waiting for answer...');
 
     const setup = async () => {
@@ -62,7 +77,7 @@ export function useWebRtcCall(call: CallSession | null) {
         }
 
         const remote = new MediaStream();
-        const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+        const pc = new RTCPeerConnection({ iceServers: getIceServers() });
         pcRef.current = pc;
         setLocalStream(stream);
         setRemoteStream(remote);
@@ -71,8 +86,14 @@ export function useWebRtcCall(call: CallSession | null) {
         stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
         pc.ontrack = (event) => {
-          event.streams[0]?.getTracks().forEach((track) => remote.addTrack(track));
+          const tracks = event.streams[0]?.getTracks() ?? [event.track];
+          tracks.forEach((track) => {
+            if (!remote.getTracks().some((item) => item.id === track.id)) {
+              remote.addTrack(track);
+            }
+          });
           setRemoteStream(remote);
+          setHasRemoteMedia(remote.getTracks().length > 0);
           setStatusText('Connected');
         };
 
@@ -87,6 +108,12 @@ export function useWebRtcCall(call: CallSession | null) {
           if (pc.connectionState === 'connected') setStatusText('Connected');
           if (pc.connectionState === 'failed') setStatusText('Connection failed');
           if (pc.connectionState === 'disconnected') setStatusText('Disconnected');
+        };
+
+        pc.oniceconnectionstatechange = () => {
+          if (pc.iceConnectionState === 'checking') setStatusText('Connecting media...');
+          if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') setStatusText('Connected');
+          if (pc.iceConnectionState === 'failed') setStatusText('Media connection failed');
         };
       } catch (err) {
         console.warn('[WebRTC] media setup failed:', err);
@@ -108,6 +135,7 @@ export function useWebRtcCall(call: CallSession | null) {
         return null;
       });
       setRemoteStream(null);
+      setHasRemoteMedia(false);
     };
   }, [call?.id, remoteUserId, showToast]);
 
@@ -201,6 +229,7 @@ export function useWebRtcCall(call: CallSession | null) {
   return {
     localStream,
     remoteStream,
+    hasRemoteMedia,
     micEnabled,
     cameraEnabled,
     statusText,
