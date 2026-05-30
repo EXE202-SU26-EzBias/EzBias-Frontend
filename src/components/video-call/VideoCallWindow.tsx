@@ -1,5 +1,5 @@
 import type { AxiosError } from 'axios';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useWebRtcCall } from '../../features/video-call/useWebRtcCall';
 import { useEndCall } from '../../services/video-call.service';
 import { useUiStore } from '../../stores/ui.store';
@@ -14,19 +14,8 @@ const VideoCallWindow = () => {
   const { mutate: endCall, isPending: ending } = useEndCall();
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
-  const { localStream, remoteStream, hasRemoteMedia, micEnabled, cameraEnabled, statusText, toggleMic, toggleCamera } = useWebRtcCall(activeCall);
-
-  useEffect(() => {
-    if (localVideoRef.current) localVideoRef.current.srcObject = localStream;
-  }, [localStream]);
-
-  useEffect(() => {
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream;
-      remoteVideoRef.current.volume = 1;
-      remoteVideoRef.current.play().catch((err) => console.warn('[WebRTC] remote playback blocked:', err));
-    }
-  }, [remoteStream]);
+  const { hasRemoteMedia, micEnabled, cameraEnabled, statusText, toggleMic, toggleCamera } =
+    useWebRtcCall(activeCall, { localVideoRef, remoteVideoRef });
 
   if (!activeCall) return null;
 
