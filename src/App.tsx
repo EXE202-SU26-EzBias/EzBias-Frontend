@@ -3,6 +3,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ErrorBoundary from './components/layout/ErrorBoundary';
 import ProtectedRoute from './components/layout/ProtectedRoute';
+import VideoCallRoot from './components/video-call/VideoCallRoot';
 import { queryClient } from './lib/queryClient';
 
 const LandingPage = lazy(() => import('./pages/LandingPage/LandingPage'));
@@ -32,6 +33,7 @@ function App() {
       <BrowserRouter>
         <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
+            <VideoCallRoot />
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/fandoms" element={<FandomPage />} />

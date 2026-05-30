@@ -4,14 +4,16 @@ import { useMessages, useMarkRead, useSendMessage } from '../../services/chat.se
 import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 import MessageBubble from './MessageBubble';
+import StartVideoCallButton from '../video-call/StartVideoCallButton';
 
 interface MessageThreadProps {
   conversationId: number;
   otherParticipantName: string;
+  otherParticipantId?: number;
   hideHeader?: boolean;
 }
 
-const MessageThread = ({ conversationId, otherParticipantName, hideHeader = false }: MessageThreadProps) => {
+const MessageThread = ({ conversationId, otherParticipantName, otherParticipantId, hideHeader = false }: MessageThreadProps) => {
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
   const currentUserId = useAuthStore((s) => s.user?.userId);
@@ -58,11 +60,16 @@ const MessageThread = ({ conversationId, otherParticipantName, hideHeader = fals
     <div className="flex flex-col h-full">
       {/* Header — hidden when used inside ChatPanel */}
       {!hideHeader && (
-        <div className="flex items-center gap-3 border-b border-[#e6e6e6] px-4 py-3 shrink-0">
-          <div className="h-8 w-8 rounded-full bg-[#ad93e6] grid place-items-center text-[11px] font-bold text-white">
-            {otherParticipantName.slice(0, 2).toUpperCase()}
+        <div className="flex items-center justify-between gap-3 border-b border-[#e6e6e6] px-4 py-3 shrink-0">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-[#ad93e6] grid place-items-center text-[11px] font-bold text-white">
+              {otherParticipantName.slice(0, 2).toUpperCase()}
+            </div>
+            <span className="truncate text-[14px] font-semibold text-[#121212]">{otherParticipantName}</span>
           </div>
-          <span className="text-[14px] font-semibold text-[#121212]">{otherParticipantName}</span>
+          {otherParticipantId !== undefined && (
+            <StartVideoCallButton conversation={{ id: conversationId, otherParticipantName }} compact />
+          )}
         </div>
       )}
 

@@ -29,6 +29,7 @@ const ChatSection = () => {
               <MessageThread
                 conversationId={active.id}
                 otherParticipantName={active.otherParticipantName}
+                otherParticipantId={active.otherParticipantId}
               />
             ) : (
               <div className="flex flex-1 items-center justify-center text-[13px] text-[#b3b3b3]">
