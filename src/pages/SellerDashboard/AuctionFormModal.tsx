@@ -1,6 +1,8 @@
 import { useEffect, type ReactNode } from 'react';
+import { DEPOSIT_FRACTION_OF_FLOOR } from '../../constants/auction';
 import { useCreateAuctionForm } from '../../features/seller/useAuctionForm';
 import { useProducts } from '../../services/product.service';
+import { formatCurrency } from '../../utils/formatters';
 
 interface AuctionFormModalProps {
   onClose: () => void;
@@ -23,7 +25,10 @@ function Field({ label, error, children }: { label: string; error?: { message?: 
 
 function AuctionFormModal({ onClose }: AuctionFormModalProps) {
   const { data: products = [], isLoading: isProductsLoading } = useProducts();
-  const { register, onSubmit, errors, isPending } = useCreateAuctionForm({ products, isProductsLoading, onSuccess: onClose });
+  const { register, onSubmit, watch, errors, isPending } = useCreateAuctionForm({ products, isProductsLoading, onSuccess: onClose });
+
+  const floorPrice = Number(watch('floorPrice')) || 0;
+  const requiredDeposit = Math.round(floorPrice * DEPOSIT_FRACTION_OF_FLOOR);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -74,6 +79,15 @@ function AuctionFormModal({ onClose }: AuctionFormModalProps) {
                   <input type="number" min="0" placeholder="250000" className={inputCls} {...register('reservePrice')} />
                 </Field>
               </div>
+
+              <Field label="Required deposit to bid (auto)">
+                <div className="flex h-10 items-center rounded-lg border border-dashed border-[#e6e6e6] bg-[#f9f8fc] px-3 text-[14px] text-[#121212]">
+                  {floorPrice > 0 ? formatCurrency(requiredDeposit) : '—'}
+                  <span className="ml-2 text-[12px] text-[#737373]">
+                    ({Math.round(DEPOSIT_FRACTION_OF_FLOOR * 100)}% of floor price)
+                  </span>
+                </div>
+              </Field>
 
               <Field label="Ends at" error={errors.endsAt}>
                 <input type="datetime-local" className={inputCls} {...register('endsAt')} />

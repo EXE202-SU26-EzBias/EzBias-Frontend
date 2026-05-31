@@ -31,7 +31,7 @@ export function useCreateAuctionForm({ products, isProductsLoading, onSuccess }:
   const { mutate, isPending } = useCreateSellerAuction();
   const showToast = useUiStore((s) => s.showToast);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<AuctionFormValues>({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<AuctionFormValues>({
     resolver: zodResolver(schema) as Resolver<AuctionFormValues>,
     mode: 'onChange',
     defaultValues: {
@@ -47,6 +47,7 @@ export function useCreateAuctionForm({ products, isProductsLoading, onSuccess }:
   });
 
   const onSubmit = handleSubmit((values) => {
+    // The required bid deposit is derived server-side from the floor price; nothing to submit here.
     mutate(
       { ...values, endsAt: new Date(values.endsAt).toISOString() },
       {
@@ -59,7 +60,7 @@ export function useCreateAuctionForm({ products, isProductsLoading, onSuccess }:
     );
   });
 
-  return { register, onSubmit, errors, isPending, products, isProductsLoading };
+  return { register, onSubmit, watch, errors, isPending, products, isProductsLoading };
 }
 
 // ─── Relist ──────────────────────────────────────────────────────────────────
@@ -97,7 +98,7 @@ export function useRelistAuctionForm({ auction, onSuccess }: UseRelistAuctionFor
   // Default endsAt: 3 days from now
   const defaultEndsAt = toDatetimeLocal(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString());
 
-  const { register, handleSubmit, formState: { errors } } = useForm<RelistFormValues>({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<RelistFormValues>({
     resolver: zodResolver(relistSchema) as Resolver<RelistFormValues>,
     mode: 'onChange',
     defaultValues: {
@@ -112,6 +113,7 @@ export function useRelistAuctionForm({ auction, onSuccess }: UseRelistAuctionFor
   });
 
   const onSubmit = handleSubmit((values) => {
+    // The required bid deposit is derived server-side from the floor price; nothing to submit here.
     mutate(
       {
         auctionId: auction.auctionId,
@@ -130,5 +132,5 @@ export function useRelistAuctionForm({ auction, onSuccess }: UseRelistAuctionFor
     );
   });
 
-  return { register, onSubmit, errors, isPending };
+  return { register, onSubmit, watch, errors, isPending };
 }
