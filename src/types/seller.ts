@@ -22,6 +22,18 @@ export interface SellerProduct {
 // Re-export so existing imports of SellerAuctionStatus keep working
 export type { AuctionStatus as SellerAuctionStatus };
 
+export interface SellerAuctionProduct {
+  id: number;
+  name: string;
+  artist: string;
+  type: string;
+  price: number;
+  stock: number;
+  primaryImageUrl: string;
+  status: number;
+  fandomId: string;
+}
+
 export interface SellerAuction {
   auctionId: number;
   productId: number;
@@ -30,6 +42,7 @@ export interface SellerAuction {
   status: AuctionStatus;
   endsAt: string;
   createdAt?: string;
+  product?: SellerAuctionProduct;
 }
 
 export type { Order as SellerOrder } from './order';

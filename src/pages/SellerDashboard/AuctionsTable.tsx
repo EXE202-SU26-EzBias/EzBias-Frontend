@@ -50,8 +50,36 @@ const AuctionsTable = React.memo(function AuctionsTable({
                 className="hover:bg-[rgba(173,147,230,0.05)] border-b border-[rgba(230,230,230,0.5)] last:border-b-0"
               >
                 <td className="px-4 py-[14px] align-middle">
-                  <p className="font-semibold text-[#121212] m-0">Product #{a.productId}</p>
-                  <p className="text-[11px] text-[#737373] m-0">Auction #{a.auctionId}</p>
+                  <div className="flex items-center gap-3">
+                    {a.product?.primaryImageUrl ? (
+                      <img
+                        src={a.product.primaryImageUrl}
+                        alt={a.product.name}
+                        className="h-11 w-11 shrink-0 rounded-lg border border-[#e6e6e6] object-cover"
+                        loading="lazy"
+                        width="44"
+                        height="44"
+                      />
+                    ) : (
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#e6e6e6] bg-[#f4f3f7] text-[10px] text-[#b3b3b3]">
+                        No img
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-[#121212] m-0" title={a.product?.name}>
+                        {a.product?.name ?? `Product #${a.productId}`}
+                      </p>
+                      {a.product && (
+                        <p className="truncate text-[11px] text-[#737373] m-0">
+                          {a.product.artist} · {a.product.type}
+                        </p>
+                      )}
+                      <p className="text-[11px] text-[#b3b3b3] m-0">
+                        Auction #{a.auctionId}
+                        {a.product ? ` · List ${formatCurrency(a.product.price)} · Stock ${a.product.stock}` : ''}
+                      </p>
+                    </div>
+                  </div>
                 </td>
                 <td className="px-4 py-[14px] text-[#121212] align-middle">{formatCurrency(a.floorPrice)}</td>
                 <td className="px-4 py-[14px] text-[#121212] align-middle">{formatCurrency(a.currentBid)}</td>
