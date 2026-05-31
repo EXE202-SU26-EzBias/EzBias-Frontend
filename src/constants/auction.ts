@@ -45,3 +45,7 @@ const FALLBACK_STATUS_COLORS = 'text-[#737373] bg-[#f5f5f5] border-[#e6e6e6]';
 export function getAuctionStatusColors(status: number): string {
   return AUCTION_STATUS_COLORS[status as AuctionStatus] ?? FALLBACK_STATUS_COLORS;
 }
+
+// Fraction of the floor price collected as the required bid deposit (must match the
+// backend Deposit:DepositFractionOfFloor setting). Used only for display in seller forms.
+export const DEPOSIT_FRACTION_OF_FLOOR = 0.10;

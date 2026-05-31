@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BidHistory from '../../components/auction/BidHistory';
 import CountdownTimer from '../../components/auction/CountdownTimer';
+import DepositPanel from '../../components/auction/DepositPanel';
 import PageLayout from '../../components/layout/PageLayout';
 import AuctionWonModal from '../../components/shared/AuctionWonModal';
 import BackLink from '../../components/ui/BackLink';
@@ -12,6 +13,7 @@ import { AUCTION_STATUS } from '../../constants/auction';
 import { useCountdown } from '../../features/auction/useCountdown';
 import { useAuctionHub } from '../../features/auction/useAuctionHub';
 import { useAuctionDetail, useBidHistory, usePlaceBid } from '../../services/auction.service';
+import { useDepositStatus } from '../../services/deposit.service';
 import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 import { formatCurrency } from '../../utils/formatters';
@@ -32,6 +34,12 @@ const AuctionDetailPage = () => {
   const currentUserId = useAuthStore((s) => s.user?.userId);
   const showToast = useUiStore((s) => s.showToast);
   const isLive = auction?.status === AUCTION_STATUS.LIVE || auction?.status === AUCTION_STATUS.EXTENDED;
+
+  const { data: depositStatus } = useDepositStatus(auctionId);
+  const depositRequired = (depositStatus?.requiredDepositAmount ?? 0) > 0;
+  const depositHeld = depositStatus?.state === 'Held';
+  const bidGateBlocked = depositRequired && !depositHeld;
+
   const userWon = Boolean(
     auction?.status === AUCTION_STATUS.ENDED_PENDING_PAYMENT &&
     currentUserId != null &&
@@ -110,6 +118,9 @@ const AuctionDetailPage = () => {
                   </div>
                 </div>
 
+                {/* Deposit panel */}
+                <DepositPanel auctionId={auctionId} isLive={isLive} />
+
                 {/* Bid input */}
                 <div className="flex flex-col gap-1.5">
                   <div className="flex gap-2">
@@ -121,18 +132,22 @@ const AuctionDetailPage = () => {
                       onChange={handleBidInputChange}
                       placeholder={`${formatCurrency(auction.currentBid + 1000)} or higher`}
                       aria-label="Your bid amount in VND"
-                      className="h-10 flex-1 rounded-lg border border-[#e6e6e6] px-4 text-sm text-[#121212] placeholder-[#b3b3b3] outline-none focus:border-[#ad93e6] focus:ring-2 focus:ring-[rgba(173,147,230,0.2)]"
+                      disabled={bidGateBlocked}
+                      className="h-10 flex-1 rounded-lg border border-[#e6e6e6] px-4 text-sm text-[#121212] placeholder-[#b3b3b3] outline-none focus:border-[#ad93e6] focus:ring-2 focus:ring-[rgba(173,147,230,0.2)] disabled:bg-[#f5f5f5] disabled:opacity-60"
                     />
                     <button
                       type="button"
                       onClick={handlePlaceBid}
-                      disabled={placing || !isLive || !bidInput}
+                      disabled={placing || !isLive || !bidInput || bidGateBlocked}
                       className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#ad93e6] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#9d7ed9] disabled:opacity-60"
                     >
                       <RocketIcon className="h-4 w-4" />
                       {placing ? 'Placing…' : 'Place Bid'}
                     </button>
                   </div>
+                  {isLive && bidGateBlocked && (
+                    <p className="text-[11px] text-[#737373]">Pay the required deposit above to unlock bidding.</p>
+                  )}
                 </div>
               </div>
             </div>
