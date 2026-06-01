@@ -43,6 +43,7 @@ export interface SellerAuction {
   endsAt: string;
   createdAt?: string;
   product?: SellerAuctionProduct;
+  relistedToAuctionId?: number | null;
 }
 
 export type { Order as SellerOrder } from './order';
