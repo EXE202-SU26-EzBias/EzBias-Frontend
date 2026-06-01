@@ -42,7 +42,8 @@ const AuctionsTable = React.memo(function AuctionsTable({
             const statusColors = getAuctionStatusColors(a.status);
             const showPublish = a.status === 1;
             const showCancel = a.status === 2 || a.status === 3;
-            const showRelist = a.status === 4 || a.status === 6 || a.status === 8;
+            // Only show relist if auction is in relistable status AND hasn't been relisted yet
+            const showRelist = (a.status === 4 || a.status === 6 || a.status === 8) && !a.relistedToAuctionId;
 
             return (
               <tr
