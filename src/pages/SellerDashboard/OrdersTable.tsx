@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import type { AxiosError } from 'axios';
 import { getOrderStatusColors, getOrderStatusLabel } from '../../constants/order';
-import { useCreateOrderPayment } from '../../services/payment.service';
 import { useStartConversation } from '../../services/chat.service';
 import { useAddAuctionToCart } from '../../services/cart.service';
 import { useUiStore } from '../../stores/ui.store';
@@ -81,7 +80,7 @@ function SellingModeAction({ order, onShip }: { order: SellerOrder; onShip?: (id
   return null;
 }
 
-function PayNowButton({ orderId, order }: { orderId: number; order?: any }) {
+function PayNowButton({ order }: { order?: any }) {
   const navigate = useNavigate();
   const showToast = useUiStore((s) => s.showToast);
   const addAuctionToCart = useAddAuctionToCart();
@@ -189,7 +188,7 @@ function BuyingModeAction({
   if (order.status === 1 && !order.paymentId) {
     return (
       <div className="flex items-center gap-1.5 flex-wrap">
-        <PayNowButton orderId={order.id} order={order} />
+        <PayNowButton order={order} />
         {msgBtn}
       </div>
     );
