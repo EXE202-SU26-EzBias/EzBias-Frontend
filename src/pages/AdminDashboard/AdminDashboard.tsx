@@ -18,6 +18,7 @@ const AuctionsSection  = lazy(() => import('./sections/AuctionsSection'));
 const PayoutsSection   = lazy(() => import('./sections/PayoutsSection'));
 const AnalyticsSection = lazy(() => import('./sections/AnalyticsSection'));
 const DisputesSection  = lazy(() => import('./sections/DisputesSection'));
+const DepositsSection  = lazy(() => import('./sections/DepositsSection'));
 
 const PAGE_META: Record<AdminPageId, { title: string; sub: string }> = {
   overview:  { title: 'Platform Overview',   sub: 'Real-time health of the marketplace'              },
@@ -29,6 +30,7 @@ const PAGE_META: Record<AdminPageId, { title: string; sub: string }> = {
   payouts:   { title: 'Payout Queue',        sub: 'Approve or reject seller withdrawal requests'     },
   analytics: { title: 'Analytics',           sub: 'Platform trends, top sellers, top products'       },
   disputes:  { title: 'Disputes',            sub: 'Review and action buyer dispute requests'          },
+  deposits:  { title: 'Deposit Management',  sub: 'Process refunds for losing bidders'               },
 };
 
 function SectionLoader() {
@@ -50,6 +52,7 @@ function renderSection(page: AdminPageId) {
     case 'payouts':   return <PayoutsSection />;
     case 'analytics': return <AnalyticsSection />;
     case 'disputes':  return <DisputesSection />;
+    case 'deposits':  return <DepositsSection />;
   }
 }
 
