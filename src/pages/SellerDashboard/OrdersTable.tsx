@@ -5,6 +5,7 @@ import type { AxiosError } from 'axios';
 import { getOrderStatusColors, getOrderStatusLabel } from '../../constants/order';
 import { useCreateOrderPayment } from '../../services/payment.service';
 import { useStartConversation } from '../../services/chat.service';
+import { useAddAuctionToCart } from '../../services/cart.service';
 import { useUiStore } from '../../stores/ui.store';
 import type { SellerOrder } from '../../types/seller';
 import type { Conversation } from '../../types/chat';
@@ -80,30 +81,38 @@ function SellingModeAction({ order, onShip }: { order: SellerOrder; onShip?: (id
   return null;
 }
 
-function PayNowButton({ orderId }: { orderId: number }) {
+function PayNowButton({ orderId, order }: { orderId: number; order?: any }) {
   const navigate = useNavigate();
   const showToast = useUiStore((s) => s.showToast);
-  const { mutate: createPayment, isPending } = useCreateOrderPayment();
+  const addAuctionToCart = useAddAuctionToCart();
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handlePay = () => {
-    createPayment(orderId, {
-      onSuccess: (payment) => navigate(`/payment/${payment.paymentId}`),
-      onError: (err) => {
-        const message = (err as AxiosError<{ message?: string }>).response?.data?.message
-          ?? 'Failed to initiate payment. Please try again.';
-        showToast(message, 'error');
-      },
-    });
+  const handlePay = async () => {
+    // If this is an auction order, add to cart first then navigate to checkout
+    if (order?.auctionId) {
+      setIsProcessing(true);
+      try {
+        await addAuctionToCart.mutateAsync(order.auctionId);
+        navigate('/checkout');
+      } catch (error: any) {
+        showToast(error.response?.data?.message || 'Failed to prepare checkout', 'error');
+        setIsProcessing(false);
+      }
+      return;
+    }
+
+    // For regular cart orders, navigate directly to checkout
+    navigate('/checkout');
   };
 
   return (
     <button
       type="button"
-      disabled={isPending}
+      disabled={isProcessing}
       onClick={handlePay}
       className="inline-flex h-7 items-center rounded-lg border border-amber-300 bg-amber-50 px-3 text-[12px] font-semibold text-amber-700 transition-colors hover:bg-amber-100 disabled:opacity-50"
     >
-      {isPending ? '…' : 'Pay Now'}
+      {isProcessing ? '…' : 'Pay Now'}
     </button>
   );
 }
@@ -180,7 +189,7 @@ function BuyingModeAction({
   if (order.status === 1 && !order.paymentId) {
     return (
       <div className="flex items-center gap-1.5 flex-wrap">
-        <PayNowButton orderId={order.id} />
+        <PayNowButton orderId={order.id} order={order} />
         {msgBtn}
       </div>
     );
