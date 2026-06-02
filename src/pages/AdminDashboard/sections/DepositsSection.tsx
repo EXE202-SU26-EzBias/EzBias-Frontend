@@ -1,46 +1,14 @@
 import React, { useState } from 'react';
-import type { AxiosError } from 'axios';
 import SellerTopbar from '../../SellerDashboard/SellerTopbar';
-import { useAdminPendingRefunds, useProcessManualRefund } from '../../../services/admin.service';
-import { useUiStore } from '../../../stores/ui.store';
+import { useAdminPendingRefunds } from '../../../services/admin.service';
 import DepositDetailModal from './DepositDetailModal';
+import RefundQRModal from './RefundQRModal';
 
 const DepositsSection = React.memo(function DepositsSection() {
   const [selectedDepositId, setSelectedDepositId] = useState<number | null>(null);
-  const [processingId, setProcessingId] = useState<number | null>(null);
+  const [refundingDepositId, setRefundingDepositId] = useState<number | null>(null);
 
   const { data: deposits = [], isLoading, refetch } = useAdminPendingRefunds();
-  const { mutate: processRefund, isPending } = useProcessManualRefund();
-  const showToast = useUiStore((s) => s.showToast);
-
-  const handleProcessRefund = (depositId: number) => {
-    if (processingId !== null) return;
-
-    const confirmed = window.confirm(
-      'Are you sure you want to process this refund? This action cannot be undone.'
-    );
-
-    if (!confirmed) return;
-
-    setProcessingId(depositId);
-    processRefund(
-      { depositId, reason: 'Manual refund by admin - losing bidder' },
-      {
-        onSuccess: () => {
-          showToast('Refund processed successfully', 'success');
-          setProcessingId(null);
-          refetch();
-        },
-        onError: (err) => {
-          const message =
-            (err as AxiosError<{ message?: string }>).response?.data?.message ??
-            'Failed to process refund. Please try again.';
-          showToast(message, 'error');
-          setProcessingId(null);
-        },
-      }
-    );
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -169,13 +137,10 @@ const DepositsSection = React.memo(function DepositsSection() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleProcessRefund(deposit.depositId)}
-                          disabled={isPending || processingId === deposit.depositId}
-                          className="px-3 py-1.5 text-[12px] font-medium rounded-lg bg-[#7c3aed] text-white hover:bg-[#6d28d9] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          onClick={() => setRefundingDepositId(deposit.depositId)}
+                          className="px-3 py-1.5 text-[12px] font-medium rounded-lg bg-[#16a34a] text-white hover:bg-[#15803d] transition-colors"
                         >
-                          {processingId === deposit.depositId
-                            ? 'Processing...'
-                            : 'Refund'}
+                          Refund
                         </button>
                       </div>
                     </td>
@@ -191,8 +156,15 @@ const DepositsSection = React.memo(function DepositsSection() {
         <DepositDetailModal
           depositId={selectedDepositId}
           onClose={() => setSelectedDepositId(null)}
+        />
+      )}
+
+      {refundingDepositId && (
+        <RefundQRModal
+          depositId={refundingDepositId}
+          onClose={() => setRefundingDepositId(null)}
           onRefundProcessed={() => {
-            setSelectedDepositId(null);
+            setRefundingDepositId(null);
             refetch();
           }}
         />

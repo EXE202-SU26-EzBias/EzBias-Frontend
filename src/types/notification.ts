@@ -10,7 +10,10 @@ export type NotificationType =
   | 'PayoutPaid'
   | 'DisputeOpened'
   | 'DisputeResolved'
-  | 'UserVerified';
+  | 'UserVerified'
+  | 'DepositConfirmed'
+  | 'DepositRefundInitiated'
+  | 'DepositForfeited';
 
 export interface NotificationMeta {
   orderId?: number;
