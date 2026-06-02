@@ -1,6 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { AuctionDetail } from '../../types/auction';
 import { formatCurrency } from '../../utils/formatters';
+import { useAddAuctionToCart } from '../../services/cart.service';
+import { useUiStore } from '../../stores/ui.store';
 
 interface AuctionWonModalProps {
   auction: AuctionDetail;
@@ -10,6 +12,9 @@ interface AuctionWonModalProps {
 
 const AuctionWonModal = ({ auction, onClose, onProceedToPayment }: AuctionWonModalProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const addAuctionToCart = useAddAuctionToCart();
+  const showToast = useUiStore((s) => s.showToast);
 
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
@@ -24,6 +29,17 @@ const AuctionWonModal = ({ auction, onClose, onProceedToPayment }: AuctionWonMod
       prev?.focus();
     };
   }, [onClose]);
+
+  const handleProceedToPayment = async () => {
+    setIsProcessing(true);
+    try {
+      await addAuctionToCart.mutateAsync(auction.auctionId);
+      onProceedToPayment(auction.auctionId);
+    } catch (error: any) {
+      showToast(error.response?.data?.message || 'Failed to add auction to cart', 'error');
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div
@@ -50,15 +66,17 @@ const AuctionWonModal = ({ auction, onClose, onProceedToPayment }: AuctionWonMod
         <div className="flex flex-col gap-3">
           <button
             type="button"
-            onClick={() => onProceedToPayment(auction.auctionId)}
-            className="flex h-11 w-full items-center justify-center rounded-full bg-[#ad93e6] text-sm font-semibold text-white transition-colors hover:bg-[#9d7ed9]"
+            onClick={handleProceedToPayment}
+            disabled={isProcessing}
+            className="flex h-11 w-full items-center justify-center rounded-full bg-[#ad93e6] text-sm font-semibold text-white transition-colors hover:bg-[#9d7ed9] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Proceed to Payment
+            {isProcessing ? 'Processing...' : 'Proceed to Payment'}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-11 w-full items-center justify-center rounded-full border border-[#e6e6e6] text-sm font-medium text-[#737373] transition-colors hover:bg-[#f4f3f7]"
+            disabled={isProcessing}
+            className="flex h-11 w-full items-center justify-center rounded-full border border-[#e6e6e6] text-sm font-medium text-[#737373] transition-colors hover:bg-[#f4f3f7] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Pay Later
           </button>
