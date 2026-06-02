@@ -59,3 +59,14 @@ export function useClearCart() {
     },
   });
 }
+
+export function useAddAuctionToCart() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (auctionId: number) =>
+      http.post(`/api/cart/auction/${auctionId}`).then((r) => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: cartKeys.detail() });
+    },
+  });
+}
