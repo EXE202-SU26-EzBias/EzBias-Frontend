@@ -65,9 +65,27 @@ export function useNotificationHub() {
     connection.on('ReceiveNotification', (notification: { type: string; title: string; body: string; meta?: string }) => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.list() });
 
-      // Invalidate auction queries when deposit is confirmed so user can bid immediately
+      // Invalidate deposit and auction queries when deposit is confirmed so user can bid immediately
       if (notification.type === 'DepositConfirmed') {
-        // Invalidate all auction-related queries to refresh deposit status and bid button
+        // Parse meta to get auctionId if available
+        let auctionId: number | undefined;
+        try {
+          if (notification.meta) {
+            const meta = JSON.parse(notification.meta);
+            auctionId = meta.auctionId;
+          }
+        } catch {
+          // ignore parse errors
+        }
+
+        // Invalidate deposit status queries (all or specific auction)
+        if (auctionId) {
+          queryClient.invalidateQueries({ queryKey: ['deposits', 'status', auctionId] });
+        } else {
+          queryClient.invalidateQueries({ queryKey: ['deposits'] });
+        }
+
+        // Invalidate auction queries to refresh UI
         queryClient.invalidateQueries({ queryKey: ['auction'] });
         queryClient.invalidateQueries({ queryKey: ['auctions'] });
       }
