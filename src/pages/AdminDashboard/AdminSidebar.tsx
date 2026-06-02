@@ -44,6 +44,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Finance',
     items: [
       { id: 'payouts',   label: 'Payouts',   icon: AdminIcons.wallet, pipKey: 'payouts'     },
+      { id: 'deposits',  label: 'Deposits',  icon: AdminIcons.wallet                        },
     ],
   },
   {

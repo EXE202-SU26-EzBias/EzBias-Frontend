@@ -1,10 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { http } from '../lib/axios';
-import type { AdminDashboardOverviewResponse } from '../types/admin';
+import type { AdminDashboardOverviewResponse, AdminDepositListItem, AdminDepositDetailResponse } from '../types/admin';
 
 export const adminDashboardKeys = {
   all: ['admin', 'dashboard'] as const,
   overview: () => [...adminDashboardKeys.all, 'overview'] as const,
+};
+
+export const adminDepositKeys = {
+  all: ['admin', 'deposits'] as const,
+  list: () => [...adminDepositKeys.all, 'list'] as const,
+  detail: (id: number) => [...adminDepositKeys.all, 'detail', id] as const,
 };
 
 export function useAdminDashboardOverview() {
@@ -12,5 +18,32 @@ export function useAdminDashboardOverview() {
     queryKey: adminDashboardKeys.overview(),
     queryFn: () => http.get<AdminDashboardOverviewResponse>('/api/admin/dashboard/overview').then((r) => r.data),
     staleTime: 60_000,
+  });
+}
+
+export function useAdminPendingRefunds() {
+  return useQuery({
+    queryKey: adminDepositKeys.list(),
+    queryFn: () => http.get<AdminDepositListItem[]>('/api/admin/deposits/pending-refunds').then((r) => r.data),
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminDepositDetail(depositId: number) {
+  return useQuery({
+    queryKey: adminDepositKeys.detail(depositId),
+    queryFn: () => http.get<AdminDepositDetailResponse>(`/api/admin/deposits/${depositId}`).then((r) => r.data),
+    enabled: depositId > 0,
+  });
+}
+
+export function useProcessManualRefund() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ depositId, reason }: { depositId: number; reason: string }) =>
+      http.post(`/api/admin/deposits/${depositId}/refund`, { reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminDepositKeys.all });
+    },
   });
 }

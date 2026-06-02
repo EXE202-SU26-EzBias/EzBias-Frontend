@@ -7,7 +7,8 @@ export type AdminPageId =
   | 'auctions'
   | 'payouts'
   | 'analytics'
-  | 'disputes';
+  | 'disputes'
+  | 'deposits';
 
 export interface AdminDashboardOverviewResponse {
   totalUsers: number;
@@ -37,3 +38,33 @@ type NumericKeys<T> = {
 }[keyof T];
 
 export type AdminOverviewNumericKey = NumericKeys<AdminDashboardOverviewResponse>;
+
+// Admin Deposit Management Types
+export interface AdminDepositListItem {
+  depositId: number;
+  auctionId: number;
+  auctionTitle: string;
+  userId: number;
+  userEmail: string;
+  userFullName: string;
+  amount: number;
+  heldAt: string;
+  paymentReference: string | null;
+}
+
+export interface AdminDepositDetailResponse {
+  depositId: number;
+  auctionId: number;
+  auctionTitle: string;
+  auctionStatus: string;
+  winnerId: number | null;
+  userId: number;
+  userEmail: string;
+  userFullName: string;
+  amount: number;
+  state: string;
+  heldAt: string;
+  paymentId: number | null;
+  paymentReference: string | null;
+  createdAt: string;
+}
