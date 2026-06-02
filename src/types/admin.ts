@@ -61,6 +61,9 @@ export interface AdminDepositDetailResponse {
   userId: number;
   userEmail: string;
   userFullName: string;
+  bankName: string | null;
+  bankAccountNumber: string | null;
+  bankAccountName: string | null;
   amount: number;
   state: string;
   heldAt: string;
