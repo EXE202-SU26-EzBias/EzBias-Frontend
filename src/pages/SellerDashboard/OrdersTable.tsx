@@ -326,6 +326,11 @@ const OrdersTable = React.memo(function OrdersTable({
                   <td className="px-4 py-[14px] align-middle">{itemsCell}</td>
                   <td className="px-4 py-[14px] text-[#121212] align-middle font-semibold">
                     {formatCurrency(o.total)}
+                    {o.source === 2 && (
+                      <div className="text-[10px] text-[#16a34a] font-normal mt-0.5">
+                        (Deposit will be deducted at payment)
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-[14px] align-middle">
                     <span
