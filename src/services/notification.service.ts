@@ -39,10 +39,11 @@ export function useMarkReadAll() {
   });
 }
 
-const TOAST_TYPES = new Set(['Outbid', 'AuctionEndingSoon']);
+const TOAST_TYPES = new Set(['Outbid', 'AuctionEndingSoon', 'DepositConfirmed', 'DepositRefundInitiated']);
 
 /** Connects to NotificationHub, invalidates the notification list, and shows
- *  a toast popup for time-sensitive auction events (Outbid, AuctionEndingSoon). */
+ *  a toast popup for time-sensitive auction events (Outbid, AuctionEndingSoon)
+ *  and deposit events (DepositConfirmed, DepositRefundInitiated). */
 export function useNotificationHub() {
   const queryClient = useQueryClient();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -61,11 +62,19 @@ export function useNotificationHub() {
 
     connectionRef.current = connection;
 
-    connection.on('ReceiveNotification', (notification: { type: string; title: string; body: string }) => {
+    connection.on('ReceiveNotification', (notification: { type: string; title: string; body: string; meta?: string }) => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.list() });
 
+      // Invalidate auction queries when deposit is confirmed so user can bid immediately
+      if (notification.type === 'DepositConfirmed') {
+        // Invalidate all auction-related queries to refresh deposit status and bid button
+        queryClient.invalidateQueries({ queryKey: ['auction'] });
+        queryClient.invalidateQueries({ queryKey: ['auctions'] });
+      }
+
       if (TOAST_TYPES.has(notification.type)) {
-        showToast(`${notification.title} — ${notification.body}`, 'error', 4000);
+        const toastType = notification.type === 'DepositConfirmed' ? 'success' : 'error';
+        showToast(`${notification.title} — ${notification.body}`, toastType, 4000);
       }
     });
 
