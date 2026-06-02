@@ -24,7 +24,9 @@ function Field({ label, error, children }: { label: string; error?: { message?: 
 }
 
 function AuctionFormModal({ onClose }: AuctionFormModalProps) {
-  const { data: products = [], isLoading: isProductsLoading } = useProducts();
+  const { data: allProducts = [], isLoading: isProductsLoading } = useProducts();
+  // Filter out products that already have an auction
+  const products = allProducts.filter((p) => !p.isAuction);
   const { register, onSubmit, watch, errors, isPending } = useCreateAuctionForm({ products, isProductsLoading, onSuccess: onClose });
 
   const floorPrice = Number(watch('floorPrice')) || 0;
@@ -64,7 +66,9 @@ function AuctionFormModal({ onClose }: AuctionFormModalProps) {
             <div className="flex flex-col gap-4">
               <Field label="Product" error={errors.productId}>
                 <select className={selectCls} disabled={isProductsLoading} {...register('productId')}>
-                  <option value="0">{isProductsLoading ? 'Loading products…' : 'Select product…'}</option>
+                  <option value="0">
+                    {isProductsLoading ? 'Loading products…' : products.length === 0 ? 'No available products (all are already in auctions)' : 'Select product…'}
+                  </option>
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>{p.name} · {p.artist}</option>
                   ))}
@@ -125,7 +129,7 @@ function AuctionFormModal({ onClose }: AuctionFormModalProps) {
             </button>
             <button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || products.length === 0}
               className="flex h-10 items-center justify-center rounded-full bg-[#ad93e6] px-5 text-[13px] font-semibold text-white transition hover:bg-[#9d7ed9] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isPending ? 'Creating…' : 'Create auction'}

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { http } from '../lib/axios';
 import type { SellerAuction, SellerAuctionStatus } from '../types/seller';
+import { productKeys } from './product.service';
 
 export const sellerAuctionKeys = {
   all: ['seller-auctions'] as const,
@@ -37,6 +38,8 @@ export function useCreateSellerAuction() {
       http.post<SellerAuction>('/api/seller/auctions', payload).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sellerAuctionKeys.all });
+      // Invalidate products to update isAuction flag
+      queryClient.invalidateQueries({ queryKey: productKeys.list() });
     },
   });
 }
@@ -59,6 +62,8 @@ export function useCancelSellerAuction() {
       http.post<SellerAuction>(`/api/seller/auctions/${auctionId}/cancel`).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sellerAuctionKeys.all });
+      // Invalidate products to update isAuction flag
+      queryClient.invalidateQueries({ queryKey: productKeys.list() });
     },
   });
 }
@@ -80,6 +85,8 @@ export function useRelistSellerAuction() {
       http.post<SellerAuction>(`/api/seller/auctions/${auctionId}/relist`, payload).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sellerAuctionKeys.all });
+      // Invalidate products to update isAuction flag
+      queryClient.invalidateQueries({ queryKey: productKeys.list() });
     },
   });
 }
