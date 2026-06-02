@@ -27,10 +27,21 @@ function AuctionFormModal({ onClose }: AuctionFormModalProps) {
   const { data: allProducts = [], isLoading: isProductsLoading } = useProducts();
   // Filter out products that already have an auction
   const products = allProducts.filter((p) => !p.isAuction);
-  const { register, onSubmit, watch, errors, isPending } = useCreateAuctionForm({ products, isProductsLoading, onSuccess: onClose });
+  const { register, onSubmit, watch, setValue, errors, isPending } = useCreateAuctionForm({ products, isProductsLoading, onSuccess: onClose });
 
+  const productId = Number(watch('productId')) || 0;
   const floorPrice = Number(watch('floorPrice')) || 0;
   const requiredDeposit = Math.round(floorPrice * DEPOSIT_FRACTION_OF_FLOOR);
+
+  // Auto-fill floor price when product is selected
+  useEffect(() => {
+    if (productId > 0) {
+      const selectedProduct = products.find((p) => p.id === productId);
+      if (selectedProduct) {
+        setValue('floorPrice', selectedProduct.price);
+      }
+    }
+  }, [productId, products, setValue]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -77,7 +88,10 @@ function AuctionFormModal({ onClose }: AuctionFormModalProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Floor price (VNĐ)" error={errors.floorPrice}>
-                  <input type="number" min="1" placeholder="180000" className={inputCls} {...register('floorPrice')} />
+                  <div className="flex h-10 items-center rounded-lg border border-dashed border-[#e6e6e6] bg-[#f9f8fc] px-3 text-[14px] text-[#121212]">
+                    {floorPrice > 0 ? formatCurrency(floorPrice) : '—'}
+                  </div>
+                  <input type="hidden" {...register('floorPrice')} />
                 </Field>
                 <Field label="Reserve price (VNĐ)" error={errors.reservePrice}>
                   <input type="number" min="0" placeholder="250000" className={inputCls} {...register('reservePrice')} />

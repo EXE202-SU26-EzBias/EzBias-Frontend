@@ -31,7 +31,7 @@ export function useCreateAuctionForm({ products, isProductsLoading, onSuccess }:
   const { mutate, isPending } = useCreateSellerAuction();
   const showToast = useUiStore((s) => s.showToast);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<AuctionFormValues>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<AuctionFormValues>({
     resolver: zodResolver(schema) as Resolver<AuctionFormValues>,
     mode: 'onChange',
     defaultValues: {
@@ -60,7 +60,7 @@ export function useCreateAuctionForm({ products, isProductsLoading, onSuccess }:
     );
   });
 
-  return { register, onSubmit, watch, errors, isPending, products, isProductsLoading };
+  return { register, onSubmit, watch, setValue, errors, isPending, products, isProductsLoading };
 }
 
 // ─── Relist ──────────────────────────────────────────────────────────────────
