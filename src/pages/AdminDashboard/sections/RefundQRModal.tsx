@@ -33,21 +33,22 @@ const RefundQRModal = React.memo(function RefundQRModal({
     if (!bankName) return '';
     const name = bankName.toLowerCase();
     
+    // Check specific bank names first before checking abbreviations to avoid false matches
     if (name.includes('vietcombank') || name.includes('vcb')) return 'VCB';
     if (name.includes('techcombank') || name.includes('tcb')) return 'TCB';
     if (name.includes('vietinbank') || name.includes('ctg')) return 'CTG';
     if (name.includes('agribank')) return 'AGR';
-    if (name.includes('bidv')) return 'BIDV';
+    if (name.includes('sacombank') || name.includes('stb')) return 'STB';
     if (name.includes('mbbank') || name.includes('mb')) return 'MB';
+    if (name.includes('vpbank') || name.includes('vpb')) return 'VPB';
+    if (name.includes('tpbank') || name.includes('tpb')) return 'TPB';
+    if (name.includes('hdbank') || name.includes('hdb')) return 'HDB';
+    if (name.includes('seabank') || name.includes('seab')) return 'SEAB';
+    if (name.includes('bidv')) return 'BIDV';
     if (name.includes('acb')) return 'ACB';
-    if (name.includes('vpbank')) return 'VPB';
-    if (name.includes('sacombank')) return 'STB';
-    if (name.includes('tpbank')) return 'TPB';
     if (name.includes('vib')) return 'VIB';
-    if (name.includes('hdbank')) return 'HDB';
     if (name.includes('ocb')) return 'OCB';
     if (name.includes('shb')) return 'SHB';
-    if (name.includes('seabank')) return 'SEAB';
     
     return 'VCB';
   };
