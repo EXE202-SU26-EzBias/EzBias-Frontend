@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ErrorBoundary from './components/layout/ErrorBoundary';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import VideoCallRoot from './components/video-call/VideoCallRoot';
+import GlobalHooks from './components/providers/GlobalHooks';
 import { queryClient } from './lib/queryClient';
 
 const LandingPage = lazy(() => import('./pages/LandingPage/LandingPage'));
@@ -32,6 +33,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ErrorBoundary>
+          <GlobalHooks />
           <Suspense fallback={<PageLoader />}>
             <VideoCallRoot />
             <Routes>

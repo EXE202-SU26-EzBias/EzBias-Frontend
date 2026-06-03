@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NAV_LINKS } from '../../constants/landing';
 import { useCart } from '../../services/cart.service';
-import { useNotificationHub } from '../../services/notification.service';
-import { useChatHub } from '../../features/chat/useChatHub';
 import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 import NotificationBell from '../ui/NotificationBell';
@@ -18,10 +16,6 @@ const Header = () => {
   const openLogin = useUiStore((s) => s.openLogin);
 
   const initials = (user?.username ?? user?.email ?? '??').slice(0, 2).toUpperCase();
-
-  // Connect to SignalR notification hub when authenticated
-  useNotificationHub();
-  useChatHub();
 
   return (
     <div className="sticky top-0 z-[100]">
