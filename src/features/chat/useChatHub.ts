@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { chatKeys } from '../../services/chat.service';
 import { useAuthStore } from '../../stores/auth.store';
 import type { ChatMessage } from '../../types/chat';
+import type { MessagePage } from '../../types/chat';
 
 const HUB_URL = `${(import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')}/hubs/chat`;
 
@@ -25,8 +26,32 @@ export function useChatHub() {
     connectionRef.current = connection;
 
     connection.on('ReceiveMessage', (message: ChatMessage) => {
-      // Invalidate the specific conversation's messages and the conversation list
-      queryClient.invalidateQueries({ queryKey: chatKeys.messages(message.conversationId) });
+      // Optimistically add the message to the cache immediately
+      queryClient.setQueryData<{ pages: MessagePage[]; pageParams: (number | null)[] }>(
+        chatKeys.messages(message.conversationId),
+        (old) => {
+          if (!old) return old;
+          
+          // Add message to the first page (most recent messages)
+          const updatedPages = [...old.pages];
+          if (updatedPages.length > 0) {
+            const firstPage = { ...updatedPages[0] };
+            // Check if message already exists to avoid duplicates
+            const exists = firstPage.messages.some(m => m.id === message.id);
+            if (!exists) {
+              firstPage.messages = [...firstPage.messages, message];
+              updatedPages[0] = firstPage;
+            }
+          }
+          
+          return {
+            ...old,
+            pages: updatedPages,
+          };
+        }
+      );
+
+      // Also invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: chatKeys.conversations() });
     });
 

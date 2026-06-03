@@ -60,6 +60,21 @@ export function useSendMessage(conversationId: number) {
   });
 }
 
+export function useUploadChatImage(conversationId: number) {
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      const response = await http.post<{ imageUrl: string }>(
+        `/api/conversations/${conversationId}/upload-image`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
+      return response.data.imageUrl;
+    },
+  });
+}
+
 export function useMarkRead(conversationId: number) {
   const queryClient = useQueryClient();
   return useMutation({

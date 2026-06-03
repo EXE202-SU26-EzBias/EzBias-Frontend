@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useConversations } from '../../services/chat.service';
 import { formatTimeAgo } from '../../utils/formatters';
 import type { Conversation } from '../../types/chat';
@@ -9,6 +10,13 @@ interface ConversationListProps {
 
 const ConversationList = ({ activeId, onSelect }: ConversationListProps) => {
   const { data: conversations = [], isLoading } = useConversations();
+  const [, setTick] = useState(0);
+
+  // Update time display every minute
+  useEffect(() => {
+    const timer = setInterval(() => setTick(t => t + 1), 60_000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (isLoading) {
     return (
