@@ -1,5 +1,4 @@
 import { useEffect, type ReactNode } from 'react';
-import { DEPOSIT_FRACTION_OF_FLOOR } from '../../constants/auction';
 import { useRelistAuctionForm } from '../../features/seller/useAuctionForm';
 import type { SellerAuction } from '../../types/seller';
 import { formatCurrency } from '../../utils/formatters';
@@ -23,10 +22,9 @@ function Field({ label, error, children }: { label: string; error?: { message?: 
 }
 
 function RelistAuctionModal({ auction, onClose }: RelistAuctionModalProps) {
-  const { register, onSubmit, watch, errors, isPending } = useRelistAuctionForm({ auction, onSuccess: onClose });
+  const { register, onSubmit, errors, isPending } = useRelistAuctionForm({ auction, onSuccess: onClose });
 
-  const floorPrice = Number(watch('floorPrice')) || 0;
-  const requiredDeposit = Math.round(floorPrice * DEPOSIT_FRACTION_OF_FLOOR);
+  const floorPrice = auction.floorPrice;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -47,7 +45,6 @@ function RelistAuctionModal({ auction, onClose }: RelistAuctionModalProps) {
           <div>
             <h2 id="relist-modal-title" className="text-[17px] font-bold text-[#121212]">Relist Auction</h2>
             <p className="text-[12px] text-[#737373] mt-0.5">
-              Product #{auction.productId} · Previous floor: {formatCurrency(auction.floorPrice)}
             </p>
           </div>
           <button
@@ -66,21 +63,26 @@ function RelistAuctionModal({ auction, onClose }: RelistAuctionModalProps) {
           <div className="flex-1 overflow-y-auto px-6 py-5">
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Floor price (VNĐ)" error={errors.floorPrice}>
-                  <input type="number" min="1" className={inputCls} {...register('floorPrice')} />
+                <Field label="Floor price (VNĐ)">
+                  <div className="flex h-10 items-center rounded-lg border border-dashed border-[#e6e6e6] bg-[#f9f8fc] px-3 text-[14px] text-[#121212]">
+                    {formatCurrency(floorPrice)}
+                  </div>
                 </Field>
                 <Field label="Reserve price (VNĐ)" error={errors.reservePrice}>
                   <input type="number" min="0" className={inputCls} {...register('reservePrice')} />
                 </Field>
               </div>
 
-              <Field label="Required deposit to bid (auto)">
-                <div className="flex h-10 items-center rounded-lg border border-dashed border-[#e6e6e6] bg-[#f9f8fc] px-3 text-[14px] text-[#121212]">
-                  {floorPrice > 0 ? formatCurrency(requiredDeposit) : '—'}
-                  <span className="ml-2 text-[12px] text-[#737373]">
-                    ({Math.round(DEPOSIT_FRACTION_OF_FLOOR * 100)}% of floor price)
-                  </span>
-                </div>
+              <Field label="Required deposit to bid (VNĐ)" error={errors.requiredDepositAmount}>
+                <input
+                  type="number"
+                  min="0"
+                  step="1000"
+                  max={floorPrice > 0 ? floorPrice : undefined}
+                  placeholder="0 = no deposit required"
+                  className={inputCls}
+                  {...register('requiredDepositAmount')}
+                />
               </Field>
 
               <Field label="Ends at" error={errors.endsAt}>

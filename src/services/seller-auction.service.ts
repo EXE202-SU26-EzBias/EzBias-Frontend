@@ -13,6 +13,7 @@ export interface CreateSellerAuctionPayload {
   floorPrice: number;
   reservePrice: number;
   endsAt: string;
+  requiredDepositAmount: number;
   isUrgent: boolean;
   hasProofImage: boolean;
   extensionSeconds: number;
@@ -69,9 +70,9 @@ export function useCancelSellerAuction() {
 }
 
 export interface RelistSellerAuctionPayload {
-  floorPrice: number;
   reservePrice: number;
   endsAt: string;
+  requiredDepositAmount: number;
   isUrgent: boolean;
   hasProofImage: boolean;
   extensionSeconds: number;

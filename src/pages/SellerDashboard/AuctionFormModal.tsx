@@ -31,14 +31,14 @@ function AuctionFormModal({ onClose }: AuctionFormModalProps) {
 
   const productId = Number(watch('productId')) || 0;
   const floorPrice = Number(watch('floorPrice')) || 0;
-  const requiredDeposit = Math.round(floorPrice * DEPOSIT_FRACTION_OF_FLOOR);
 
-  // Auto-fill floor price when product is selected
+  // Auto-fill floor price and suggest a 10% deposit when a product is selected
   useEffect(() => {
     if (productId > 0) {
       const selectedProduct = products.find((p) => p.id === productId);
       if (selectedProduct) {
         setValue('floorPrice', selectedProduct.price);
+        setValue('requiredDepositAmount', Math.round(selectedProduct.price * DEPOSIT_FRACTION_OF_FLOOR));
       }
     }
   }, [productId, products, setValue]);
@@ -98,13 +98,16 @@ function AuctionFormModal({ onClose }: AuctionFormModalProps) {
                 </Field>
               </div>
 
-              <Field label="Required deposit to bid (auto)">
-                <div className="flex h-10 items-center rounded-lg border border-dashed border-[#e6e6e6] bg-[#f9f8fc] px-3 text-[14px] text-[#121212]">
-                  {floorPrice > 0 ? formatCurrency(requiredDeposit) : '—'}
-                  <span className="ml-2 text-[12px] text-[#737373]">
-                    ({Math.round(DEPOSIT_FRACTION_OF_FLOOR * 100)}% of floor price)
-                  </span>
-                </div>
+              <Field label="Required deposit to bid (VNĐ)" error={errors.requiredDepositAmount}>
+                <input
+                  type="number"
+                  min="0"
+                  step="1000"
+                  max={floorPrice > 0 ? floorPrice : undefined}
+                  placeholder="0 = no deposit required"
+                  className={inputCls}
+                  {...register('requiredDepositAmount')}
+                />
               </Field>
 
               <Field label="Ends at" error={errors.endsAt}>

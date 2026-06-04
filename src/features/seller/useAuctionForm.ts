@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { AxiosError } from 'axios';
 import { useForm, type Resolver } from 'react-hook-form';
 import { z } from 'zod';
+import { DEPOSIT_FRACTION_OF_FLOOR } from '../../constants/auction';
 import { useCreateSellerAuction, useRelistSellerAuction } from '../../services/seller-auction.service';
 import { useUiStore } from '../../stores/ui.store';
 import type { SellerAuction, SellerProduct } from '../../types/seller';
@@ -10,6 +11,7 @@ const schema = z.object({
   productId: z.coerce.number().min(1, 'Select a product'),
   floorPrice: z.coerce.number().min(1, 'Must be greater than 0'),
   reservePrice: z.coerce.number().min(0, 'Cannot be negative'),
+  requiredDepositAmount: z.coerce.number().min(0, 'Cannot be negative'),
   endsAt: z.string()
     .min(1, 'Required')
     .refine((val) => new Date(val) > new Date(), { message: 'End time must be in the future' }),
@@ -17,6 +19,9 @@ const schema = z.object({
   hasProofImage: z.boolean(),
   extensionSeconds: z.coerce.number().min(0),
   triggerBeforeEnd: z.coerce.number().min(0),
+}).refine((v) => v.requiredDepositAmount <= v.floorPrice, {
+  message: 'Deposit cannot exceed the floor price',
+  path: ['requiredDepositAmount'],
 });
 
 export type AuctionFormValues = z.infer<typeof schema>;
@@ -38,6 +43,7 @@ export function useCreateAuctionForm({ products, isProductsLoading, onSuccess }:
       productId: 0,
       floorPrice: 0,
       reservePrice: 0,
+      requiredDepositAmount: 0,
       endsAt: '',
       isUrgent: false,
       hasProofImage: false,
@@ -47,7 +53,6 @@ export function useCreateAuctionForm({ products, isProductsLoading, onSuccess }:
   });
 
   const onSubmit = handleSubmit((values) => {
-    // The required bid deposit is derived server-side from the floor price; nothing to submit here.
     mutate(
       { ...values, endsAt: new Date(values.endsAt).toISOString() },
       {
@@ -66,8 +71,8 @@ export function useCreateAuctionForm({ products, isProductsLoading, onSuccess }:
 // ─── Relist ──────────────────────────────────────────────────────────────────
 
 const relistSchema = z.object({
-  floorPrice: z.coerce.number().min(1, 'Must be greater than 0'),
   reservePrice: z.coerce.number().min(0, 'Cannot be negative'),
+  requiredDepositAmount: z.coerce.number().min(0, 'Cannot be negative'),
   endsAt: z.string()
     .min(1, 'Required')
     .refine((val) => new Date(val) > new Date(), { message: 'End time must be in the future' }),
@@ -102,8 +107,8 @@ export function useRelistAuctionForm({ auction, onSuccess }: UseRelistAuctionFor
     resolver: zodResolver(relistSchema) as Resolver<RelistFormValues>,
     mode: 'onChange',
     defaultValues: {
-      floorPrice: auction.floorPrice,
       reservePrice: 0,
+      requiredDepositAmount: Math.round(auction.floorPrice * DEPOSIT_FRACTION_OF_FLOOR),
       endsAt: defaultEndsAt,
       isUrgent: false,
       hasProofImage: false,
@@ -113,7 +118,6 @@ export function useRelistAuctionForm({ auction, onSuccess }: UseRelistAuctionFor
   });
 
   const onSubmit = handleSubmit((values) => {
-    // The required bid deposit is derived server-side from the floor price; nothing to submit here.
     mutate(
       {
         auctionId: auction.auctionId,
