@@ -10,6 +10,25 @@ export type AdminPageId =
   | 'disputes'
   | 'deposits';
 
+export interface AdminTopSellerCommission {
+  sellerId: number;
+  username: string;
+  fullName: string;
+  orderCount: number;
+  grossRevenue: number;
+  commissionRevenue: number;
+  netRevenue: number;
+}
+
+export interface AdminMonthlySalesPoint {
+  month: string;   // "yyyy-MM"
+  label: string;   // "Jan 2026"
+  orderCount: number;
+  grossSales: number;
+  commissionRevenue: number;
+  sellerNetAmount: number;
+}
+
 export interface AdminDashboardOverviewResponse {
   totalUsers: number;
   newUsersToday: number;
@@ -28,9 +47,15 @@ export interface AdminDashboardOverviewResponse {
   grossRevenue: number;
   refundedAmount: number;
   netRevenue: number;
+  totalCommissionRevenue: number;
+  commissionRevenueToday: number;
+  commissionRevenueLast7Days: number;
+  commissionRevenueLast30Days: number;
   openDisputes: number;
   pendingRefunds: number;
   pendingPayouts: number;
+  topSellersByNetRevenue: AdminTopSellerCommission[];
+  monthlySales: AdminMonthlySalesPoint[];
 }
 
 type NumericKeys<T> = {
