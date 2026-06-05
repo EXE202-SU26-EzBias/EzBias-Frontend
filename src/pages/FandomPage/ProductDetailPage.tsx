@@ -11,6 +11,7 @@ import { useCatalogProductDetail } from '../../services/fandom.service';
 import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 import { formatCurrency } from '../../utils/formatters';
+import ReviewsSection from '../../components/product/ReviewsSection';
 import type { Conversation } from '../../types/chat';
 
 const CONDITION_LABELS: Record<number, string> = {
@@ -70,6 +71,7 @@ const ProductDetailPage = () => {
         ) : isError || !product ? (
           <p className="py-16 text-center text-sm text-[#737373]">Product not found.</p>
         ) : (
+          <>
           <div className="mt-6 flex flex-col gap-10 md:flex-row md:gap-12">
             {/* ── Images ── */}
             <div className="flex flex-col gap-3 md:w-80 md:shrink-0">
@@ -232,6 +234,8 @@ const ProductDetailPage = () => {
               )}
             </div>
           </div>
+          <ReviewsSection productId={product.id} />
+          </>
         )}
       </div>
     </PageLayout>
