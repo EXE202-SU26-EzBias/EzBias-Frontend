@@ -35,10 +35,10 @@ export function useAdminPayoutsFeature() {
   }, []);
 
   const handleApprove = useCallback(
-    (adminNote?: string) => {
+    (bankTransferRef?: string) => {
       if (!selectedPayout) return;
       approveMutate(
-        { payoutId: selectedPayout.payoutId, payload: { adminNote } },
+        { payoutId: selectedPayout.payoutId, payload: { bankTransferRef } },
         {
           onSuccess: () => {
             showToast('Payout approved successfully.', 'success');

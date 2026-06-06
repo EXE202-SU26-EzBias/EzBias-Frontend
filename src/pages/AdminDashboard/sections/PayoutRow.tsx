@@ -17,7 +17,6 @@ interface PayoutRowProps {
 const PayoutRow = React.memo(function PayoutRow({ payout, onApprove, onReject }: PayoutRowProps) {
   const badge = STATUS_BADGE[payout.status];
   const isPending = payout.status === 1;
-  const ref = payout.bankTransferRef;
 
   return (
     <tr className="border-b border-[rgba(230,230,230,0.5)] hover:bg-[rgba(173,147,230,0.04)] transition-colors">
@@ -62,15 +61,6 @@ const PayoutRow = React.memo(function PayoutRow({ payout, onApprove, onReject }:
       {/* Created */}
       <td className="px-4 py-[14px] align-middle text-[12px] text-[#737373] whitespace-nowrap">
         {formatTimeAgo(payout.createdAt)}
-      </td>
-
-      {/* Bank ref */}
-      <td className="px-4 py-[14px] align-middle text-[11px] font-mono text-[#737373] max-w-[140px] truncate">
-        {ref ? (
-          <span title={ref}>{ref.length > 16 ? `${ref.slice(0, 14)}…` : ref}</span>
-        ) : (
-          <span className="text-[#b3b3b3]">—</span>
-        )}
       </td>
 
       {/* Actions */}

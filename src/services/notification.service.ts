@@ -39,7 +39,7 @@ export function useMarkReadAll() {
   });
 }
 
-const TOAST_TYPES = new Set(['Outbid', 'AuctionEndingSoon', 'DepositConfirmed', 'DepositRefundInitiated']);
+const TOAST_TYPES = new Set(['Outbid', 'AuctionEndingSoon', 'DepositConfirmed', 'DepositRefundInitiated', 'PayoutPaid']);
 
 /** Connects to NotificationHub, invalidates the notification list, and shows
  *  a toast popup for time-sensitive auction events (Outbid, AuctionEndingSoon)
@@ -91,7 +91,10 @@ export function useNotificationHub() {
       }
 
       if (TOAST_TYPES.has(notification.type)) {
-        const toastType = notification.type === 'DepositConfirmed' ? 'success' : 'error';
+        const toastType =
+          notification.type === 'DepositConfirmed' || notification.type === 'PayoutPaid'
+            ? 'success'
+            : 'error';
         showToast(`${notification.title} — ${notification.body}`, toastType, 4000);
       }
     });

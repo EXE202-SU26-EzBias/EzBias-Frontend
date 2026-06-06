@@ -15,7 +15,7 @@ const TABS: { id: FilterTab; label: string }[] = [
   { id: 3,     label: 'Rejected' },
 ];
 
-const COLUMNS = ['Seller', 'Order', 'Amount', 'Status', 'Created', 'Bank Ref', ''] as const;
+const COLUMNS = ['Seller', 'Order', 'Amount', 'Status', 'Created', ''] as const;
 
 function SkeletonRow() {
   return (
@@ -24,7 +24,7 @@ function SkeletonRow() {
         <td key={i} className="px-4 py-[14px]">
           <div
             className="h-4 rounded bg-[#f0f0f0] animate-pulse"
-            style={{ width: i === 0 ? 140 : i === 6 ? 120 : 80 }}
+            style={{ width: i === 0 ? 140 : i === COLUMNS.length - 1 ? 120 : 80 }}
           />
         </td>
       ))}
