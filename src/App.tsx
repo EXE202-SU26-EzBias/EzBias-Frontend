@@ -20,6 +20,7 @@ const CheckoutPage = lazy(() => import('./pages/CheckoutPage/CheckoutPage'));
 const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage/OrderConfirmationPage'));
 const PaymentPage = lazy(() => import('./pages/PaymentPage/PaymentPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage/PrivacyPolicyPage'));
+const AccountDeletionPage = lazy(() => import('./pages/AccountDeletionPage/AccountDeletionPage'));
 
 function PageLoader() {
   return (
@@ -51,6 +52,7 @@ function App() {
               <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
               <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
               <Route path="/payment/:paymentId" element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
+              <Route path="/account-deletion" element={<AccountDeletionPage />} />
             </Routes>
           </Suspense>
         </ErrorBoundary>
