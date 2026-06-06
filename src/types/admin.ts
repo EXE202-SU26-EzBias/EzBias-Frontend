@@ -84,6 +84,9 @@ export interface PayoutSellerSummary {
   avatarUrl: string;
   avgSellerRating: number;
   totalRatings: number;
+  bankName: string | null;
+  bankAccountNumber: string | null;
+  bankAccountName: string | null;
 }
 
 export interface AdminPayoutListItem {
@@ -100,7 +103,7 @@ export interface AdminPayoutListItem {
 }
 
 export interface ApprovePayoutPayload {
-  adminNote?: string;
+  bankTransferRef?: string;
 }
 
 export interface RejectPayoutPayload {
