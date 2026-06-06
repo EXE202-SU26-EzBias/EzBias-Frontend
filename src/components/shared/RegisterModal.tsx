@@ -101,7 +101,19 @@ const RegisterModal = () => {
             {isPending ? 'Creating…' : 'Create Account'}
           </button>
 
-          <p className="mb-4 text-[9px] text-[#7c838a]">
+          <p className="mb-2 text-[9px] text-[#7c838a]">
+            By creating an account, you agree to our{' '}
+            <a
+              href="/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#9b84ec] hover:underline"
+            >
+              Privacy Policy
+            </a>
+            .
+          </p>
+          <p className="text-[9px] text-[#7c838a]">
             Already have an account?{' '}
             <span className="cursor-pointer text-[#9b84ec]" onClick={openLogin}>
               Login

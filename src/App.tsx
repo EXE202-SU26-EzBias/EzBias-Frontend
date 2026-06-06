@@ -19,6 +19,7 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard/AdminDashboard'
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage/CheckoutPage'));
 const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage/OrderConfirmationPage'));
 const PaymentPage = lazy(() => import('./pages/PaymentPage/PaymentPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage/PrivacyPolicyPage'));
 
 function PageLoader() {
   return (
@@ -44,6 +45,7 @@ function App() {
               <Route path="/auction/:id" element={<AuctionDetailPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="/seller" element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="Admin"><AdminDashboard /></ProtectedRoute>} />
               <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
