@@ -64,6 +64,49 @@ type NumericKeys<T> = {
 
 export type AdminOverviewNumericKey = NumericKeys<AdminDashboardOverviewResponse>;
 
+// Admin Payout Management Types
+// status: 1 = Pending, 2 = Approved, 3 = Rejected
+export type PayoutStatus = 1 | 2 | 3;
+
+export interface PayoutOrderSummary {
+  id: number;
+  userId: number;
+  sellerId: number;
+  total: number;
+  status: number;
+  createdAt: string;
+}
+
+export interface PayoutSellerSummary {
+  id: number;
+  username: string;
+  fullName: string;
+  avatarUrl: string;
+  avgSellerRating: number;
+  totalRatings: number;
+}
+
+export interface AdminPayoutListItem {
+  payoutId: number;
+  orderId: number;
+  sellerId: number;
+  amount: number;
+  status: PayoutStatus;
+  createdAt: string;
+  paidAt: string | null;
+  bankTransferRef: string | null;
+  order: PayoutOrderSummary;
+  seller: PayoutSellerSummary;
+}
+
+export interface ApprovePayoutPayload {
+  adminNote?: string;
+}
+
+export interface RejectPayoutPayload {
+  reason: string;
+}
+
 // Admin Deposit Management Types
 export interface AdminDepositListItem {
   depositId: number;

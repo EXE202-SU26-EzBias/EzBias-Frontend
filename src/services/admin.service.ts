@@ -1,10 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { http } from '../lib/axios';
-import type { AdminDashboardOverviewResponse, AdminDepositListItem, AdminDepositDetailResponse } from '../types/admin';
+import type {
+  AdminDashboardOverviewResponse,
+  AdminDepositListItem,
+  AdminDepositDetailResponse,
+  AdminPayoutListItem,
+  ApprovePayoutPayload,
+  RejectPayoutPayload,
+} from '../types/admin';
 
 export const adminDashboardKeys = {
   all: ['admin', 'dashboard'] as const,
   overview: () => [...adminDashboardKeys.all, 'overview'] as const,
+};
+
+export const adminPayoutKeys = {
+  all: ['admin', 'payouts'] as const,
+  list: () => [...adminPayoutKeys.all, 'list'] as const,
 };
 
 export const adminDepositKeys = {
@@ -18,6 +30,36 @@ export function useAdminDashboardOverview() {
     queryKey: adminDashboardKeys.overview(),
     queryFn: () => http.get<AdminDashboardOverviewResponse>('/api/admin/dashboard/overview').then((r) => r.data),
     staleTime: 60_000,
+  });
+}
+
+export function useAdminPayouts() {
+  return useQuery({
+    queryKey: adminPayoutKeys.list(),
+    queryFn: () => http.get<AdminPayoutListItem[]>('/api/admin/payouts').then((r) => r.data),
+    staleTime: 30_000,
+  });
+}
+
+export function useApprovePayout() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ payoutId, payload }: { payoutId: number; payload: ApprovePayoutPayload }) =>
+      http.put(`/api/admin/payouts/${payoutId}/approve`, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminPayoutKeys.all });
+    },
+  });
+}
+
+export function useRejectPayout() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ payoutId, payload }: { payoutId: number; payload: RejectPayoutPayload }) =>
+      http.put(`/api/admin/payouts/${payoutId}/reject`, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminPayoutKeys.all });
+    },
   });
 }
 
