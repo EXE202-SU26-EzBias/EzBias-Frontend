@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import PageLayout from '../../components/layout/PageLayout';
 
-const LAST_UPDATED = 'June 2025';
+const LAST_UPDATED = 'June 2026';
 
 interface PrivacySectionData {
   id: string;
@@ -212,11 +212,7 @@ const SECTIONS: PrivacySectionData[] = [
           We do not sell your personal information. We share data only in the limited circumstances described below:
         </P>
         <p className="mt-4 text-sm font-semibold text-[#121212] md:text-base">Third-party service providers:</p>
-        <UL
-          items={[
-            'SePay — payment processing and transaction webhooks',
-          ]}
-        />
+        <UL items={['SePay — payment processing and transaction webhooks']} />
         <P>
           SePay processes payment data only as necessary to complete your transactions and is bound by applicable
           financial data protection obligations.
