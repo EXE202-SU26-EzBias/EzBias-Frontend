@@ -40,6 +40,7 @@ export interface DisputeResponse {
   adminNote: string | null;
   createdAt: string;
   resolvedAt: string | null;
+  refundProcessed: boolean;
   refundPayoutInfo: RefundPayoutInfo | null;
   items: DisputeItem[];
 }

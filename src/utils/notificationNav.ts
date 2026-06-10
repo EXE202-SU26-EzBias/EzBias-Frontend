@@ -28,6 +28,7 @@ export function getNotificationRoute(notification: NotificationItem): string | n
 
     case 'DisputeOpened':
     case 'DisputeResolved':
+    case 'DisputeRefundCompleted':
       return '/seller';
 
     case 'UserVerified':
