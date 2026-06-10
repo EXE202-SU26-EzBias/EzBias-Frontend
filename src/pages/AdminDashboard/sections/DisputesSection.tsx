@@ -59,7 +59,7 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
 
   const busy = approving || rejecting || refunding;
   const isOpen = status === DISPUTE_STATUS.OPEN;
-  const isApproved = status === DISPUTE_STATUS.APPROVED;
+  const isApproved = status === DISPUTE_STATUS.RESOLVED_BUYER;
   const hasBankInfo = !!(refundPayoutInfo?.bankName || refundPayoutInfo?.bankAccountNumber || refundPayoutInfo?.bankAccountName);
 
   const handleApprove = useCallback(() => {
