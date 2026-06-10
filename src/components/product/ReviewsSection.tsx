@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import StarRating from '../ui/StarRating';
 import { useReviewForm } from '../../features/review/useReviewForm';
 import {
@@ -24,11 +24,38 @@ const ReviewsSection = ({ productId }: ReviewsSectionProps) => {
   const { data: eligibility } = useReviewEligibility(productId, isAuthenticated);
 
   const existingReview = eligibility?.existingReview ?? null;
-  const form = useReviewForm(productId, existingReview);
-  const { mutate: deleteReview, isPending: isDeleting } = useDeleteReview(productId);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const form = useReviewForm(productId, existingReview, () => setIsEditing(false));
+  const { mutate: deleteReview, isPending: isDeleting } = useDeleteReview(productId);
 
   const showToast = useUiStore((s) => s.showToast);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [menuOpen]);
+
+  const handleEdit = () => {
+    setMenuOpen(false);
+    setConfirmingDelete(false);
+    setIsEditing(true);
+  };
+
+  const handleDeleteOption = () => {
+    setMenuOpen(false);
+    setIsEditing(false);
+    setConfirmingDelete(true);
+  };
 
   const handleDelete = () => {
     if (!existingReview) return;
@@ -80,21 +107,113 @@ const ReviewsSection = ({ productId }: ReviewsSectionProps) => {
                     </span>
                   )}
                 </div>
-                <span className="text-[11px] text-[#a3a3a3]">
-                  {formatTimeAgo(review.createdAt)}
-                  {review.updatedAt ? ' (edited)' : ''}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-[#a3a3a3]">
+                    {formatTimeAgo(review.createdAt)}
+                    {review.updatedAt ? ' (edited)' : ''}
+                  </span>
+                  {review.userId === currentUserId && (
+                    <div className="relative" ref={menuRef}>
+                      <button
+                        type="button"
+                        aria-label="Review options"
+                        onClick={() => setMenuOpen((o) => !o)}
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-[#737373] transition-colors hover:bg-[#f0edf7] hover:text-[#7c3aed]"
+                      >
+                        <span className="text-lg font-bold leading-none">:</span>
+                      </button>
+                      {menuOpen && (
+                        <div className="absolute right-0 top-7 z-10 w-32 overflow-hidden rounded-xl border border-[#e6e6e6] bg-white py-1 shadow-lg">
+                          <button
+                            type="button"
+                            onClick={handleEdit}
+                            className="block w-full px-4 py-2 text-left text-[13px] font-medium text-[#121212] transition-colors hover:bg-[#faf9fc]"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleDeleteOption}
+                            className="block w-full px-4 py-2 text-left text-[13px] font-medium text-[#dc2626] transition-colors hover:bg-[#fef2f2]"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
               <StarRating value={review.stars} size={14} className="mt-1.5" />
-              {review.comment && (
-                <p className="mt-2 text-sm leading-relaxed text-[#525252]">{review.comment}</p>
+              {review.userId === currentUserId && isEditing ? (
+                <form onSubmit={form.onSubmit} className="mt-3 flex flex-col gap-3">
+                  <StarRating value={form.stars} onChange={form.setStars} size={24} />
+                  {form.errors.stars && (
+                    <p className="text-[12px] text-[#ef4343]">{form.errors.stars.message}</p>
+                  )}
+                  <textarea
+                    {...form.register('comment')}
+                    rows={3}
+                    placeholder="Share your experience with this product (optional)"
+                    className="w-full resize-none rounded-xl border border-[#e6e6e6] bg-white px-3.5 py-2.5 text-sm text-[#121212] outline-none transition-colors placeholder:text-[#a3a3a3] focus:border-[#ad93e6]"
+                  />
+                  {form.errors.comment && (
+                    <p className="text-[12px] text-[#ef4343]">{form.errors.comment.message}</p>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="submit"
+                      disabled={form.isPending}
+                      className="inline-flex h-9 items-center rounded-full bg-[#ad93e6] px-5 text-[13px] font-semibold text-white transition-colors hover:bg-[#9d7ed9] disabled:opacity-50"
+                    >
+                      {form.isPending ? 'Saving…' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(false)}
+                      className="text-[13px] font-medium text-[#737373] hover:text-[#121212]"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <>
+                  {review.comment && (
+                    <p className="mt-2 text-sm leading-relaxed text-[#525252]">{review.comment}</p>
+                  )}
+                  {review.userId === currentUserId && confirmingDelete && (
+                    <div className="mt-3 rounded-xl border border-[#fecaca] bg-[#fef2f2] p-3.5">
+                      <p className="text-sm text-[#991b1b]">
+                        Bạn có chắc chắn muốn xóa đánh giá này không?
+                      </p>
+                      <div className="mt-3 flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={handleDelete}
+                          disabled={isDeleting}
+                          className="inline-flex h-9 items-center rounded-full bg-[#dc2626] px-5 text-[13px] font-semibold text-white transition-colors hover:bg-[#b91c1c] disabled:opacity-50"
+                        >
+                          {isDeleting ? 'Đang xóa…' : 'Xóa'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingDelete(false)}
+                          className="text-[13px] font-medium text-[#737373] hover:text-[#121212]"
+                        >
+                          Hủy
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ))
         )}
       </div>
 
-      {/* Form / gating */}
+      {/* Create form / gating */}
       <div className="mt-8 rounded-2xl border border-[#e6e6e6] bg-[#faf9fc] p-5">
         {!isAuthenticated ? (
           <div className="flex flex-col items-start gap-3">
@@ -111,11 +230,13 @@ const ReviewsSection = ({ productId }: ReviewsSectionProps) => {
           <p className="text-sm text-[#737373]">
             Only verified buyers can review this product.
           </p>
+        ) : existingReview ? (
+          <p className="text-sm text-[#737373]">
+            You've already reviewed this product. Use the menu on your review to edit or delete it.
+          </p>
         ) : (
           <form onSubmit={form.onSubmit} className="flex flex-col gap-4">
-            <h3 className="text-sm font-semibold text-[#121212]">
-              {form.isEditing ? 'Edit your review' : 'Leave a review'}
-            </h3>
+            <h3 className="text-sm font-semibold text-[#121212]">Leave a review</h3>
 
             <div>
               <StarRating value={form.stars} onChange={form.setStars} size={26} />
@@ -136,48 +257,13 @@ const ReviewsSection = ({ productId }: ReviewsSectionProps) => {
               )}
             </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                type="submit"
-                disabled={form.isPending}
-                className="inline-flex h-10 items-center rounded-full bg-[#ad93e6] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[#9d7ed9] disabled:opacity-50"
-              >
-                {form.isPending
-                  ? 'Saving…'
-                  : form.isEditing
-                    ? 'Update review'
-                    : 'Submit review'}
-              </button>
-
-              {form.isEditing &&
-                (confirmingDelete ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handleDelete}
-                      disabled={isDeleting}
-                      className="inline-flex h-10 items-center rounded-full bg-[#dc2626] px-5 text-[13px] font-semibold text-white transition-colors hover:bg-[#b91c1c] disabled:opacity-50"
-                    >
-                      {isDeleting ? 'Removing…' : 'Confirm delete'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setConfirmingDelete(false)}
-                      className="text-[13px] font-medium text-[#737373] hover:text-[#121212]"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setConfirmingDelete(true)}
-                    className="inline-flex h-10 items-center rounded-full border border-[#e6e6e6] px-5 text-[13px] font-semibold text-[#737373] transition-colors hover:bg-white"
-                  >
-                    Delete
-                  </button>
-                ))}
-            </div>
+            <button
+              type="submit"
+              disabled={form.isPending}
+              className="inline-flex h-10 w-fit items-center rounded-full bg-[#ad93e6] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[#9d7ed9] disabled:opacity-50"
+            >
+              {form.isPending ? 'Saving…' : 'Submit review'}
+            </button>
           </form>
         )}
       </div>
