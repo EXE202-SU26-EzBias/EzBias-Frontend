@@ -210,16 +210,29 @@ function BuyingModeAction({
     );
   }
   if (order.status === 5) {
+    const wasRejected = order.dispute?.status === 'ResolvedSeller';
+    const rejectionNote = wasRejected ? order.dispute?.adminNote ?? null : null;
     return (
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <button
-          type="button"
-          onClick={() => onRequestRefund?.(order)}
-          className="h-8 px-3 rounded-lg border border-[#c2410c] text-[#c2410c] text-[12px] font-semibold hover:bg-[#fff7ed] transition-colors whitespace-nowrap"
-        >
-          Request Refund
-        </button>
-        {msgBtn}
+      <div className="flex flex-col items-start gap-1.5">
+        {rejectionNote && (
+          <span className="inline-flex items-start gap-1 max-w-[260px] text-[11px] text-[#b91c1c] bg-[#fef2f2] border border-[#fecaca] rounded-lg px-2 py-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 mt-0.5">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v4M12 16h.01" />
+            </svg>
+            <span>Refund rejected: {rejectionNote}</span>
+          </span>
+        )}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <button
+            type="button"
+            onClick={() => onRequestRefund?.(order)}
+            className="h-8 px-3 rounded-lg border border-[#c2410c] text-[#c2410c] text-[12px] font-semibold hover:bg-[#fff7ed] transition-colors whitespace-nowrap"
+          >
+            {wasRejected ? 'Request Refund Again' : 'Request Refund'}
+          </button>
+          {msgBtn}
+        </div>
       </div>
     );
   }

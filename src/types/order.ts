@@ -20,6 +20,13 @@ export interface OrderItem {
   subtotal: number;
 }
 
+export interface OrderDispute {
+  id: number;
+  status: string;
+  adminNote: string | null;
+  resolvedAt: string | null;
+}
+
 export interface Order {
   id: number;
   userId: number;
@@ -33,7 +40,9 @@ export interface Order {
   carrier: string | null;
   trackingNumber: string | null;
   createdAt: string;
+  deliveredAt: string | null;
   user: OrderUser;
   seller: OrderSeller;
+  dispute: OrderDispute | null;
   items: OrderItem[];
 }
