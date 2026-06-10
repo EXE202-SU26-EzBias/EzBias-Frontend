@@ -1,108 +1,72 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { AxiosError } from 'axios';
-import { useAdminDepositDetail, useProcessManualRefund } from '../../../services/admin.service';
+import { useRefundPayment } from '../../../services/dispute.service';
 import { useUiStore } from '../../../stores/ui.store';
+import type { DisputeResponse } from '../../../types/dispute';
+import { formatCurrency } from '../../../utils/formatters';
 import { buildVietQrUrl } from '../../../utils/vietqr';
 
-interface RefundQRModalProps {
-  depositId: number;
+interface DisputeRefundQRModalProps {
+  dispute: DisputeResponse;
   onClose: () => void;
-  onRefundProcessed: () => void;
+  onProcessed: () => void;
 }
 
-const RefundQRModal = React.memo(function RefundQRModal({
-  depositId,
+const DisputeRefundQRModal = React.memo(function DisputeRefundQRModal({
+  dispute,
   onClose,
-  onRefundProcessed,
-}: RefundQRModalProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
+  onProcessed,
+}: DisputeRefundQRModalProps) {
   const [qrError, setQrError] = useState(false);
 
-  const { data: deposit, isLoading } = useAdminDepositDetail(depositId);
-  const { mutate: processRefund } = useProcessManualRefund();
+  const { mutate: refund, isPending: isProcessing } = useRefundPayment();
   const showToast = useUiStore((s) => s.showToast);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(amount);
-  };
+  const info = dispute.refundPayoutInfo;
 
-  // Map bank names to VietQR bank codes
-  const buildQRUrl = (): string => {
-    if (!deposit) return '';
-    return buildVietQrUrl({
-      bankName: deposit.bankName,
-      accountNumber: deposit.bankAccountNumber,
-      amount: deposit.amount,
-      addInfo: `Refund deposit auction ${deposit.auctionId}`,
-    });
-  };
+  const refundAmount = useMemo(
+    () => dispute.items.reduce((sum, item) => sum + (item.approvedQty ?? 0) * item.unitPrice, 0),
+    [dispute.items],
+  );
+
+  const hasBankInfo = !!(info?.bankName && info?.bankAccountNumber);
+
+  const qrUrl = useMemo(
+    () =>
+      buildVietQrUrl({
+        bankName: info?.bankName ?? null,
+        accountNumber: info?.bankAccountNumber ?? null,
+        amount: refundAmount,
+        addInfo: `Refund dispute ${dispute.id}`,
+      }),
+    [info?.bankName, info?.bankAccountNumber, refundAmount, dispute.id],
+  );
 
   const handleConfirmTransfer = () => {
     const confirmed = window.confirm(
-      `Confirm that you have transferred ${formatCurrency(deposit!.amount)} to ${deposit!.userFullName}?\n\nThis will mark the deposit as refunded and notify the user.`
+      `Confirm that you have transferred ${formatCurrency(refundAmount)} to ${info?.buyerFullName ?? 'the buyer'}?\n\nThis will mark the refund as processed and notify the buyer.`,
     );
-
     if (!confirmed) return;
 
-    setIsProcessing(true);
-    processRefund(
-      { depositId, reason: 'Manual refund by admin - deposit refunded via bank transfer' },
-      {
-        onSuccess: () => {
-          showToast('Refund processed successfully. User has been notified.', 'success');
-          setIsProcessing(false);
-          onRefundProcessed();
-        },
-        onError: (err) => {
-          const message =
-            (err as AxiosError<{ message?: string }>).response?.data?.message ??
-            'Failed to process refund. Please try again.';
-          showToast(message, 'error');
-          setIsProcessing(false);
-        },
-      }
-    );
+    refund(dispute.id, {
+      onSuccess: () => {
+        showToast('Refund processed. Buyer notified.', 'success');
+        onProcessed();
+      },
+      onError: (err) => {
+        const message =
+          (err as AxiosError<{ message?: string }>).response?.data?.message ??
+          'Failed to process refund. Please try again.';
+        showToast(message, 'error');
+      },
+    });
   };
-
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <span className="h-8 w-8 animate-spin rounded-full border-2 border-[#e6e6e6] border-t-[#ad93e6]" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!deposit) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-          <p className="text-[13px] text-[#737373]">Deposit not found</p>
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-4 px-4 py-2 text-[13px] font-medium rounded-lg border border-[#e6e6e6] bg-white text-[#121212] hover:bg-[#f4f4f4]"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const hasBankInfo = deposit.bankName && deposit.bankAccountNumber;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
         <div className="sticky top-0 bg-white border-b border-[#e6e6e6] px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <h2 className="text-[17px] font-bold text-[#121212]">
-            Process Refund
-          </h2>
+          <h2 className="text-[17px] font-bold text-[#121212]">Process Refund</h2>
           <button
             type="button"
             onClick={onClose}
@@ -119,13 +83,11 @@ const RefundQRModal = React.memo(function RefundQRModal({
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-2 h-2 rounded-full bg-[#16a34a]" />
                   <p className="text-[11px] font-bold uppercase tracking-[0.6px] text-[#737373]">
-                    User Details
+                    Buyer Details
                   </p>
                 </div>
-                <p className="text-[13px] font-semibold text-[#121212] mb-1">
-                  {deposit.userFullName}
-                </p>
-                <p className="text-[11px] text-[#737373]">{deposit.userEmail}</p>
+                <p className="text-[13px] font-semibold text-[#121212] mb-1">{info?.buyerFullName}</p>
+                <p className="text-[11px] text-[#737373]">{info?.buyerEmail}</p>
               </div>
 
               <div className="p-6 bg-white border-2 border-[#ad93e6] rounded-lg mb-6">
@@ -137,7 +99,7 @@ const RefundQRModal = React.memo(function RefundQRModal({
                       </div>
                     ) : (
                       <img
-                        src={buildQRUrl()}
+                        src={qrUrl}
                         alt="VietQR Code"
                         width={220}
                         height={220}
@@ -153,19 +115,19 @@ const RefundQRModal = React.memo(function RefundQRModal({
                     <div className="space-y-1.5 bg-[#f9fafb] p-3 rounded-lg">
                       <p className="text-[12px] text-[#121212]">
                         <span className="font-semibold text-[#737373]">Bank:</span>{' '}
-                        <span className="font-medium">{deposit.bankName}</span>
+                        <span className="font-medium">{info?.bankName}</span>
                       </p>
                       <p className="text-[12px] text-[#121212]">
                         <span className="font-semibold text-[#737373]">Account:</span>{' '}
-                        <span className="font-mono font-medium">{deposit.bankAccountNumber}</span>
+                        <span className="font-mono font-medium">{info?.bankAccountNumber}</span>
                       </p>
                       <p className="text-[12px] text-[#121212]">
                         <span className="font-semibold text-[#737373]">Name:</span>{' '}
-                        <span className="font-medium">{deposit.bankAccountName || deposit.userFullName}</span>
+                        <span className="font-medium">{info?.bankAccountName || info?.buyerFullName}</span>
                       </p>
                     </div>
                     <p className="text-[16px] text-[#7c5ac4] font-bold mt-3 pt-2 border-t border-[#e6e6e6]">
-                      {formatCurrency(deposit.amount)}
+                      {formatCurrency(refundAmount)}
                     </p>
                   </div>
                 </div>
@@ -179,11 +141,9 @@ const RefundQRModal = React.memo(function RefundQRModal({
             </>
           ) : (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <p className="text-[12px] text-red-800 font-medium mb-2">
-                ⚠️ Cannot process refund
-              </p>
+              <p className="text-[12px] text-red-800 font-medium mb-2">⚠️ Cannot process refund</p>
               <p className="text-[11px] text-red-700">
-                User has not provided bank information yet. Please contact the user directly to obtain their bank details.
+                Buyer has not provided bank information yet. Please contact the buyer directly to obtain their bank details.
               </p>
             </div>
           )}
@@ -202,7 +162,7 @@ const RefundQRModal = React.memo(function RefundQRModal({
             onClick={handleConfirmTransfer}
             disabled={isProcessing || !hasBankInfo}
             className="px-4 py-2 text-[13px] font-medium rounded-lg bg-[#16a34a] text-white hover:bg-[#15803d] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title={!hasBankInfo ? 'User must provide bank information first' : ''}
+            title={!hasBankInfo ? 'Buyer must provide bank information first' : ''}
           >
             {isProcessing ? 'Processing...' : 'Confirm Transfer Complete'}
           </button>
@@ -212,4 +172,4 @@ const RefundQRModal = React.memo(function RefundQRModal({
   );
 });
 
-export default RefundQRModal;
+export default DisputeRefundQRModal;

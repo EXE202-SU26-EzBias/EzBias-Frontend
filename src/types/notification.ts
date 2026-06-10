@@ -10,6 +10,7 @@ export type NotificationType =
   | 'PayoutPaid'
   | 'DisputeOpened'
   | 'DisputeResolved'
+  | 'DisputeRefundCompleted'
   | 'UserVerified'
   | 'DepositConfirmed'
   | 'DepositRefundInitiated'

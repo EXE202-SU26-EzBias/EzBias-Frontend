@@ -4,13 +4,13 @@ import { DISPUTE_STATUS, getDisputeStatusColors, getDisputeStatusLabel } from '.
 import {
   useApproveDispute,
   useDisputes,
-  useRefundPayment,
   useRejectDispute,
 } from '../../../services/dispute.service';
 import { useUiStore } from '../../../stores/ui.store';
 import type { ApprovedItem, DisputeItem, DisputeResponse } from '../../../types/dispute';
 import { formatCurrency, formatTimeAgo } from '../../../utils/formatters';
 import SellerTopbar from '../../SellerDashboard/SellerTopbar';
+import DisputeRefundQRModal from './DisputeRefundQRModal';
 
 const COLUMNS = ['#', 'Order', 'Buyer', 'Status', 'Reason', 'Filed', 'Resolved', 'actions'] as const;
 
@@ -46,9 +46,9 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
   const showToast = useUiStore((s) => s.showToast);
   const { mutate: approve, isPending: approving } = useApproveDispute();
   const { mutate: reject, isPending: rejecting } = useRejectDispute();
-  const { mutate: refund, isPending: refunding } = useRefundPayment();
 
   const [adminNote, setAdminNote] = useState('');
+  const [showRefundModal, setShowRefundModal] = useState(false);
   const [approvedQtys, setApprovedQtys] = useState<Record<number, number>>(() => {
     const qtys: Record<number, number> = {};
     items.forEach((item) => { qtys[item.orderItemId] = item.requestedQty; });
@@ -57,9 +57,9 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
   const [itemNotes, setItemNotes] = useState<Record<number, string>>({});
   const [rejectReason, setRejectReason] = useState('');
 
-  const busy = approving || rejecting || refunding;
+  const busy = approving || rejecting;
   const isOpen = status === DISPUTE_STATUS.OPEN;
-  const isApproved = status === DISPUTE_STATUS.RESOLVED_BUYER;
+  const isApproved = status === DISPUTE_STATUS.RESOLVED_BUYER && !dispute.refundProcessed;
   const hasBankInfo = !!(refundPayoutInfo?.bankName || refundPayoutInfo?.bankAccountNumber || refundPayoutInfo?.bankAccountName);
 
   const handleApprove = useCallback(() => {
@@ -94,17 +94,6 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
       },
     );
   }, [reject, dispute.id, rejectReason, showToast]);
-
-  const handleRefund = useCallback(() => {
-    if (!window.confirm('Process refund? Payment will be returned to the buyer.')) return;
-    refund(dispute.id, {
-      onSuccess: () => showToast('Refund processed.', 'success'),
-      onError: (err) => {
-        const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Action failed. Please try again.';
-        showToast(message, 'error');
-      },
-    });
-  }, [refund, dispute.id, showToast]);
 
   return (
     <div className="grid grid-cols-[1fr_240px] gap-0 divide-x divide-[#e6e6e6]">
@@ -208,10 +197,17 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
 
         {isApproved && (
           <div>
-            <button type="button" disabled={busy} onClick={handleRefund}
-              className="h-7 px-3 rounded-lg bg-[#166534] text-white text-[12px] font-semibold hover:bg-[#14532d] transition-colors disabled:opacity-50">
-              {refunding ? '…' : 'Process Refund'}
+            <button type="button" disabled={busy || !hasBankInfo} onClick={() => setShowRefundModal(true)}
+              title={!hasBankInfo ? 'Buyer must provide bank information first' : ''}
+              className="h-7 px-3 rounded-lg bg-[#166534] text-white text-[12px] font-semibold hover:bg-[#14532d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              Process Refund
             </button>
+          </div>
+        )}
+
+        {dispute.refundProcessed && (
+          <div className="inline-flex w-fit items-center gap-1.5 px-3 py-1 rounded-full bg-[#f0fdf4] border border-[#bbf7d0] text-[12px] font-semibold text-[#166534]">
+            <span className="text-[13px] leading-none">✓</span> Refund processed
           </div>
         )}
       </div>
@@ -251,6 +247,14 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
           </div>
         )}
       </div>
+
+      {showRefundModal && (
+        <DisputeRefundQRModal
+          dispute={dispute}
+          onClose={() => setShowRefundModal(false)}
+          onProcessed={() => setShowRefundModal(false)}
+        />
+      )}
     </div>
   );
 }
