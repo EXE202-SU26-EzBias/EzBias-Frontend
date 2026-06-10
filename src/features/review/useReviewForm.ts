@@ -14,7 +14,11 @@ const reviewSchema = z.object({
 
 export type ReviewFormData = z.infer<typeof reviewSchema>;
 
-export function useReviewForm(productId: number, existingReview: ProductReview | null) {
+export function useReviewForm(
+  productId: number,
+  existingReview: ProductReview | null,
+  onSaved?: () => void,
+) {
   const showToast = useUiStore((s) => s.showToast);
   const { mutate: createReview, isPending: isCreating } = useCreateReview(productId);
   const { mutate: updateReview, isPending: isUpdating } = useUpdateReview(productId);
@@ -60,13 +64,19 @@ export function useReviewForm(productId: number, existingReview: ProductReview |
       updateReview(
         { reviewId: existingReview.id, payload },
         {
-          onSuccess: () => showToast('Review updated.', 'success'),
+          onSuccess: () => {
+            showToast('Review updated.', 'success');
+            onSaved?.();
+          },
           onError,
         },
       );
     } else {
       createReview(payload, {
-        onSuccess: () => showToast('Thanks for your review!', 'success'),
+        onSuccess: () => {
+          showToast('Thanks for your review!', 'success');
+          onSaved?.();
+        },
         onError,
       });
     }
