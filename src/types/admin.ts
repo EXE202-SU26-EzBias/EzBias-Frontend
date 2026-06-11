@@ -6,7 +6,6 @@ export type AdminPageId =
   | 'orders'
   | 'auctions'
   | 'payouts'
-  | 'analytics'
   | 'disputes'
   | 'deposits';
 
@@ -31,6 +30,8 @@ export interface AdminMonthlySalesPoint {
 
 export interface AdminDashboardOverviewResponse {
   totalUsers: number;
+  totalReviews: number;
+  avgReviewStars: number;
   newUsersToday: number;
   newUsersLast7Days: number;
   newUsersLast30Days: number;
