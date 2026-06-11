@@ -89,3 +89,17 @@ export function useProcessManualRefund() {
     },
   });
 }
+
+export const adminTransactionKeys = {
+  all: ['admin', 'transactions'] as const,
+  list: () => [...adminTransactionKeys.all, 'list'] as const,
+};
+
+export function useAdminTransactions() {
+  return useQuery({
+    queryKey: adminTransactionKeys.list(),
+    queryFn: () =>
+      http.get<import('../types/admin').AdminTransactionItem[]>('/api/admin/dashboard/transactions').then((r) => r.data),
+    staleTime: 30_000,
+  });
+}

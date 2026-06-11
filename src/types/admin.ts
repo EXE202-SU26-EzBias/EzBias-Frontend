@@ -143,3 +143,19 @@ export interface AdminDepositDetailResponse {
   paymentReference: string | null;
   createdAt: string;
 }
+
+export interface AdminTransactionItem {
+  id: number;
+  kind: 'payment' | 'payout' | 'deposit' | 'refund';
+  direction: 'in' | 'out';
+  amount: number;
+  status: string;
+  reference: string;
+  orderId: number | null;
+  buyerUsername: string | null;
+  buyerEmail: string | null;
+  sellerUsername: string | null;
+  sellerEmail: string | null;
+  createdAt: string;
+  settledAt: string | null;
+}
