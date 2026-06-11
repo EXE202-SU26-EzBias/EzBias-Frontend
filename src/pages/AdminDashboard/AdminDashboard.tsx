@@ -16,7 +16,6 @@ const ListingsSection  = lazy(() => import('./sections/ListingsSection'));
 const OrdersSection    = lazy(() => import('./sections/OrdersSection'));
 const AuctionsSection  = lazy(() => import('./sections/AuctionsSection'));
 const PayoutsSection   = lazy(() => import('./sections/PayoutsSection'));
-const AnalyticsSection = lazy(() => import('./sections/AnalyticsSection'));
 const DisputesSection  = lazy(() => import('./sections/DisputesSection'));
 const DepositsSection  = lazy(() => import('./sections/DepositsSection'));
 
@@ -28,7 +27,6 @@ const PAGE_META: Record<AdminPageId, { title: string; sub: string }> = {
   orders:    { title: 'Orders',              sub: 'All orders across the platform'                   },
   auctions:  { title: 'Auctions',            sub: 'Monitor all live and ended auctions'              },
   payouts:   { title: 'Payout Queue',        sub: 'Approve or reject seller withdrawal requests'     },
-  analytics: { title: 'Analytics',           sub: 'Platform trends, top sellers, top products'       },
   disputes:  { title: 'Disputes',            sub: 'Review and action buyer dispute requests'          },
   deposits:  { title: 'Deposit Management',  sub: 'Process refunds for losing bidders'               },
 };
@@ -50,7 +48,6 @@ function renderSection(page: AdminPageId) {
     case 'orders':    return <OrdersSection />;
     case 'auctions':  return <AuctionsSection />;
     case 'payouts':   return <PayoutsSection />;
-    case 'analytics': return <AnalyticsSection />;
     case 'disputes':  return <DisputesSection />;
     case 'deposits':  return <DepositsSection />;
   }

@@ -47,12 +47,6 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'deposits',  label: 'Deposits',  icon: AdminIcons.wallet                        },
     ],
   },
-  {
-    label: 'Insights',
-    items: [
-      { id: 'analytics', label: 'Analytics', icon: AdminIcons.chart                         },
-    ],
-  },
 ];
 
 interface AdminSidebarProps {
