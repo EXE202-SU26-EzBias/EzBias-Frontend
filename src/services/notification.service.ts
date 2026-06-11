@@ -39,7 +39,7 @@ export function useMarkReadAll() {
   });
 }
 
-const TOAST_TYPES = new Set(['Outbid', 'AuctionEndingSoon', 'DepositConfirmed', 'DepositRefundInitiated', 'PayoutPaid']);
+const TOAST_TYPES = new Set(['Outbid', 'AuctionEndingSoon', 'DepositConfirmed', 'DepositRefundInitiated', 'PayoutPaid', 'DepositPendingReview', 'DisputePendingReview']);
 
 /** Connects to NotificationHub, invalidates the notification list, and shows
  *  a toast popup for time-sensitive auction events (Outbid, AuctionEndingSoon)
@@ -92,7 +92,10 @@ export function useNotificationHub() {
 
       if (TOAST_TYPES.has(notification.type)) {
         const toastType =
-          notification.type === 'DepositConfirmed' || notification.type === 'PayoutPaid'
+          notification.type === 'DepositConfirmed' ||
+          notification.type === 'PayoutPaid' ||
+          notification.type === 'DepositPendingReview' ||
+          notification.type === 'DisputePendingReview'
             ? 'success'
             : 'error';
         showToast(`${notification.title} — ${notification.body}`, toastType, 4000);

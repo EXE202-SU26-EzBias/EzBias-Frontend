@@ -34,6 +34,12 @@ export function getNotificationRoute(notification: NotificationItem): string | n
     case 'UserVerified':
       return '/';
 
+    case 'DepositPendingReview':
+      return '/admin';
+
+    case 'DisputePendingReview':
+      return '/admin';
+
     default:
       return null;
   }

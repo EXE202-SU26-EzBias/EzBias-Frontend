@@ -14,7 +14,9 @@ export type NotificationType =
   | 'UserVerified'
   | 'DepositConfirmed'
   | 'DepositRefundInitiated'
-  | 'DepositForfeited';
+  | 'DepositForfeited'
+  | 'DepositPendingReview'
+  | 'DisputePendingReview';
 
 export interface NotificationMeta {
   orderId?: number;
