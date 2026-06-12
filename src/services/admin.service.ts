@@ -103,3 +103,27 @@ export function useAdminTransactions() {
     staleTime: 30_000,
   });
 }
+
+export const adminReviewKeys = {
+  all: ['admin', 'reviews'] as const,
+  list: () => [...adminReviewKeys.all, 'list'] as const,
+};
+
+export function useAdminReviews() {
+  return useQuery({
+    queryKey: adminReviewKeys.list(),
+    queryFn: () =>
+      http.get<import('../types/admin').AdminReviewListItem[]>('/api/admin/reviews').then((r) => r.data),
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminDeleteReview() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (reviewId: number) => http.delete(`/api/admin/reviews/${reviewId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminReviewKeys.all });
+    },
+  });
+}

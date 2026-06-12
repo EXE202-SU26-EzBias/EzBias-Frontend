@@ -7,7 +7,8 @@ export type AdminPageId =
   | 'auctions'
   | 'payouts'
   | 'disputes'
-  | 'deposits';
+  | 'deposits'
+  | 'reviews';
 
 export interface AdminTopSellerCommission {
   sellerId: number;
@@ -158,4 +159,16 @@ export interface AdminTransactionItem {
   sellerEmail: string | null;
   createdAt: string;
   settledAt: string | null;
+}
+
+export interface AdminReviewListItem {
+  id: number;
+  productId: number;
+  productName: string;
+  userId: number;
+  username: string;
+  stars: number;
+  comment: string | null;
+  createdAt: string;
+  updatedAt: string | null;
 }
