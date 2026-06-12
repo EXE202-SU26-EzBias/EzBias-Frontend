@@ -1,10 +1,6 @@
 export type AdminPageId =
   | 'overview'
-  | 'users'
-  | 'sellers'
-  | 'listings'
   | 'orders'
-  | 'auctions'
   | 'payouts'
   | 'disputes'
   | 'deposits'
