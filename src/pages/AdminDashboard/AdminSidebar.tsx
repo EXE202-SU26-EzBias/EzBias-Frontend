@@ -14,7 +14,7 @@ interface NavItem {
   id: AdminPageId;
   label: string;
   icon: React.ReactNode;
-  pipKey?: 'users' | 'orders' | 'payouts' | 'disputes';
+  pipKey?: 'orders' | 'payouts' | 'disputes';
 }
 
 interface NavGroup {
@@ -27,17 +27,13 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Platform',
     items: [
       { id: 'overview', label: 'Overview',  icon: AdminIcons.home                           },
-      { id: 'users',    label: 'Users',     icon: AdminIcons.users,  pipKey: 'users'        },
-      { id: 'sellers',  label: 'Sellers',   icon: AdminIcons.store                          },
     ],
   },
   {
     label: 'Commerce',
     items: [
-      { id: 'listings',  label: 'Listings',  icon: AdminIcons.list                          },
       { id: 'orders',    label: 'Orders',    icon: AdminIcons.bag,    pipKey: 'orders'      },
       { id: 'disputes',  label: 'Disputes',  icon: AdminIcons.flag,   pipKey: 'disputes'    },
-      { id: 'auctions',  label: 'Auctions',  icon: AdminIcons.gavel                         },
     ],
   },
   {
@@ -59,7 +55,7 @@ interface AdminSidebarProps {
   active: AdminPageId;
   onNav: (id: AdminPageId) => void;
   user: AdminUser;
-  counts: { users: number; orders: number; payouts: number; disputes: number };
+  counts: { orders: number; payouts: number; disputes: number };
   isOpen: boolean;
   onClose: () => void;
   onLogout: () => void;

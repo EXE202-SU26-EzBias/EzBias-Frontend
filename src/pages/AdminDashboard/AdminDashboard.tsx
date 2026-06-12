@@ -10,11 +10,7 @@ import type { AdminPageId } from '../../types/admin';
 import AdminSidebar from './AdminSidebar';
 
 const OverviewSection  = lazy(() => import('./sections/OverviewSection'));
-const UsersSection     = lazy(() => import('./sections/UsersSection'));
-const SellersSection   = lazy(() => import('./sections/SellersSection'));
-const ListingsSection  = lazy(() => import('./sections/ListingsSection'));
 const OrdersSection    = lazy(() => import('./sections/OrdersSection'));
-const AuctionsSection  = lazy(() => import('./sections/AuctionsSection'));
 const PayoutsSection   = lazy(() => import('./sections/PayoutsSection'));
 const DisputesSection  = lazy(() => import('./sections/DisputesSection'));
 const DepositsSection  = lazy(() => import('./sections/DepositsSection'));
@@ -22,11 +18,7 @@ const ReviewsSection   = lazy(() => import('./sections/ReviewsSection'));
 
 const PAGE_META: Record<AdminPageId, { title: string; sub: string }> = {
   overview:  { title: 'Platform Overview',   sub: 'Real-time health of the marketplace'              },
-  users:     { title: 'User Management',     sub: 'Manage buyer and seller accounts'                 },
-  sellers:   { title: 'Seller Management',   sub: 'Verify sellers and manage store access'           },
-  listings:  { title: 'Listings',            sub: 'Review and moderate product listings'             },
   orders:    { title: 'Orders',              sub: 'All orders across the platform'                   },
-  auctions:  { title: 'Auctions',            sub: 'Monitor all live and ended auctions'              },
   payouts:   { title: 'Payout Queue',        sub: 'Approve or reject seller withdrawal requests'     },
   disputes:  { title: 'Disputes',            sub: 'Review and action buyer dispute requests'          },
   deposits:  { title: 'Deposit Management',  sub: 'Process refunds for losing bidders'               },
@@ -44,11 +36,7 @@ function SectionLoader() {
 function renderSection(page: AdminPageId) {
   switch (page) {
     case 'overview':  return <OverviewSection />;
-    case 'users':     return <UsersSection />;
-    case 'sellers':   return <SellersSection />;
-    case 'listings':  return <ListingsSection />;
     case 'orders':    return <OrdersSection />;
-    case 'auctions':  return <AuctionsSection />;
     case 'payouts':   return <PayoutsSection />;
     case 'disputes':  return <DisputesSection />;
     case 'deposits':  return <DepositsSection />;
@@ -83,7 +71,6 @@ export default function AdminDashboard() {
   };
 
   const counts = {
-    users: 0,
     orders: 0,
     payouts: 0,
     disputes: openDisputeCount,
