@@ -3,6 +3,7 @@ import { useAdminTransactions } from '../../../services/admin.service';
 import type { AdminTransactionItem } from '../../../types/admin';
 import { formatCurrency, formatTimeAgo } from '../../../utils/formatters';
 import SellerTopbar from '../../SellerDashboard/SellerTopbar';
+import OrderDetailModal from './OrderDetailModal';
 
 // ==================== Filter type ====================
 
@@ -53,7 +54,7 @@ function DirectionBadge({ direction, kind }: { direction: 'in' | 'out'; kind: st
 
 // ==================== Table row ====================
 
-function TxRow({ tx }: { tx: AdminTransactionItem }) {
+function TxRow({ tx, onOrderClick }: { tx: AdminTransactionItem; onOrderClick: (id: number) => void }) {
   return (
     <tr className="border-b border-[rgba(230,230,230,0.5)] hover:bg-[rgba(173,147,230,0.04)] transition-colors">
       <td className="px-4 py-[13px] text-[#737373] text-[12px] whitespace-nowrap">#{tx.id}</td>
@@ -78,8 +79,18 @@ function TxRow({ tx }: { tx: AdminTransactionItem }) {
           <span className="text-[11px] text-[#737373]">{tx.sellerEmail ?? ''}</span>
         </div>
       </td>
-      <td className="px-4 py-[13px] text-[#737373] text-[12px] whitespace-nowrap">
-        {tx.orderId ? `#${tx.orderId}` : '—'}
+      <td className="px-4 py-[13px] text-[12px] whitespace-nowrap">
+        {tx.orderId ? (
+          <button
+            type="button"
+            onClick={() => onOrderClick(tx.orderId!)}
+            className="text-[#7c3aed] font-medium hover:underline"
+          >
+            #{tx.orderId}
+          </button>
+        ) : (
+          <span className="text-[#737373]">—</span>
+        )}
       </td>
       <td className="px-4 py-[13px] text-[#737373] text-[11px] max-w-[160px] truncate" title={tx.reference}>
         {tx.reference || '—'}
@@ -101,6 +112,7 @@ const COLS = ['#', 'Loại', 'Trạng thái', 'Số tiền', 'Buyer', 'Seller', 
 const OrdersSection = React.memo(function OrdersSection() {
   const { data: transactions = [], isLoading, isError, refetch } = useAdminTransactions();
   const [filter, setFilter] = useState<FilterKind>('all');
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
 
   const filtered = filter === 'all' ? transactions : transactions.filter((t) => t.kind === filter);
 
@@ -184,13 +196,17 @@ const OrdersSection = React.memo(function OrdersSection() {
               </thead>
               <tbody>
                 {filtered.map((tx) => (
-                  <TxRow key={`${tx.kind}-${tx.id}`} tx={tx} />
+                  <TxRow key={`${tx.kind}-${tx.id}`} tx={tx} onOrderClick={setSelectedOrderId} />
                 ))}
               </tbody>
             </table>
           </div>
         )}
       </div>
+
+      {selectedOrderId !== null && (
+        <OrderDetailModal orderId={selectedOrderId} onClose={() => setSelectedOrderId(null)} />
+      )}
     </div>
   );
 });
