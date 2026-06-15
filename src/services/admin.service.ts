@@ -104,6 +104,21 @@ export function useAdminTransactions() {
   });
 }
 
+export const adminOrderKeys = {
+  all: ['admin', 'orders'] as const,
+  detail: (id: number) => [...adminOrderKeys.all, 'detail', id] as const,
+};
+
+export function useAdminOrderDetail(orderId: number) {
+  return useQuery({
+    queryKey: adminOrderKeys.detail(orderId),
+    queryFn: () =>
+      http.get<import('../types/order').Order>(`/api/admin/dashboard/orders/${orderId}`).then((r) => r.data),
+    enabled: orderId > 0,
+    staleTime: 30_000,
+  });
+}
+
 export const adminReviewKeys = {
   all: ['admin', 'reviews'] as const,
   list: () => [...adminReviewKeys.all, 'list'] as const,
