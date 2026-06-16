@@ -99,6 +99,14 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
     <div className="grid grid-cols-[1fr_240px] gap-0 divide-x divide-[#e6e6e6]">
       {/* Left: items table + action forms */}
       <div className="flex flex-col gap-4 px-6 py-5">
+        {dispute.reason && (
+          <div className="flex flex-col gap-1.5">
+            <p className="text-[10px] font-bold text-[#737373] uppercase tracking-wider">Reason</p>
+            <p className="text-[12px] text-[#121212] bg-[rgba(244,243,247,0.6)] rounded-lg px-3 py-2 border border-[#e6e6e6] whitespace-pre-wrap break-words">
+              {dispute.reason}
+            </p>
+          </div>
+        )}
         {items.length > 0 && (
           <table className="w-full text-[12px]">
             <thead>
@@ -315,7 +323,7 @@ const DisputesSection = React.memo(function DisputesSection() {
                             {getDisputeStatusLabel(d.status)}
                           </span>
                         </td>
-                        <td className="px-4 py-[14px] text-[#737373] align-middle max-w-[180px] truncate">{d.reason}</td>
+                        <td className="px-4 py-[14px] text-[#737373] align-middle max-w-[180px] truncate" title={d.reason}>{d.reason}</td>
                         <td className="px-4 py-[14px] text-[#737373] align-middle text-[12px] whitespace-nowrap">{formatTimeAgo(d.createdAt)}</td>
                         <td className="px-4 py-[14px] align-middle text-[12px] whitespace-nowrap">
                           {d.resolvedAt
