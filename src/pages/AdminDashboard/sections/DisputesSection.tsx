@@ -7,21 +7,12 @@ import {
   useRejectDispute,
 } from '../../../services/dispute.service';
 import { useUiStore } from '../../../stores/ui.store';
-import type { ApprovedItem, DisputeItem, DisputeResponse } from '../../../types/dispute';
+import type { DisputeResponse } from '../../../types/dispute';
 import { formatCurrency, formatTimeAgo } from '../../../utils/formatters';
 import SellerTopbar from '../../SellerDashboard/SellerTopbar';
 import DisputeRefundQRModal from './DisputeRefundQRModal';
 
 const COLUMNS = ['#', 'Order', 'Buyer', 'Status', 'Reason', 'Filed', 'Resolved', 'actions'] as const;
-
-function ChevronDown({ open }: { open: boolean }) {
-  return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-      className={`shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}>
-      <path d="M6 9l6 6 6-6" />
-    </svg>
-  );
-}
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   if (!value) return null;
@@ -33,15 +24,30 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function buildApprovedItems(items: DisputeItem[], qtys: Record<number, number>, notes: Record<number, string>): ApprovedItem[] {
-  return items.map((item) => ({
-    orderItemId: item.orderItemId,
-    approvedQty: qtys[item.orderItemId] ?? item.requestedQty,
-    note: notes[item.orderItemId] ?? '',
-  }));
+function DisputeDetailModal({ dispute, onClose }: { dispute: DisputeResponse; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-[#e6e6e6] px-6 py-4 flex items-center justify-between rounded-t-2xl">
+          <div>
+            <h2 className="text-[17px] font-bold text-[#121212]">Dispute #{dispute.id}</h2>
+            <p className="text-[12px] text-[#737373]">Order #{dispute.orderId}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-lg border border-[#e6e6e6] flex items-center justify-center text-[#737373] hover:text-[#121212] hover:bg-[#f4f4f4] transition-colors"
+          >
+            ×
+          </button>
+        </div>
+        <DisputeDetailPanel dispute={dispute} onClose={onClose} />
+      </div>
+    </div>
+  );
 }
 
-function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
+function DisputeDetailPanel({ dispute, onClose }: { dispute: DisputeResponse; onClose: () => void }) {
   const { items, status, refundPayoutInfo, adminNote: existingNote } = dispute;
   const showToast = useUiStore((s) => s.showToast);
   const { mutate: approve, isPending: approving } = useApproveDispute();
@@ -49,12 +55,6 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
 
   const [adminNote, setAdminNote] = useState('');
   const [showRefundModal, setShowRefundModal] = useState(false);
-  const [approvedQtys, setApprovedQtys] = useState<Record<number, number>>(() => {
-    const qtys: Record<number, number> = {};
-    items.forEach((item) => { qtys[item.orderItemId] = item.requestedQty; });
-    return qtys;
-  });
-  const [itemNotes, setItemNotes] = useState<Record<number, string>>({});
   const [rejectReason, setRejectReason] = useState('');
 
   const busy = approving || rejecting;
@@ -63,22 +63,22 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
   const hasBankInfo = !!(refundPayoutInfo?.bankName || refundPayoutInfo?.bankAccountNumber || refundPayoutInfo?.bankAccountName);
 
   const handleApprove = useCallback(() => {
-    const approvedItems = buildApprovedItems(items, approvedQtys, itemNotes);
-    if (approvedItems.every((i) => i.approvedQty === 0)) {
-      showToast('At least one item must have approved quantity greater than 0.', 'error');
-      return;
-    }
+    const approvedItems = items.map((item) => ({
+      orderItemId: item.orderItemId,
+      approvedQty: item.requestedQty,
+      note: '',
+    }));
     approve(
       { disputeId: dispute.id, payload: { adminNote, approvedItems } },
       {
-        onSuccess: () => showToast('Dispute approved.', 'success'),
+        onSuccess: () => { showToast('Dispute approved.', 'success'); },
         onError: (err) => {
           const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Action failed. Please try again.';
           showToast(message, 'error');
         },
       },
     );
-  }, [approve, dispute.id, adminNote, approvedQtys, itemNotes, items, showToast]);
+  }, [approve, dispute.id, adminNote, items, showToast]);
 
   const handleReject = useCallback(() => {
     if (!rejectReason.trim()) { showToast('Please enter a reason for rejection.', 'error'); return; }
@@ -86,14 +86,14 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
     reject(
       { disputeId: dispute.id, payload: { reason: rejectReason.trim() } },
       {
-        onSuccess: () => showToast('Dispute rejected.', 'success'),
+        onSuccess: () => { showToast('Dispute rejected.', 'success'); onClose(); },
         onError: (err) => {
           const message = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Action failed. Please try again.';
           showToast(message, 'error');
         },
       },
     );
-  }, [reject, dispute.id, rejectReason, showToast]);
+  }, [reject, dispute.id, rejectReason, showToast, onClose]);
 
   return (
     <div className="grid grid-cols-[1fr_240px] gap-0 divide-x divide-[#e6e6e6]">
@@ -111,8 +111,8 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
           <table className="w-full text-[12px]">
             <thead>
               <tr className="border-b border-[#e6e6e6]">
-                {['Product', 'Ordered', 'Requested', 'Approved', 'Unit price',
-                  ...(isOpen ? ['Approve qty', 'Note'] : [])].map((h) => (
+                {['Product', 'Ordered', 'Unit price',
+                  ...(isOpen ? ['Quantity'] : [])].map((h) => (
                   <th key={h} className="text-left text-[11px] font-semibold text-[#737373] pb-2 pr-5 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -122,39 +122,9 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
                 <tr key={item.id} className="border-b border-[rgba(230,230,230,0.4)] last:border-0">
                   <td className="py-2.5 pr-5 text-[#121212] font-medium">{item.productName}</td>
                   <td className="py-2.5 pr-5 text-[#737373]">{item.orderedQty}</td>
-                  <td className="py-2.5 pr-5 text-[#737373]">{item.requestedQty}</td>
-                  <td className="py-2.5 pr-5">
-                    {item.approvedQty != null
-                      ? <span className="text-[#166534] font-semibold">{item.approvedQty}</span>
-                      : <span className="text-[#b3b3b3]">—</span>}
-                  </td>
                   <td className="py-2.5 pr-5 text-[#737373]">{formatCurrency(item.unitPrice)}</td>
                   {isOpen && (
-                    <>
-                      <td className="py-2.5 pr-5">
-                        <input
-                          type="number"
-                          min={0}
-                          max={item.requestedQty}
-                          step={1}
-                          value={approvedQtys[item.orderItemId] ?? item.requestedQty}
-                          onChange={(e) => setApprovedQtys((prev) => ({
-                            ...prev,
-                            [item.orderItemId]: Math.floor(Math.max(0, Math.min(item.requestedQty, Number(e.target.value)))),
-                          }))}
-                          className="w-16 h-6 px-2 rounded border border-[#e6e6e6] text-[#121212] text-[12px] focus:outline-none focus:border-[#ad93e6]"
-                        />
-                      </td>
-                      <td className="py-2.5 pr-5">
-                        <input
-                          type="text"
-                          placeholder="optional"
-                          value={itemNotes[item.orderItemId] ?? ''}
-                          onChange={(e) => setItemNotes((prev) => ({ ...prev, [item.orderItemId]: e.target.value }))}
-                          className="w-28 h-6 px-2 rounded border border-[#e6e6e6] text-[#121212] text-[12px] focus:outline-none focus:border-[#ad93e6]"
-                        />
-                      </td>
-                    </>
+                    <td className="py-2.5 pr-5 text-[#737373]">{item.requestedQty}</td>
                   )}
                 </tr>
               ))}
@@ -260,7 +230,7 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
         <DisputeRefundQRModal
           dispute={dispute}
           onClose={() => setShowRefundModal(false)}
-          onProcessed={() => setShowRefundModal(false)}
+          onProcessed={() => { setShowRefundModal(false); onClose(); }}
         />
       )}
     </div>
@@ -269,11 +239,11 @@ function DisputeDetailPanel({ dispute }: { dispute: DisputeResponse }) {
 
 const DisputesSection = React.memo(function DisputesSection() {
   const { data: disputes = [], isLoading, isError } = useDisputes();
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [selectedDispute, setSelectedDispute] = useState<DisputeResponse | null>(null);
 
-  const toggleExpand = useCallback((id: number) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-  }, []);
+  const currentDispute = selectedDispute
+    ? (disputes.find((d) => d.id === selectedDispute.id) ?? selectedDispute)
+    : null;
 
   return (
     <div>
@@ -305,46 +275,36 @@ const DisputesSection = React.memo(function DisputesSection() {
               </thead>
               <tbody>
                 {disputes.map((d: DisputeResponse) => {
-                  const isExpanded = expandedId === d.id;
                   const statusCls = getDisputeStatusColors(d.status);
                   return (
-                    <React.Fragment key={d.id}>
-                      <tr className="hover:bg-[rgba(173,147,230,0.05)] border-b border-[rgba(230,230,230,0.5)]">
-                        <td className="px-4 py-[14px] text-[#121212] font-medium align-middle whitespace-nowrap">#{d.id}</td>
-                        <td className="px-4 py-[14px] text-[#737373] align-middle whitespace-nowrap">#{d.orderId}</td>
-                        <td className="px-4 py-[14px] align-middle">
-                          <div className="flex flex-col">
-                            <span className="text-[#121212] font-medium text-[13px]">{d.refundPayoutInfo?.buyerFullName ?? '—'}</span>
-                            <span className="text-[#737373] text-[11px]">{d.refundPayoutInfo?.buyerEmail ?? ''}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-[14px] align-middle">
-                          <span className={`inline-flex items-center px-[10px] py-0.5 rounded-full text-[11px] font-semibold border whitespace-nowrap ${statusCls}`}>
-                            {getDisputeStatusLabel(d.status)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-[14px] text-[#737373] align-middle max-w-[180px] truncate" title={d.reason}>{d.reason}</td>
-                        <td className="px-4 py-[14px] text-[#737373] align-middle text-[12px] whitespace-nowrap">{formatTimeAgo(d.createdAt)}</td>
-                        <td className="px-4 py-[14px] align-middle text-[12px] whitespace-nowrap">
-                          {d.resolvedAt
-                            ? <span className="text-[#737373]">{formatTimeAgo(d.resolvedAt)}</span>
-                            : <span className="text-[#b3b3b3]">—</span>}
-                        </td>
-                        <td className="px-4 py-[14px] align-middle">
-                          <button type="button" onClick={() => toggleExpand(d.id)}
-                            className="flex items-center gap-1 text-[#737373] hover:text-[#121212] transition-colors text-[12px] whitespace-nowrap">
-                            Details <ChevronDown open={isExpanded} />
-                          </button>
-                        </td>
-                      </tr>
-                      {isExpanded && (
-                        <tr className="bg-[rgba(244,243,247,0.6)] border-b border-[rgba(230,230,230,0.5)]">
-                          <td colSpan={COLUMNS.length}>
-                            <DisputeDetailPanel key={d.id} dispute={d} />
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
+                    <tr key={d.id} className="hover:bg-[rgba(173,147,230,0.05)] border-b border-[rgba(230,230,230,0.5)]">
+                      <td className="px-4 py-[14px] text-[#121212] font-medium align-middle whitespace-nowrap">#{d.id}</td>
+                      <td className="px-4 py-[14px] text-[#737373] align-middle whitespace-nowrap">#{d.orderId}</td>
+                      <td className="px-4 py-[14px] align-middle">
+                        <div className="flex flex-col">
+                          <span className="text-[#121212] font-medium text-[13px]">{d.refundPayoutInfo?.buyerFullName ?? '—'}</span>
+                          <span className="text-[#737373] text-[11px]">{d.refundPayoutInfo?.buyerEmail ?? ''}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-[14px] align-middle">
+                        <span className={`inline-flex items-center px-[10px] py-0.5 rounded-full text-[11px] font-semibold border whitespace-nowrap ${statusCls}`}>
+                          {getDisputeStatusLabel(d.status)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-[14px] text-[#737373] align-middle max-w-[180px] truncate" title={d.reason}>{d.reason}</td>
+                      <td className="px-4 py-[14px] text-[#737373] align-middle text-[12px] whitespace-nowrap">{formatTimeAgo(d.createdAt)}</td>
+                      <td className="px-4 py-[14px] align-middle text-[12px] whitespace-nowrap">
+                        {d.resolvedAt
+                          ? <span className="text-[#737373]">{formatTimeAgo(d.resolvedAt)}</span>
+                          : <span className="text-[#b3b3b3]">—</span>}
+                      </td>
+                      <td className="px-4 py-[14px] align-middle">
+                        <button type="button" onClick={() => setSelectedDispute(d)}
+                          className="flex items-center gap-1 text-[#737373] hover:text-[#121212] transition-colors text-[12px] whitespace-nowrap">
+                          Details
+                        </button>
+                      </td>
+                    </tr>
                   );
                 })}
               </tbody>
@@ -352,6 +312,10 @@ const DisputesSection = React.memo(function DisputesSection() {
           </div>
         )}
       </div>
+
+      {currentDispute && (
+        <DisputeDetailModal dispute={currentDispute} onClose={() => setSelectedDispute(null)} />
+      )}
     </div>
   );
 });

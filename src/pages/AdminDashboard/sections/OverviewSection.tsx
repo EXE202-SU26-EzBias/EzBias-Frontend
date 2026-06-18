@@ -65,9 +65,9 @@ function OverviewSkeleton() {
 // ==================== Charts ====================
 
 const SALES_SERIES: BarSeries[] = [
-  { key: 'gross',      label: 'Gross sales',          color: '#ad93e6' },
-  { key: 'commission', label: 'Platform commission',   color: '#22c55e' },
-  { key: 'sellerNet',  label: 'Paid to sellers',       color: '#3b82f6' },
+  { key: 'gross',      label: 'Gross Sales',          color: '#ad93e6' },
+  { key: 'commission', label: 'Platform Commission',   color: '#22c55e' },
+  { key: 'sellerNet',  label: 'Paid to Sellers',       color: '#3b82f6' },
 ];
 
 // ==================== Content ====================
@@ -99,30 +99,30 @@ const OverviewContent = React.memo(function OverviewContent({ data }: { data: Ad
       {/* 4 KPI boxes */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <KpiCard
-          label="Tổng doanh thu"
+          label="Gross Revenue"
           value={formatCurrency(data.grossRevenue)}
-          sub={`Chưa trừ hoa hồng & hoàn tiền`}
+          sub={`Before commission & refunds`}
           icon={AdminIcons.wallet}
           accent="purple"
         />
         <KpiCard
-          label="Tiền hoa hồng"
+          label="Commission"
           value={formatCurrency(data.totalCommissionRevenue)}
-          sub={`${formatCurrency(data.commissionRevenueLast30Days)} trong 30 ngày qua`}
+          sub={`${formatCurrency(data.commissionRevenueLast30Days)} in last 30 days`}
           icon={AdminIcons.spark}
           accent="green"
         />
         <KpiCard
-          label="Tổng số user"
+          label="Total Users"
           value={data.totalUsers.toLocaleString()}
-          sub={`+${data.newUsersLast30Days} trong 30 ngày qua`}
+          sub={`+${data.newUsersLast30Days} in last 30 days`}
           icon={AdminIcons.users}
           accent="blue"
         />
         <KpiCard
-          label="Tổng số review"
+          label="Total Reviews"
           value={data.totalReviews.toLocaleString()}
-          sub={data.totalReviews > 0 ? `Điểm trung bình ${data.avgReviewStars.toFixed(1)} / 5 ⭐` : 'Chưa có đánh giá nào'}
+          sub={data.totalReviews > 0 ? `Avg ${data.avgReviewStars.toFixed(1)} / 5 ⭐` : 'No reviews yet'}
           icon={AdminIcons.star}
           accent="amber"
         />
@@ -174,7 +174,7 @@ const OverviewContent = React.memo(function OverviewContent({ data }: { data: Ad
                 <span className="w-5 text-[12px] font-bold text-[#9ca3af] shrink-0">{i + 1}</span>
                 <div className="w-32 shrink-0 min-w-0">
                   <p className="text-[13px] font-semibold text-[#121212] truncate">{s.fullName || s.username}</p>
-                  <p className="text-[11px] text-[#737373] truncate">{s.orderCount.toLocaleString()} orders</p>
+        <p className="text-[11px] text-[#737373]">{s.orderCount.toLocaleString()} orders</p>
                 </div>
                 <div className="flex-1 h-6 bg-[#f3f4f6] rounded-md overflow-hidden">
                   <div
