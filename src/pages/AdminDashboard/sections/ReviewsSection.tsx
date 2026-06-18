@@ -63,7 +63,7 @@ function ReviewRow({ review, onDelete }: { review: AdminReviewListItem; onDelete
           onClick={() => onDelete(review.id)}
           className="h-7 px-3 rounded-lg text-[12px] font-medium text-[#ef4343] border border-[rgba(239,67,67,0.3)] hover:bg-[rgba(239,67,67,0.06)] transition-colors"
         >
-          Xóa
+          Delete
         </button>
       </td>
     </tr>
@@ -72,7 +72,7 @@ function ReviewRow({ review, onDelete }: { review: AdminReviewListItem; onDelete
 
 // ==================== Main ====================
 
-const COLS = ['#', 'Sản phẩm', 'Người dùng', 'Đánh giá', 'Bình luận', 'Ngày đăng', 'Cập nhật', ''] as const;
+const COLS = ['#', 'Product', 'User', 'Rating', 'Comment', 'Posted At', 'Updated At', ''] as const;
 
 const ReviewsSection = React.memo(function ReviewsSection() {
   const { data: reviews = [], isLoading, isError, refetch } = useAdminReviews();
@@ -85,11 +85,11 @@ const ReviewsSection = React.memo(function ReviewsSection() {
     : reviews.filter((r) => r.stars === filterStars);
 
   const handleDelete = (id: number) => {
-    if (!window.confirm('Xóa review này không thể hoàn tác. Tiếp tục?')) return;
+    if (!window.confirm('Deleting this review cannot be undone. Continue?')) return;
     deleteReview(id, {
-      onSuccess: () => showToast('Đã xóa review.', 'success'),
+      onSuccess: () => showToast('Review deleted.', 'success'),
       onError: (err) => {
-        const msg = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Xóa thất bại.';
+        const msg = (err as AxiosError<{ message?: string }>).response?.data?.message ?? 'Delete failed.';
         showToast(msg, 'error');
       },
     });
@@ -103,7 +103,7 @@ const ReviewsSection = React.memo(function ReviewsSection() {
 
   return (
     <div>
-      <SellerTopbar title="Product Reviews" sub="Lịch sử đánh giá sản phẩm từ người mua" />
+      <SellerTopbar title="Product Reviews" sub="Review history from buyers" />
 
       {/* Stats bar */}
       {reviews.length > 0 && (
@@ -117,7 +117,7 @@ const ReviewsSection = React.memo(function ReviewsSection() {
                 : 'text-[#737373] hover:bg-[rgba(173,147,230,0.1)]'
             }`}
           >
-            Tất cả ({reviews.length})
+            All ({reviews.length})
           </button>
           {countByStar.map(({ stars, count }) => (
             <button
@@ -145,20 +145,20 @@ const ReviewsSection = React.memo(function ReviewsSection() {
 
         {isError && (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <p className="text-[14px] text-[#ef4343]">Không thể tải dữ liệu.</p>
+            <p className="text-[14px] text-[#ef4343]">Failed to load data.</p>
             <button
               type="button"
               onClick={() => refetch()}
               className="text-[12px] font-medium px-4 h-8 rounded-full border border-[#e6e6e6] bg-white text-[#737373] hover:border-[#ad93e6] hover:text-[#ad93e6] transition-all"
             >
-              Thử lại
+              Retry
             </button>
           </div>
         )}
 
         {!isLoading && !isError && filtered.length === 0 && (
           <p className="px-5 py-16 text-center text-[14px] text-[#737373]">
-            Chưa có review nào.
+            No reviews found.
           </p>
         )}
 
@@ -193,7 +193,7 @@ const ReviewsSection = React.memo(function ReviewsSection() {
 
       {deleting && (
         <div className="fixed bottom-6 right-6 bg-[#121212] text-white text-[13px] px-4 py-2 rounded-lg shadow-lg">
-          Đang xóa…
+          Deleting…
         </div>
       )}
     </div>

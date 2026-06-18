@@ -33,10 +33,10 @@ function StatusBadge({ status }: { status: string }) {
 
 function DirectionBadge({ direction, kind }: { direction: 'in' | 'out'; kind: string }) {
   const LABELS: Record<string, string> = {
-    payment: '↓ Buyer → Sàn',
-    deposit: '↓ Cọc đấu giá',
-    payout:  '↑ Sàn → Seller',
-    refund:  '↑ Hoàn tiền',
+    payment: '↓ Buyer → Platform',
+    deposit: '↓ Deposit',
+    payout:  '↑ Platform → Seller',
+    refund:  '↑ Refund',
   };
   const isIn = direction === 'in';
   return (
@@ -107,7 +107,7 @@ function TxRow({ tx, onOrderClick }: { tx: AdminTransactionItem; onOrderClick: (
 
 // ==================== Main ====================
 
-const COLS = ['#', 'Loại', 'Trạng thái', 'Số tiền', 'Buyer', 'Seller', 'Order', 'Mã tham chiếu', 'Tạo lúc', 'Hoàn thành'] as const;
+const COLS = ['#', 'Type', 'Status', 'Amount', 'Buyer', 'Seller', 'Order', 'Reference', 'Created At', 'Settled At'] as const;
 
 const OrdersSection = React.memo(function OrdersSection() {
   const { data: transactions = [], isLoading, isError, refetch } = useAdminTransactions();
@@ -124,16 +124,16 @@ const OrdersSection = React.memo(function OrdersSection() {
 
   return (
     <div>
-      <SellerTopbar title="Transaction History" sub="Lịch sử chuyển tiền qua sàn" />
+      <SellerTopbar title="Transaction History" sub="Transaction history through the exchange" />
 
       {/* Filter tabs */}
       <div className="flex items-center gap-1 mb-5 bg-white border border-[rgba(230,230,230,0.5)] rounded-xl px-4 py-3 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]">
         {([
-          { id: 'all' as FilterKind,     label: 'Tất cả',          count: countAll     },
-          { id: 'payment' as FilterKind, label: 'Buyer → Sàn',     count: countPayment },
-          { id: 'deposit' as FilterKind, label: 'Cọc đấu giá',     count: countDeposit },
-          { id: 'payout' as FilterKind,  label: 'Sàn → Seller',    count: countPayout  },
-          { id: 'refund' as FilterKind,  label: 'Hoàn tiền',       count: countRefund  },
+          { id: 'all' as FilterKind,     label: 'All',              count: countAll     },
+          { id: 'payment' as FilterKind, label: 'Buyer → Platform', count: countPayment },
+          { id: 'deposit' as FilterKind, label: 'Deposit',          count: countDeposit },
+          { id: 'payout' as FilterKind,  label: 'Platform → Seller',count: countPayout  },
+          { id: 'refund' as FilterKind,  label: 'Refund',           count: countRefund  },
         ] as const).map((tab) => (
           <button
             key={tab.id}
@@ -164,19 +164,19 @@ const OrdersSection = React.memo(function OrdersSection() {
 
         {isError && (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <p className="text-[14px] text-[#ef4343]">Không thể tải dữ liệu giao dịch.</p>
+            <p className="text-[14px] text-[#ef4343]">Failed to load transaction data.</p>
             <button
               type="button"
               onClick={() => refetch()}
               className="text-[12px] font-medium px-4 h-8 rounded-full border border-[#e6e6e6] bg-white text-[#737373] hover:border-[#ad93e6] hover:text-[#ad93e6] transition-all"
             >
-              Thử lại
+              Retry
             </button>
           </div>
         )}
 
         {!isLoading && !isError && filtered.length === 0 && (
-          <p className="px-5 py-16 text-center text-[14px] text-[#737373]">Không có giao dịch nào.</p>
+          <p className="px-5 py-16 text-center text-[14px] text-[#737373]">No transactions found.</p>
         )}
 
         {!isLoading && !isError && filtered.length > 0 && (
