@@ -8,13 +8,12 @@ import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 import SellerSidebar from './SellerSidebar';
 
-type PageId = 'overview' | 'listings' | 'orders' | 'auctions' | 'analytics' | 'settings';
+type PageId = 'overview' | 'listings' | 'orders' | 'auctions' | 'settings';
 
 const OverviewSection  = lazy(() => import('./sections/OverviewSection'));
 const ListingsSection  = lazy(() => import('./sections/ListingsSection'));
 const OrdersSection    = lazy(() => import('./sections/OrdersSection'));
 const AuctionsSection  = lazy(() => import('./sections/AuctionsSection'));
-const AnalyticsSection = lazy(() => import('./sections/AnalyticsSection'));
 const SettingsSection  = lazy(() => import('./sections/SettingsSection'));
 
 const PAGE_META: Record<PageId, { title: string; sub: string }> = {
@@ -22,7 +21,6 @@ const PAGE_META: Record<PageId, { title: string; sub: string }> = {
   listings:  { title: 'Listings',      sub: 'Edit, pause, duplicate, or list new merch' },
   orders:    { title: 'Orders',        sub: 'Process and ship customer orders' },
   auctions:  { title: 'Auctions',      sub: 'Track live and ended auctions you host' },
-  analytics: { title: 'Analytics',     sub: 'Trends, top performers, conversion' },
   settings:  { title: 'User profile',  sub: 'Manage your account details' },
 };
 
@@ -40,7 +38,6 @@ function renderSection(page: PageId) {
     case 'listings':  return <ListingsSection />;
     case 'orders':    return <OrdersSection />;
     case 'auctions':  return <AuctionsSection />;
-    case 'analytics': return <AnalyticsSection />;
     case 'settings':  return <SettingsSection />;
   }
 }

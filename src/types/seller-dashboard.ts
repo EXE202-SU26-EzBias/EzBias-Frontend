@@ -8,6 +8,14 @@ export interface SellerMonthlySalesPoint {
   netRevenue: number;
 }
 
+export interface SellerTopListing {
+  productId: number | null;
+  productName: string;
+  productImage: string;
+  unitsSold: number;
+  revenue: number;
+}
+
 export interface SellerDashboardResponse {
   // Revenue
   grossRevenue: number;
@@ -43,4 +51,7 @@ export interface SellerDashboardResponse {
 
   // Monthly trend (last 12 calendar months, oldest first)
   monthlySales: SellerMonthlySalesPoint[];
+
+  // Best-selling listings, ranked by units sold (desc), top 5
+  topListings: SellerTopListing[];
 }

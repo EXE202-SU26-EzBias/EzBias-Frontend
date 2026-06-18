@@ -106,6 +106,60 @@ const OverviewContent = React.memo(function OverviewContent({ data }: { data: Se
           ariaLabel="Monthly items sold bar chart"
         />
       </div>
+
+      {/* Top listings */}
+      <div className="bg-white border border-[rgba(230,230,230,0.5)] rounded-xl shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]">
+        <div className="flex items-center justify-between px-5 py-[18px] border-b border-[rgba(230,230,230,0.5)] gap-3 flex-wrap">
+          <div>
+            <h2 className="text-[16px] font-bold text-[#121212] m-0">Top listings</h2>
+            <p className="text-[12px] text-[#737373] mt-0.5 mb-0">Your best-selling listings by units sold</p>
+          </div>
+        </div>
+        {data.topListings.length === 0 && (
+          <p className="px-5 py-12 text-center text-[14px] text-[#737373]">No sales yet.</p>
+        )}
+        {data.topListings.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-[13px]">
+              <thead>
+                <tr>
+                  {['#', 'Item', 'Units sold', 'Revenue'].map((h) => (
+                    <th
+                      key={h}
+                      className="text-left text-[11px] font-bold text-[#737373] uppercase tracking-[0.6px] px-4 py-[10px] border-b border-[#e6e6e6] bg-[rgba(244,243,247,0.4)]"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.topListings.map((l, idx) => (
+                  <tr
+                    key={l.productId ?? `name:${l.productName}`}
+                    className="hover:bg-[rgba(173,147,230,0.05)] border-b border-[rgba(230,230,230,0.5)] last:border-b-0"
+                  >
+                    <td className="px-4 py-[14px] text-[#737373] font-semibold align-middle">{idx + 1}</td>
+                    <td className="px-4 py-[14px] text-[#121212] align-middle">
+                      <div className="flex items-center gap-2.5 min-w-[220px]">
+                        <img
+                          src={l.productImage}
+                          alt={l.productName}
+                          className="w-9 h-9 rounded-lg object-cover flex-shrink-0 bg-[#f0edf7]"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
+                        <p className="font-semibold m-0">{l.productName}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-[14px] text-[#121212] font-semibold align-middle">{l.unitsSold}</td>
+                    <td className="px-4 py-[14px] text-[#121212] align-middle">{formatCurrency(l.revenue)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 });
