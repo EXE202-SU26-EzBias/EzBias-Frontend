@@ -18,7 +18,7 @@ export interface AuctionProduct {
   stock: number;
   primaryImageUrl: string;
   status: number;
-  fandomId: number;
+  fandomId: string;
 }
 
 export interface Auction {

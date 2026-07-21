@@ -263,13 +263,23 @@ function CreateProductModal({ onClose }: { onClose: () => void }) {
               </Field>
             </div>
 
-            <Field label="Fandom" error={errors.fandomId}>
-              <select className={selectCls} disabled={isFandomsLoading} {...register('fandomId')}>
-                <option value="">{isFandomsLoading ? 'Loading fandoms…' : 'Select fandom…'}</option>
+            <Field label="Fandom" error={errors.fandomName}>
+              <input
+                type="text"
+                list="fandom-name-suggestions"
+                placeholder="e.g. BTS, NewJeans"
+                autoComplete="off"
+                className={inputCls}
+                {...register('fandomName')}
+              />
+              <datalist id="fandom-name-suggestions">
                 {fandoms.map((f) => (
-                  <option key={f.id} value={String(f.id)}>{f.name}</option>
+                  <option key={f.id} value={f.name} />
                 ))}
-              </select>
+              </datalist>
+              {isFandomsLoading && (
+                <span className="text-[11px] text-[#737373]">Loading fandom suggestions…</span>
+              )}
             </Field>
 
             <MultiImagePicker
