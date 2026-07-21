@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { http } from '../lib/axios';
 import type { ProductStatus } from '../constants/product';
+import { fandomKeys } from './fandom.service';
 import type { SellerProduct } from '../types/seller';
 
 export const productKeys = {
@@ -10,7 +11,7 @@ export const productKeys = {
 };
 
 export interface ProductPayload {
-  fandomId: string;
+  fandomName: string;
   artist: string;
   name: string;
   type: string;
@@ -50,7 +51,7 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: (payload: ProductPayload) => {
       const form = new FormData();
-      form.append('fandomId', payload.fandomId);
+      form.append('fandomName', payload.fandomName);
       form.append('artist', payload.artist);
       form.append('name', payload.name);
       form.append('type', payload.type);
@@ -65,6 +66,7 @@ export function useCreateProduct() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.list() });
+      queryClient.invalidateQueries({ queryKey: fandomKeys.all });
     },
   });
 }

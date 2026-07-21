@@ -5,7 +5,7 @@ import type { Fandom, FandomProduct, FandomProductDetail } from '../types/fandom
 export const fandomKeys = {
   all: ['fandoms'] as const,
   list: () => [...fandomKeys.all, 'list'] as const,
-  products: (id?: number) => [...fandomKeys.all, 'products', id ?? 'all'] as const,
+  products: (id?: string) => [...fandomKeys.all, 'products', id ?? 'all'] as const,
   productDetail: (id: number) => [...fandomKeys.all, 'product', id] as const,
 };
 
@@ -16,7 +16,7 @@ export function useFandoms() {
   });
 }
 
-export function useFandomProducts(fandomId?: number) {
+export function useFandomProducts(fandomId?: string) {
   return useQuery({
     queryKey: fandomKeys.products(fandomId),
     queryFn: () =>

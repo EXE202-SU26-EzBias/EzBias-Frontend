@@ -23,10 +23,15 @@ const fileSchema = z
     'Only JPG, PNG, or WebP allowed',
   );
 
+const fandomNameSchema = z
+  .string()
+  .transform((value) => value.normalize('NFKC').trim().replace(/\s+/gu, ' '))
+  .pipe(z.string().min(1, 'Required').max(100, 'Must be 100 characters or fewer'));
+
 // ─── Create ──────────────────────────────────────────────────────────────────
 
 const createSchema = z.object({
-  fandomId: z.string().min(1, 'Required'),
+  fandomName: fandomNameSchema,
   artist: z.string().min(1, 'Required'),
   name: z.string().min(1, 'Required'),
   type: z.string().min(1, 'Required'),
@@ -51,7 +56,7 @@ export function useCreateProductForm(onSuccess: () => void) {
     resolver: zodResolver(createSchema) as Resolver<CreateFormValues>,
     mode: 'onChange',
     defaultValues: {
-      fandomId: '',
+      fandomName: '',
       artist: '',
       name: '',
       type: '',

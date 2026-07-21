@@ -1,5 +1,5 @@
 export interface Fandom {
-  id: number;
+  id: string;
   name: string;
   isActive: boolean;
 }
@@ -7,7 +7,7 @@ export interface Fandom {
 export interface FandomProduct {
   id: number;
   sellerId: number;
-  fandomId: number;
+  fandomId: string;
   artist: string;
   name: string;
   type: string;
