@@ -80,7 +80,7 @@ function SellingModeAction({ order, onShip }: { order: SellerOrder; onShip?: (id
   return null;
 }
 
-function PayNowButton({ order }: { order?: any }) {
+function PayNowButton({ order }: { order?: SellerOrder }) {
   const navigate = useNavigate();
   const showToast = useUiStore((s) => s.showToast);
   const addAuctionToCart = useAddAuctionToCart();
@@ -93,8 +93,10 @@ function PayNowButton({ order }: { order?: any }) {
       try {
         await addAuctionToCart.mutateAsync(order.auctionId);
         navigate('/checkout');
-      } catch (error: any) {
-        showToast(error.response?.data?.message || 'Failed to prepare checkout', 'error');
+      } catch (error: unknown) {
+        const message = (error as AxiosError<{ message?: string }>).response?.data?.message
+          ?? 'Failed to prepare checkout';
+        showToast(message, 'error');
         setIsProcessing(false);
       }
       return;
@@ -156,6 +158,66 @@ function MessageSellerButton({ sellerId, orderId }: { sellerId: number; orderId:
   );
 }
 
+function ReviewIcon() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z" />
+    </svg>
+  );
+}
+
+function ReviewOrderButton({ items }: { items: SellerOrder['items'] }) {
+  const reviewItems = items.filter(
+    (item, index) => item.productId > 0
+      && items.findIndex((candidate) => candidate.productId === item.productId) === index,
+  );
+
+  if (reviewItems.length === 0) return null;
+
+  const buttonClass = 'inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#ad93e6] bg-white px-3 text-[12px] font-semibold text-[#7c5ac4] transition-colors hover:bg-[rgba(173,147,230,0.1)] whitespace-nowrap';
+
+  if (reviewItems.length === 1) {
+    return (
+      <Link to={`/fandoms/${reviewItems[0].productId}#reviews`} className={buttonClass}>
+        <ReviewIcon />
+        Review
+      </Link>
+    );
+  }
+
+  return (
+    <details className="group relative">
+      <summary className={`${buttonClass} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}>
+        <ReviewIcon />
+        Review ({reviewItems.length})
+        <ChevronDown open={false} />
+      </summary>
+      <div className="absolute right-0 top-10 z-20 min-w-56 overflow-hidden rounded-xl border border-[#e6e6e6] bg-white py-1 shadow-lg">
+        {reviewItems.map((item) => (
+          <Link
+            key={item.productId}
+            to={`/fandoms/${item.productId}#reviews`}
+            className="block max-w-72 truncate px-3.5 py-2.5 text-[12px] font-medium text-[#121212] transition-colors hover:bg-[#faf9fc] hover:text-[#7c5ac4]"
+            title={item.productName}
+          >
+            {item.productName}
+          </Link>
+        ))}
+      </div>
+    </details>
+  );
+}
+
 function BuyingModeAction({
   order,
   confirmingId,
@@ -170,6 +232,9 @@ function BuyingModeAction({
   // Message button is always available for active buying orders
   const msgBtn = order.status < 8
     ? <MessageSellerButton sellerId={order.sellerId} orderId={order.id} />
+    : null;
+  const reviewBtn = order.status === 5 || order.status === 7
+    ? <ReviewOrderButton items={order.items} />
     : null;
 
   if (order.status === 1 && order.paymentId) {
@@ -231,6 +296,7 @@ function BuyingModeAction({
           >
             {wasRejected ? 'Request Refund Again' : 'Request Refund'}
           </button>
+          {reviewBtn}
           {msgBtn}
         </div>
       </div>
@@ -259,6 +325,14 @@ function BuyingModeAction({
         </svg>
         Refunded
       </span>
+    );
+  }
+  if (order.status === 7) {
+    return (
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {reviewBtn}
+        {msgBtn}
+      </div>
     );
   }
   if (order.carrier && order.status <= 5) {

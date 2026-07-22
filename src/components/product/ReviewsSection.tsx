@@ -75,7 +75,7 @@ const ReviewsSection = ({ productId }: ReviewsSectionProps) => {
   const total = summary?.totalReviews ?? 0;
 
   return (
-    <section className="mt-12 border-t border-[#e6e6e6] pt-10">
+    <section id="reviews" className="mt-12 scroll-mt-24 border-t border-[#e6e6e6] pt-10">
       <h2 className="text-xl font-bold text-[#121212]">Reviews</h2>
 
       {/* Summary */}
