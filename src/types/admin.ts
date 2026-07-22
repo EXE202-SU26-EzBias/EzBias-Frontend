@@ -1,3 +1,5 @@
+import type { ReviewMedia } from './review';
+
 export type AdminPageId =
   | 'overview'
   | 'orders'
@@ -165,6 +167,7 @@ export interface AdminReviewListItem {
   username: string;
   stars: number;
   comment: string | null;
+  media: ReviewMedia[];
   createdAt: string;
   updatedAt: string | null;
 }

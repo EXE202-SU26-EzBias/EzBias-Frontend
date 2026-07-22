@@ -5,6 +5,7 @@ import type { AdminReviewListItem } from '../../../types/admin';
 import { formatTimeAgo } from '../../../utils/formatters';
 import { useUiStore } from '../../../stores/ui.store';
 import SellerTopbar from '../../SellerDashboard/SellerTopbar';
+import ReviewMediaGallery from '../../../components/product/ReviewMediaGallery';
 
 // ==================== Star display ====================
 
@@ -51,6 +52,11 @@ function ReviewRow({ review, onDelete }: { review: AdminReviewListItem; onDelete
           ? <span className="line-clamp-2">{review.comment}</span>
           : <span className="italic text-[#b3b3b3]">No comment</span>}
       </td>
+      <td className="px-4 py-[13px] align-middle">
+        {review.media.length > 0
+          ? <ReviewMediaGallery media={review.media} compact />
+          : <span className="italic text-[11px] text-[#b3b3b3]">No media</span>}
+      </td>
       <td className="px-4 py-[13px] text-[12px] text-[#737373] whitespace-nowrap">
         {formatTimeAgo(review.createdAt)}
       </td>
@@ -72,7 +78,7 @@ function ReviewRow({ review, onDelete }: { review: AdminReviewListItem; onDelete
 
 // ==================== Main ====================
 
-const COLS = ['#', 'Product', 'User', 'Rating', 'Comment', 'Posted At', 'Updated At', ''] as const;
+const COLS = ['#', 'Product', 'User', 'Rating', 'Comment', 'Media', 'Posted At', 'Updated At', ''] as const;
 
 const ReviewsSection = React.memo(function ReviewsSection() {
   const { data: reviews = [], isLoading, isError, refetch } = useAdminReviews();

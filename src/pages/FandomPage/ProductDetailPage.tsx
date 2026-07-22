@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import type { AxiosError } from 'axios';
 import ChatPanel from '../../components/chat/ChatPanel';
 import PageLayout from '../../components/layout/PageLayout';
@@ -23,6 +23,7 @@ const CONDITION_LABELS: Record<number, string> = {
 
 const ProductDetailPage = () => {
   const { id = '' } = useParams<{ id: string }>();
+  const { hash } = useLocation();
   const productId = Number(id);
   const { data: product, isLoading, isError } = useCatalogProductDetail(productId);
 
@@ -35,6 +36,16 @@ const ProductDetailPage = () => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const showToast = useUiStore((s) => s.showToast);
   const { mutate: startConversation, isPending: startingChat } = useStartConversation();
+
+  useEffect(() => {
+    if (!product || hash !== '#reviews') return;
+
+    const frameId = window.requestAnimationFrame(() => {
+      document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [hash, product]);
 
   const handleMessageSeller = () => {
     if (!product) return;

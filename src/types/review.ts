@@ -1,3 +1,13 @@
+export type ReviewMediaType = 'image' | 'video';
+
+export interface ReviewMedia {
+  id: number;
+  type: ReviewMediaType;
+  url: string;
+  thumbnailUrl: string | null;
+  sortOrder: number;
+}
+
 export interface ProductReview {
   id: number;
   productId: number;
@@ -5,6 +15,7 @@ export interface ProductReview {
   username: string;
   stars: number;
   comment: string | null;
+  media: ReviewMedia[];
   createdAt: string;
   updatedAt: string | null;
 }
@@ -24,9 +35,12 @@ export interface ReviewEligibility {
 export interface CreateReviewPayload {
   stars: number;
   comment?: string | null;
+  media: File[];
 }
 
 export interface UpdateReviewPayload {
   stars: number;
   comment?: string | null;
+  media: File[];
+  keepMediaIds: number[];
 }
