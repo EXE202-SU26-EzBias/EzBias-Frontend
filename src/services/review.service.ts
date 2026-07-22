@@ -47,10 +47,14 @@ function invalidateReviews(
 export function useCreateReview(productId: number) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CreateReviewPayload) =>
-      http
-        .post<ProductReview>(`/api/products/${productId}/reviews`, payload)
-        .then((r) => r.data),
+    mutationFn: (payload: CreateReviewPayload) => {
+      const form = toReviewFormData(payload);
+      return http
+        .post<ProductReview>(`/api/products/${productId}/reviews`, form, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        .then((r) => r.data);
+    },
     onSuccess: () => invalidateReviews(queryClient, productId),
   });
 }
@@ -58,10 +62,23 @@ export function useCreateReview(productId: number) {
 export function useUpdateReview(productId: number) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ reviewId, payload }: { reviewId: number; payload: UpdateReviewPayload }) =>
-      http.put<ProductReview>(`/api/reviews/${reviewId}`, payload).then((r) => r.data),
+    mutationFn: ({ reviewId, payload }: { reviewId: number; payload: UpdateReviewPayload }) => {
+      const form = toReviewFormData(payload);
+      payload.keepMediaIds.forEach((id) => form.append('keepMediaIds', String(id)));
+      return http.put<ProductReview>(`/api/reviews/${reviewId}`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then((r) => r.data);
+    },
     onSuccess: () => invalidateReviews(queryClient, productId),
   });
+}
+
+function toReviewFormData(payload: CreateReviewPayload | UpdateReviewPayload) {
+  const form = new FormData();
+  form.append('stars', String(payload.stars));
+  if (payload.comment) form.append('comment', payload.comment);
+  payload.media.forEach((file) => form.append('media', file));
+  return form;
 }
 
 export function useDeleteReview(productId: number) {

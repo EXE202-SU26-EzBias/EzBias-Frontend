@@ -10,6 +10,8 @@ import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 import { formatTimeAgo } from '../../utils/formatters';
 import type { ProductReview } from '../../types/review';
+import ReviewMediaGallery from './ReviewMediaGallery';
+import ReviewMediaPicker from './ReviewMediaPicker';
 
 interface ReviewsSectionProps {
   productId: number;
@@ -160,6 +162,15 @@ const ReviewsSection = ({ productId }: ReviewsSectionProps) => {
                   {form.errors.comment && (
                     <p className="text-[12px] text-[#ef4343]">{form.errors.comment.message}</p>
                   )}
+                  <ReviewMediaPicker
+                    existingMedia={review.media}
+                    keptMediaIds={form.keptMediaIds}
+                    newMedia={form.newMedia}
+                    onAddFiles={form.addMedia}
+                    onToggleExisting={form.toggleExistingMedia}
+                    onRemoveNew={form.removeNewMedia}
+                    disabled={form.isPending}
+                  />
                   <div className="flex items-center gap-3">
                     <button
                       type="submit"
@@ -170,7 +181,10 @@ const ReviewsSection = ({ productId }: ReviewsSectionProps) => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setIsEditing(false)}
+                      onClick={() => {
+                        form.resetMediaSelection();
+                        setIsEditing(false);
+                      }}
                       className="text-[13px] font-medium text-[#737373] hover:text-[#121212]"
                     >
                       Cancel
@@ -182,6 +196,7 @@ const ReviewsSection = ({ productId }: ReviewsSectionProps) => {
                   {review.comment && (
                     <p className="mt-2 text-sm leading-relaxed text-[#525252]">{review.comment}</p>
                   )}
+                  <ReviewMediaGallery media={review.media} />
                   {review.userId === currentUserId && confirmingDelete && (
                     <div className="mt-3 rounded-xl border border-[#fecaca] bg-[#fef2f2] p-3.5">
                       <p className="text-sm text-[#991b1b]">
@@ -256,6 +271,15 @@ const ReviewsSection = ({ productId }: ReviewsSectionProps) => {
                 <p className="mt-1 text-[12px] text-[#ef4343]">{form.errors.comment.message}</p>
               )}
             </div>
+
+            <ReviewMediaPicker
+              keptMediaIds={form.keptMediaIds}
+              newMedia={form.newMedia}
+              onAddFiles={form.addMedia}
+              onToggleExisting={form.toggleExistingMedia}
+              onRemoveNew={form.removeNewMedia}
+              disabled={form.isPending}
+            />
 
             <button
               type="submit"
