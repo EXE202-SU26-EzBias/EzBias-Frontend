@@ -7,6 +7,33 @@ interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
+const AUTH_ENDPOINTS_THAT_SKIP_REFRESH = new Set([
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/refresh',
+  '/api/auth/logout',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+  '/api/auth/email-verification/request',
+  '/api/auth/email-verification/verify',
+]);
+
+function requestPath(config: InternalAxiosRequestConfig): string {
+  const rawUrl = config.url ?? '';
+  try {
+    return new URL(rawUrl, config.baseURL ?? 'http://localhost')
+      .pathname
+      .replace(/\/+$/, '') || '/';
+  } catch {
+    return rawUrl.split('?')[0].replace(/\/+$/, '') || '/';
+  }
+}
+
+function shouldRefreshAccessToken(config: RetryableRequestConfig | undefined): boolean {
+  if (!config || !useAuthStore.getState().accessToken) return false;
+  return !AUTH_ENDPOINTS_THAT_SKIP_REFRESH.has(requestPath(config));
+}
+
 export const http = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 15_000,
@@ -44,8 +71,12 @@ http.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryableRequestConfig | undefined;
 
-    const errMessage = (error.response?.data as { message?: string })?.message ?? '';
-    if (error.response?.status !== 401 || !originalRequest || originalRequest._retry || errMessage.toLowerCase().includes('not verified')) {
+    if (
+      error.response?.status !== 401 ||
+      !originalRequest ||
+      originalRequest._retry ||
+      !shouldRefreshAccessToken(originalRequest)
+    ) {
       return Promise.reject(error);
     }
 
