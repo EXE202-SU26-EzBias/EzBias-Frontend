@@ -36,8 +36,7 @@ export default function NotificationBell() {
   const { mutate: markRead } = useMarkRead();
   const { mutate: markReadAll } = useMarkReadAll();
 
-  const visibleNotifications = notifications.filter((n) => n.type !== 'NewMessage');
-  const unread = visibleNotifications.filter((n) => !n.isRead);
+  const unread = notifications.filter((n) => !n.isRead);
   const unreadCount = unread.length;
 
   // Close on outside click
@@ -87,7 +86,6 @@ export default function NotificationBell() {
           role="dialog"
           aria-label="Notifications"
         >
-          {/* Header */}
           <div className="flex items-center justify-between border-b border-[#e6e6e6] px-4 py-3">
             <span className="text-[14px] font-bold text-[#121212]">Notifications</span>
             {unreadCount > 0 && (
@@ -101,12 +99,11 @@ export default function NotificationBell() {
             )}
           </div>
 
-          {/* List */}
           <div className="max-h-[400px] overflow-y-auto">
-            {visibleNotifications.length === 0 ? (
+            {notifications.length === 0 ? (
               <p className="px-4 py-8 text-center text-[13px] text-[#b3b3b3]">No notifications yet</p>
             ) : (
-              visibleNotifications.slice(0, 30).map((notif) => (
+              notifications.slice(0, 30).map((notif) => (
                 <button
                   key={notif.id}
                   type="button"

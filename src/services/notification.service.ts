@@ -1,6 +1,6 @@
 import * as signalR from '@microsoft/signalr';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { http } from '../lib/axios';
 import { useAuthStore } from '../stores/auth.store';
 import { useUiStore } from '../stores/ui.store';
@@ -41,15 +41,12 @@ export function useMarkReadAll() {
 
 const TOAST_TYPES = new Set(['Outbid', 'AuctionEndingSoon', 'DepositConfirmed', 'DepositRefundInitiated', 'PayoutPaid', 'DepositPendingReview', 'DisputePendingReview']);
 
-/** Connects to NotificationHub, invalidates the notification list, and shows
- *  a toast popup for time-sensitive auction events (Outbid, AuctionEndingSoon)
- *  and deposit events (DepositConfirmed, DepositRefundInitiated). */
+/** Connects to NotificationHub, refreshes notification state, and shows selected event toasts. */
 export function useNotificationHub() {
   const queryClient = useQueryClient();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const accessToken = useAuthStore((s) => s.accessToken);
   const showToast = useUiStore((s) => s.showToast);
-  const connectionRef = useRef<signalR.HubConnection | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -59,8 +56,6 @@ export function useNotificationHub() {
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Warning)
       .build();
-
-    connectionRef.current = connection;
 
     connection.on('ReceiveNotification', (notification: { type: string; title: string; body: string; meta?: string }) => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.list() });

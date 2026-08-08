@@ -1,5 +1,5 @@
 import * as signalR from '@microsoft/signalr';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { chatKeys } from '../../services/chat.service';
 import { useAuthStore } from '../../stores/auth.store';
@@ -12,7 +12,6 @@ export function useChatHub() {
   const queryClient = useQueryClient();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const accessToken = useAuthStore((s) => s.accessToken);
-  const connectionRef = useRef<signalR.HubConnection | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -22,8 +21,6 @@ export function useChatHub() {
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Warning)
       .build();
-
-    connectionRef.current = connection;
 
     connection.on('ReceiveMessage', (message: ChatMessage) => {
       // Optimistically add the message to the cache immediately

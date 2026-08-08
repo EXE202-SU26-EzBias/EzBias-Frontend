@@ -1,5 +1,5 @@
 import * as signalR from '@microsoft/signalr';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useAuthStore } from '../../stores/auth.store';
 import { useUiStore } from '../../stores/ui.store';
 import { useVideoCallStore } from '../../stores/video-call.store';
@@ -18,7 +18,6 @@ export function useCallHub() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const accessToken = useAuthStore((s) => s.accessToken);
   const showToast = useUiStore((s) => s.showToast);
-  const connectionRef = useRef<signalR.HubConnection | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -32,7 +31,6 @@ export function useCallHub() {
       .configureLogging(signalR.LogLevel.Warning)
       .build();
 
-    connectionRef.current = connection;
     setCallHubConnection(connection);
 
     connection.on('IncomingCall', (call: CallSession) => {
