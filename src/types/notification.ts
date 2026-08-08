@@ -12,6 +12,7 @@ export type NotificationType =
   | 'DisputeResolved'
   | 'DisputeRefundCompleted'
   | 'UserVerified'
+  | 'NewMessage'
   | 'DepositConfirmed'
   | 'DepositRefundInitiated'
   | 'DepositForfeited'

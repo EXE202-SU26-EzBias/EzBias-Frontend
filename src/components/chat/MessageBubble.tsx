@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
 import type { ChatMessage } from '../../types/chat';
-import { formatTimeAgo } from '../../utils/formatters';
 
 interface MessageBubbleProps {
   message: ChatMessage;
   isMine: boolean;
+  showStatus: boolean;
 }
 
 // Helper to detect if content is an image URL
@@ -13,23 +12,8 @@ const isImageUrl = (content: string): boolean => {
   return imagePattern.test(content) || content.includes('cloudinary.com') || content.includes('res.cloudinary.com');
 };
 
-const MessageBubble = ({ message, isMine }: MessageBubbleProps) => {
+const MessageBubble = ({ message, isMine, showStatus }: MessageBubbleProps) => {
   const isImage = isImageUrl(message.content);
-  const [timeAgo, setTimeAgo] = useState(() => formatTimeAgo(message.sentAt));
-
-  // Update time ago every 10 seconds for recent messages, every minute for older ones
-  useEffect(() => {
-    const updateTime = () => {
-      setTimeAgo(formatTimeAgo(message.sentAt));
-    };
-
-    // Determine update interval based on message age
-    const messageAge = Date.now() - new Date(message.sentAt).getTime();
-    const interval = messageAge < 60_000 ? 10_000 : 60_000; // 10s for <1min old, 1min for older
-
-    const timer = setInterval(updateTime, interval);
-    return () => clearInterval(timer);
-  }, [message.sentAt]);
 
   return (
     <div className={`flex gap-2 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -62,7 +46,11 @@ const MessageBubble = ({ message, isMine }: MessageBubbleProps) => {
             </p>
           )}
         </div>
-        <span className="text-[10px] text-[#b3b3b3]">{timeAgo}</span>
+        {isMine && showStatus && (
+          <span className="text-[10px] text-[#b3b3b3]">
+            {message.isRead ? 'Đã xem' : 'Đã gửi'}
+          </span>
+        )}
       </div>
     </div>
   );

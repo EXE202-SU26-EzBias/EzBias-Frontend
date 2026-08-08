@@ -29,11 +29,17 @@ const MessageThread = ({ conversationId, otherParticipantName, otherParticipantI
 
   // Flatten pages — pages are in reverse order (newest page first), messages within each page are ascending
   const allMessages = data?.pages.flatMap((p) => p.messages) ?? [];
+  const lastOwnMessageId = allMessages
+    .filter((message) => message.senderId === currentUserId)
+    .sort((first, second) => first.sentAt.localeCompare(second.sentAt) || first.id - second.id)
+    .at(-1)?.id;
+  const hasUnreadIncomingMessage = currentUserId !== undefined
+    && allMessages.some((message) => message.senderId !== currentUserId && !message.isRead);
 
-  // Mark as read when opening
+  // Mark incoming messages as read when opening or receiving them in realtime.
   useEffect(() => {
-    if (conversationId > 0) markRead();
-  }, [conversationId, markRead]);
+    if (conversationId > 0 && hasUnreadIncomingMessage) markRead();
+  }, [conversationId, hasUnreadIncomingMessage, markRead]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -157,6 +163,7 @@ const MessageThread = ({ conversationId, otherParticipantName, otherParticipantI
               key={msg.id}
               message={msg}
               isMine={msg.senderId === currentUserId}
+              showStatus={msg.id === lastOwnMessageId}
             />
           ))
         )}

@@ -36,7 +36,8 @@ export default function NotificationBell() {
   const { mutate: markRead } = useMarkRead();
   const { mutate: markReadAll } = useMarkReadAll();
 
-  const unread = notifications.filter((n) => !n.isRead);
+  const visibleNotifications = notifications.filter((n) => n.type !== 'NewMessage');
+  const unread = visibleNotifications.filter((n) => !n.isRead);
   const unreadCount = unread.length;
 
   // Close on outside click
@@ -102,10 +103,10 @@ export default function NotificationBell() {
 
           {/* List */}
           <div className="max-h-[400px] overflow-y-auto">
-            {notifications.length === 0 ? (
+            {visibleNotifications.length === 0 ? (
               <p className="px-4 py-8 text-center text-[13px] text-[#b3b3b3]">No notifications yet</p>
             ) : (
-              notifications.slice(0, 30).map((notif) => (
+              visibleNotifications.slice(0, 30).map((notif) => (
                 <button
                   key={notif.id}
                   type="button"
@@ -123,7 +124,7 @@ export default function NotificationBell() {
                       <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#ad93e6]" aria-hidden="true" />
                     )}
                   </div>
-                  <span className="text-[12px] leading-relaxed text-[#737373] line-clamp-2">{notif.body}</span>
+                  <span className="break-words whitespace-pre-wrap text-[12px] leading-relaxed text-[#737373]">{notif.body}</span>
                   <span className="mt-0.5 text-[11px] text-[#b3b3b3]">{formatTimeAgo(notif.createdAt)}</span>
                 </button>
               ))
