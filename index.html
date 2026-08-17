@@ -16,11 +16,24 @@
     <!-- Performance: Preload LCP Hero Background Image -->
     <link rel="preload" as="image" href="/background.webp" type="image/webp" fetchpriority="high" />
 
-    <!-- Fonts: Load Google Fonts directly without CSS @import chaining -->
+    <!-- Fonts: Asynchronous Non-Render-Blocking Google Fonts Loading -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600&display=swap"
+    />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600&display=swap"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600&display=swap"
+      />
+    </noscript>
 
     <title>EzBias - Sàn Đấu Giá & Mua Bán K-Pop Photocard Chính Hãng</title>
     <meta

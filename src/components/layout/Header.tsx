@@ -44,7 +44,7 @@ const Header = () => {
                 key={link.label}
                 to={link.href}
                 className={`text-sm font-medium transition-colors hover:text-[#121212] ${
-                  pathname === link.href ? 'text-[#121212]' : 'text-[#121212b3]'
+                  pathname === link.href ? 'text-[#121212]' : 'text-[#4b5563]'
                 }`}
               >
                 {link.label}
