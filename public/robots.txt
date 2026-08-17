@@ -1,0 +1,23 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Allow: /fandoms
+Allow: /auction
+Allow: /about
+Allow: /contact
+Allow: /privacy-policy
+
+# Disallow private and administrative areas
+Disallow: /admin
+Disallow: /admin/
+Disallow: /seller
+Disallow: /seller/
+Disallow: /checkout
+Disallow: /checkout/
+Disallow: /payment
+Disallow: /payment/
+Disallow: /order-confirmation
+Disallow: /order-confirmation/
+
+# Sitemap location
+Sitemap: https://ezbias.com/sitemap.xml
