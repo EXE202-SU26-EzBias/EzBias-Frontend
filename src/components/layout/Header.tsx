@@ -23,15 +23,18 @@ const Header = () => {
         <div className="mx-auto flex h-[65px] w-full max-w-[1920px] items-center justify-between px-8">
           {/* Logo */}
           <Link to="/" className="flex items-center" aria-label="EZBias Home">
-            <img
-              className="h-14 w-auto object-contain"
-              src="/logo.png"
-              alt="EZBias logo"
-              width="72"
-              height="56"
-              loading="eager"
-              decoding="async"
-            />
+            <picture>
+              <source srcSet="/logo.webp" type="image/webp" />
+              <img
+                className="h-14 w-auto object-contain"
+                src="/logo.png"
+                alt="EZBias logo"
+                width="72"
+                height="56"
+                loading="eager"
+                decoding="async"
+              />
+            </picture>
           </Link>
 
           {/* Desktop nav */}

@@ -3,11 +3,13 @@ import { useAddToCart } from '../../features/cart/useAddToCart';
 import { useProductQuantity } from '../../features/cart/useProductQuantity';
 import type { FandomProduct } from '../../types/fandom';
 import { formatCurrency } from '../../utils/formatters';
+import { optimizeCloudinaryUrl } from '../../utils/image';
 
 const ProductCard = ({ id, artist, name, price, primaryImageUrl, stock, isAuction }: FandomProduct) => {
   const { quantity, maxQuantity, isOutOfStock, increment, decrement } = useProductQuantity(stock);
   const { added, isPending, handleAdd } = useAddToCart();
   const showStepper = !isOutOfStock && maxQuantity > 1;
+  const optimizedImage = optimizeCloudinaryUrl(primaryImageUrl, { width: 400, crop: 'limit' });
 
   return (
     <article className="overflow-hidden rounded-xl border border-[rgba(230,230,230,0.5)] bg-white shadow-[0_1px_2px_2px_rgba(0,0,0,0.09)]">
@@ -22,11 +24,11 @@ const ProductCard = ({ id, artist, name, price, primaryImageUrl, stock, isAuctio
           <div
             className={[
               'absolute inset-0 grid place-items-center text-xl font-bold tracking-wide text-[#ad93e6]',
-              primaryImageUrl ? 'bg-center bg-cover' : 'bg-gradient-to-br from-[#f0edf7] to-[#fcf6e8]',
+              optimizedImage ? 'bg-center bg-cover' : 'bg-gradient-to-br from-[#f0edf7] to-[#fcf6e8]',
             ].join(' ')}
-            style={primaryImageUrl ? { backgroundImage: `url(${primaryImageUrl})` } : undefined}
+            style={optimizedImage ? { backgroundImage: `url(${optimizedImage})` } : undefined}
           >
-            {!primaryImageUrl && <span>{artist}</span>}
+            {!optimizedImage && <span>{artist}</span>}
           </div>
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(244,243,247,0)_0%,rgba(143,143,145,0.11)_100%)]" />
         </div>
