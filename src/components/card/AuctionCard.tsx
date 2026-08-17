@@ -1,5 +1,6 @@
 import { useCountdown } from '../../features/auction/useCountdown';
 import { formatCurrency } from '../../utils/formatters';
+import { optimizeCloudinaryUrl } from '../../utils/image';
 
 interface AuctionCardProps {
   id: string;
@@ -21,13 +22,15 @@ const AuctionCard = ({ artist, name, currentBid, endsAt, image, onBid }: Auction
     : totalSecs > 0 ? `${secs}s`
     : 'Ended';
 
+  const optimizedImage = optimizeCloudinaryUrl(image, { width: 400, crop: 'limit' });
+
   return (
     <article className="overflow-hidden rounded-xl border border-[rgba(230,230,230,0.5)] bg-white shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]">
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-[#f0edf7] to-[#fcf6e8]">
-        {image ? (
+        {optimizedImage ? (
           <img
-            src={image}
+            src={optimizedImage}
             alt={name}
             loading="lazy"
             decoding="async"
