@@ -1,0 +1,16 @@
+# EzBias - K-pop Photocard & Merchandise Marketplace
+
+> EzBias is a specialized marketplace combining fixed-price sales and live auctions for authentic K-pop photocards and merchandise. Features include live bidding, refundable escrow deposit gates, and automated SePay bank transfers.
+
+## Core Features & Sections
+
+- [Live Auctions](https://ezbias.com/auction): Real-time live auctions with anti-snipe extensions and secure deposit gates.
+- [Fandom Collections & Photocards](https://ezbias.com/fandoms): Browse idol groups, albums, rare photocards, and official goods.
+- [About EzBias](https://ezbias.com/about): Learn about our buyer-seller protection, escrow system, and platform policies.
+- [Contact Support](https://ezbias.com/contact): Get in touch with our customer support and dispute resolution team.
+- [Privacy Policy](https://ezbias.com/privacy-policy): Information on user data handling, security, and account rights.
+
+## Platform Policies
+
+- **Deposit & Escrow:** All auctions require a refundable 10% deposit before bidding. Payments are securely held in escrow until delivery is finalized.
+- **Fair Bidding:** Bids are incremental with automated 1,000 VND minimum steps.
