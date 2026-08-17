@@ -50,7 +50,7 @@ const HeroSection = ({ trendingRef, auctionsRef }: HeroSectionProps) => (
       </h1>
 
       {/* Sub */}
-      <p className="max-w-[640px] text-center text-sm leading-relaxed text-[#737373] md:text-[18px] md:leading-[1.6]">
+      <p className="max-w-[640px] text-center text-sm leading-relaxed text-[#4b5563] md:text-[18px] md:leading-[1.6]">
         From lightsticks to limited-edition albums — shop authentic
         <br className="hidden md:block" />
         merchandise from the groups you love.

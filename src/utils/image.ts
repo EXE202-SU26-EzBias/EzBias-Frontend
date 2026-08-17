@@ -7,12 +7,12 @@ export interface CloudinaryTransformOptions {
   width?: number;
   height?: number;
   crop?: 'fill' | 'limit' | 'fit' | 'thumb';
-  quality?: 'auto' | number;
+  quality?: 'auto' | 'auto:good' | 'auto:eco' | number | string;
 }
 
 export function optimizeCloudinaryUrl(
   url?: string | null,
-  options: CloudinaryTransformOptions = { width: 400, crop: 'limit' },
+  options: CloudinaryTransformOptions = { width: 360, crop: 'limit', quality: 'auto:good' },
 ): string {
   if (!url) return '';
   if (!url.includes('res.cloudinary.com') || !url.includes('/image/upload/')) {
@@ -27,7 +27,8 @@ export function optimizeCloudinaryUrl(
   const rest = url.substring(uploadIndex + '/image/upload/'.length);
 
   // Build transformation params
-  const transforms: string[] = ['f_auto', `q_${options.quality ?? 'auto'}`];
+  const quality = options.quality ?? 'auto:good';
+  const transforms: string[] = ['f_auto', `q_${quality}`];
   if (options.width) transforms.push(`w_${options.width}`);
   if (options.height) transforms.push(`h_${options.height}`);
   if (options.crop) transforms.push(`c_${options.crop}`);
